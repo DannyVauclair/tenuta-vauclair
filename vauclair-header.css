@@ -1,0 +1,112 @@
+/* TENUTA VAUCLAIR · HEADER UNICO
+   Questo file è volutamente condiviso da tutte le pagine.
+   Non modificare l'header nelle singole pagine. */
+.masthead{
+  position:relative !important;
+  width:100% !important;
+  max-width:1280px !important;
+  margin:0 auto !important;
+  text-align:center !important;
+  padding:18px 14px 20px !important;
+  border:1px solid rgba(185,133,63,.30) !important;
+  border-top:2px solid #b9853f !important;
+  border-bottom:2px solid #b9853f !important;
+  background:
+    linear-gradient(90deg,transparent,rgba(185,133,63,.06) 22%,rgba(185,133,63,.10) 50%,rgba(185,133,63,.06) 78%,transparent),
+    rgba(24,21,22,.92) !important;
+  box-shadow:0 10px 34px rgba(0,0,0,.38),inset 0 0 34px rgba(0,0,0,.16) !important;
+  overflow:hidden !important;
+}
+.masthead::before,.masthead::after{
+  content:"" !important;
+  position:absolute !important;
+  top:34px !important;
+  width:31% !important;
+  height:1px !important;
+  background:linear-gradient(90deg,transparent,#b9853f) !important;
+  opacity:.72 !important;
+}
+.masthead::before{left:4% !important}
+.masthead::after{right:4% !important;transform:scaleX(-1) !important}
+.mast-ornament{
+  width:44px !important;
+  height:44px !important;
+  margin:0 auto 8px !important;
+  display:grid !important;
+  place-items:center !important;
+  border:1px solid #b9853f !important;
+  transform:rotate(45deg) !important;
+  color:inherit !important;
+  font-size:initial !important;
+  box-shadow:inset 0 0 0 3px rgba(185,133,63,.07),0 0 18px rgba(185,133,63,.08) !important;
+}
+.mast-ornament span{
+  display:block !important;
+  transform:rotate(-45deg) !important;
+  font-family:'Cinzel',serif !important;
+  color:#d8ad63 !important;
+  font-size:22px !important;
+  font-weight:400 !important;
+  line-height:1 !important;
+}
+.masthead h1{
+  margin:0 !important;
+  font-family:'Cormorant Garamond',Georgia,serif !important;
+  font-size:clamp(37px,5.2vw,60px) !important;
+  line-height:1.15 !important;
+  font-weight:600 !important;
+  letter-spacing:2px !important;
+  color:#d8ad63 !important;
+  text-shadow:0 2px 14px rgba(0,0,0,.55) !important;
+}
+.masthead .subtitle{
+  margin:7px 0 0 !important;
+  color:#c0ad90 !important;
+  font-family:'Cinzel',serif !important;
+  font-size:11.5px !important;
+  line-height:1.45 !important;
+  font-weight:500 !important;
+  letter-spacing:1.2px !important;
+  text-transform:uppercase !important;
+}
+
+/* Anche la navigazione fa parte della testata visiva: identica ovunque. */
+.site-nav{
+  width:100% !important;
+  max-width:1280px !important;
+  display:grid !important;
+  grid-template-columns:repeat(5,1fr) !important;
+  gap:8px !important;
+  margin:14px auto !important;
+}
+.site-nav a{
+  min-height:39px !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:7px !important;
+  padding:10px 8px !important;
+  text-decoration:none !important;
+  color:#f1e8d8 !important;
+  border:1px solid rgba(185,133,63,.30) !important;
+  background:#181516 !important;
+  font:600 11px 'Cinzel',serif !important;
+  letter-spacing:.55px !important;
+  text-transform:uppercase !important;
+}
+.site-nav a:hover,.site-nav a.active{
+  border-color:#b9853f !important;
+  color:#d8ad63 !important;
+  background:linear-gradient(180deg,#5c211e,#351311) !important;
+}
+
+@media(max-width:680px){
+  .masthead{padding:14px 8px 16px !important}
+  .masthead::before,.masthead::after{width:24% !important;top:31px !important}
+  .mast-ornament{width:38px !important;height:38px !important;margin-bottom:7px !important}
+  .mast-ornament span{font-size:19px !important}
+  .site-nav{grid-template-columns:1fr 1fr !important}
+}
+@media(max-width:430px){
+  .masthead h1{letter-spacing:1px !important}
+}
