@@ -336,7 +336,7 @@
 }
 
 
-/* ===== Registro leggibile e raccolto v4 ===== */
+/* ===== Registro elegante e leggibile v5 ===== */
 .shell > .page-bar,
 .shell > .stats,
 .shell > .filters,
@@ -347,75 +347,81 @@
   margin-right:0;
 }
 
-/* statistiche e filtri: leggibili, non miniaturizzati */
+/* statistiche e filtri */
 .stats{
   grid-template-columns:repeat(5,minmax(0,1fr));
-  gap:8px;
+  gap:9px;
 }
 .stat{
-  padding:12px 14px;
+  padding:13px 15px;
 }
 .stat strong{
-  font-size:24px;
+  font-size:25px;
   line-height:1;
 }
 .stat span{
+  margin-top:5px;
   font-size:10px;
   line-height:1.2;
 }
 .filters{
-  grid-template-columns:minmax(280px,1fr) 160px 175px auto;
-  gap:8px;
+  grid-template-columns:minmax(300px,1fr) 165px 180px auto;
+  gap:9px;
 }
 .filters input,
 .filters select{
-  padding:10px 11px;
+  padding:10px 12px;
   font-size:14px;
 }
 .filters .btn{
-  padding:10px 13px;
+  padding:10px 14px;
   font-size:13px;
 }
 
-.cards{gap:10px}
+.cards{gap:11px}
 .card{
   overflow:hidden;
 }
-
-/* La card resta larga, ma le informazioni utili sono raccolte tutte nella stessa zona */
-.card-head,
-.lines,
-.card-foot,
-.collab-body{
-  padding-left:16px;
-  padding-right:16px;
-}
 .card-head{
   display:block;
-  padding-top:13px;
-  padding-bottom:11px;
+  padding:0;
 }
-.order-summary,
-.collab-summary{
-  max-width:780px;
+.order-shell,
+.collab-shell{
+  width:min(920px,calc(100% - 34px));
+  margin:0 auto;
 }
-.order-top,
-.collab-top{
+
+/* header ordine/evento: due zone, vicine ma con respiro */
+.order-header-grid,
+.collab-header-grid{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 205px;
+  gap:26px;
+  align-items:center;
+  padding:15px 0 13px;
+}
+.order-main,
+.collab-main{
+  min-width:0;
+}
+.order-title-row,
+.collab-title-row{
   display:flex;
   align-items:center;
   gap:10px;
   flex-wrap:wrap;
 }
-.order-top .code,
-.collab-top .code{
+.order-title-row .code,
+.collab-title-row .code{
   font-size:15px;
   line-height:1;
   padding-right:10px;
   border-right:1px solid rgba(185,133,63,.28);
 }
-.order-top .title-strong,
-.collab-top .title-strong{
-  font-size:20px;
+.order-title-row .title-strong,
+.collab-title-row .title-strong{
+  font-size:21px;
   line-height:1.08;
 }
 .status-chip{
@@ -423,157 +429,261 @@
   font-size:10px;
   letter-spacing:.6px;
 }
-.order-top .money{
-  font-size:18px;
-  line-height:1;
-  margin-left:2px;
-}
-
 .order-meta,
 .collab-meta{
-  margin-top:6px;
+  margin-top:7px;
   display:flex;
   align-items:center;
   gap:8px;
   flex-wrap:wrap;
   color:var(--muted);
   font-size:12px;
-  line-height:1.25;
+  line-height:1.3;
 }
 .meta-sep{
-  opacity:.5;
-  font-size:11px;
+  opacity:.45;
+  font-size:10px;
 }
 
+.order-side,
+.collab-side{
+  padding-left:18px;
+  border-left:1px solid rgba(185,133,63,.18);
+}
+.order-total{
+  margin-bottom:9px;
+}
+.order-total .money{
+  display:block;
+  text-align:left;
+  font-size:22px;
+  line-height:1;
+  color:var(--gold2);
+}
+.order-total .meta{
+  display:block;
+  margin-top:4px;
+  font-size:10px;
+}
 .order-controls,
 .collab-controls{
-  margin-top:9px;
   display:flex;
   align-items:center;
-  gap:8px;
-  flex-wrap:wrap;
+  gap:7px;
 }
 .order-controls .status-select,
 .collab-controls .status-select{
-  width:auto;
-  min-width:145px;
+  width:132px;
+  min-width:0;
   padding:7px 9px;
   font-size:13px;
 }
 .order-controls .btn,
 .collab-controls .btn{
-  padding:7px 10px;
-  font-size:11px;
+  padding:7px 9px;
+  font-size:10px;
 }
 
-/* righe articolo: tutto nello stesso campo visivo */
+/* articoli: chiari come una piccola tabella, senza arrivare ai bordi */
 .lines{
-  padding-top:5px;
-  padding-bottom:8px;
+  padding:0;
+  border-top:1px solid var(--soft);
+}
+.order-lines-inner{
+  width:min(920px,calc(100% - 34px));
+  margin:0 auto;
+  padding:9px 0 8px;
+}
+.order-lines-head,
+.line{
+  display:grid;
+  grid-template-columns:minmax(250px,1fr) 75px 95px 95px;
+  gap:14px;
+  align-items:center;
+}
+.order-lines-head{
+  padding:0 0 6px;
+  color:var(--muted);
+  font-size:9px;
+  text-transform:uppercase;
+  letter-spacing:.6px;
+}
+.order-lines-head > span:not(:first-child){
+  text-align:right;
 }
 .line{
-  display:flex;
-  align-items:baseline;
-  justify-content:flex-start;
-  gap:8px;
-  flex-wrap:wrap;
   padding:8px 0;
   font-size:13px;
   line-height:1.25;
 }
-.line .line-name{
+.line + .line{
+  border-top:1px dashed var(--soft);
+}
+.line-item strong{
+  display:block;
   font-size:15px;
+  line-height:1.1;
 }
-.line .line-category{
+.line-category{
+  display:block;
+  margin-top:3px;
   color:var(--muted);
-  font-size:12px;
+  font-size:11px;
 }
-.line .line-qty,
-.line .line-price,
-.line .line-total{
+.line-qty,
+.line-price,
+.line-total{
+  text-align:right;
   white-space:nowrap;
 }
-.line .line-total{
+.line-total{
   color:var(--gold2);
   font-weight:700;
   font-size:14px;
 }
-.line-dot{
-  color:var(--muted);
-  opacity:.55;
-}
 
+/* footer */
 .card-foot{
-  justify-content:flex-start;
-  gap:10px;
-  padding-top:8px;
-  padding-bottom:10px;
-  font-size:11px;
-  line-height:1.25;
+  display:block;
+  padding:0;
+  border-top:1px solid var(--soft);
 }
-.card-foot span + span{
-  padding-left:10px;
-  border-left:1px solid rgba(185,133,63,.2);
+.order-foot-inner{
+  width:min(920px,calc(100% - 34px));
+  margin:0 auto;
+  padding:9px 0 10px;
+  display:flex;
+  justify-content:space-between;
+  gap:20px;
+  color:var(--muted);
+  font-size:11px;
+  line-height:1.3;
+}
+.order-note{
+  color:var(--ink);
 }
 
-/* eventi/collaborazioni: stessa gerarchia visiva */
+/* eventi */
 .collab-card .card-head{
   display:block;
 }
 .collab-body{
   display:block;
-  padding-top:0;
-  padding-bottom:11px;
+  padding:0;
+  border-top:1px solid var(--soft);
+}
+.collab-body-inner{
+  width:min(920px,calc(100% - 34px));
+  margin:0 auto;
+  padding:11px 0 12px;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 235px;
+  gap:24px;
 }
 .collab-block{
-  max-width:780px;
-  padding:9px 0 0;
+  padding:0;
   border:0;
   background:transparent;
   font-size:13px;
-  line-height:1.35;
+  line-height:1.4;
+}
+.collab-block + .collab-block{
+  padding-left:18px;
+  border-left:1px solid rgba(185,133,63,.18);
 }
 .collab-label{
-  margin-bottom:4px;
+  margin-bottom:5px;
   font-size:10px;
 }
-.collab-footer{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  flex-wrap:wrap;
-  max-width:780px;
-  margin-top:8px;
-  padding-top:7px;
-  border-top:1px dashed var(--soft);
+.collab-owner{
+  font-size:14px;
+  color:var(--ink);
+}
+.collab-updated{
+  margin-top:6px;
   color:var(--muted);
   font-size:11px;
 }
 
-@media(max-width:900px){
-  .order-summary,
-  .collab-summary,
-  .collab-block,
-  .collab-footer{max-width:100%}
+@media(max-width:980px){
+  .order-shell,
+  .collab-shell,
+  .order-lines-inner,
+  .order-foot-inner,
+  .collab-body-inner{
+    width:calc(100% - 28px);
+  }
 }
-@media(max-width:720px){
+@media(max-width:760px){
   .stats{grid-template-columns:repeat(2,1fr)}
   .filters{grid-template-columns:1fr 1fr}
   .filters input{grid-column:1/-1}
+
+  .order-header-grid,
+  .collab-header-grid{
+    grid-template-columns:1fr;
+    gap:12px;
+  }
+  .order-side,
+  .collab-side{
+    padding-left:0;
+    padding-top:11px;
+    border-left:0;
+    border-top:1px solid rgba(185,133,63,.18);
+  }
+  .order-total{
+    display:flex;
+    align-items:baseline;
+    gap:8px;
+  }
+  .order-lines-head,
+  .line{
+    grid-template-columns:minmax(180px,1fr) 58px 82px 82px;
+    gap:9px;
+  }
+  .collab-body-inner{
+    grid-template-columns:1fr;
+    gap:12px;
+  }
+  .collab-block + .collab-block{
+    padding-left:0;
+    padding-top:11px;
+    border-left:0;
+    border-top:1px dashed var(--soft);
+  }
 }
-@media(max-width:500px){
+@media(max-width:540px){
   .filters{grid-template-columns:1fr}
   .filters input{grid-column:auto}
-  .order-top .title-strong,
-  .collab-top .title-strong{font-size:18px}
-  .order-meta,
-  .collab-meta{font-size:11px}
-  .card-foot{display:block}
-  .card-foot span{display:block}
-  .card-foot span + span{
-    margin-top:4px;
-    padding-left:0;
-    border-left:0;
+
+  .order-title-row .title-strong,
+  .collab-title-row .title-strong{
+    font-size:18px;
+  }
+  .order-lines-head{
+    display:none;
+  }
+  .line{
+    grid-template-columns:1fr auto;
+    gap:5px 12px;
+  }
+  .line-item{
+    grid-column:1/-1;
+  }
+  .line-qty::before{content:'Qtà ';color:var(--muted)}
+  .line-price::before{content:'Unit. ';color:var(--muted)}
+  .line-total{
+    grid-column:2;
+  }
+  .line-total::before{content:'Totale ';color:var(--muted);font-weight:400}
+  .order-foot-inner{
+    display:block;
+  }
+  .order-foot-inner span{
+    display:block;
+  }
+  .order-foot-inner span + span{
+    margin-top:5px;
   }
 }
 </style>
@@ -718,49 +828,61 @@ function renderOrders(){
 
   box.innerHTML=f.map(o=>`<article class="card">
     <div class="card-head">
-      <div class="order-summary">
-        <div class="order-top">
-          <span class="code">${vEsc(o.id)}</span>
-          <span class="title-strong">${vEsc(o.client)}</span>
-          <span class="status-chip ${statusClass(o.status)}">${vEsc(o.status)}</span>
-          <span class="money">${vMoney(o.total)}</span>
-        </div>
+      <div class="order-shell">
+        <div class="order-header-grid">
+          <div class="order-main">
+            <div class="order-title-row">
+              <span class="code">${vEsc(o.id)}</span>
+              <span class="title-strong">${vEsc(o.client)}</span>
+              <span class="status-chip ${statusClass(o.status)}">${vEsc(o.status)}</span>
+            </div>
+            <div class="order-meta">
+              <span>${vDate(o.createdAt)}</span>
+              <span class="meta-sep">•</span>
+              <span>${vEsc(o.department)}</span>
+              <span class="meta-sep">•</span>
+              <span>Inserito da ${vEsc(o.createdBy||'—')}</span>
+            </div>
+          </div>
 
-        <div class="order-meta">
-          <span>${vDate(o.createdAt)}</span>
-          <span class="meta-sep">•</span>
-          <span>${vEsc(o.department)}</span>
-          <span class="meta-sep">•</span>
-          <span>Inserito da ${vEsc(o.createdBy||'—')}</span>
-          <span class="meta-sep">•</span>
-          <span>${Number(o.discount||0)*100}% sconto</span>
-        </div>
-
-        <div class="order-controls">
-          <select class="status-select" onchange="changeOrderStatus('${vEsc(o.id)}',this.value)">
-            ${['Nuovo','In lavorazione','Pronto','Consegnato','Annullato'].map(st=>`<option ${o.status===st?'selected':''}>${st}</option>`).join('')}
-          </select>
-          <button class="btn danger small" onclick="deleteOrder('${vEsc(o.id)}')">Elimina</button>
+          <div class="order-side">
+            <div class="order-total">
+              <span class="money">${vMoney(o.total)}</span>
+              <span class="meta">${Number(o.discount||0)*100}% sconto</span>
+            </div>
+            <div class="order-controls">
+              <select class="status-select" onchange="changeOrderStatus('${vEsc(o.id)}',this.value)">
+                ${['Nuovo','In lavorazione','Pronto','Consegnato','Annullato'].map(st=>`<option ${o.status===st?'selected':''}>${st}</option>`).join('')}
+              </select>
+              <button class="btn danger small" onclick="deleteOrder('${vEsc(o.id)}')">Elimina</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
     <div class="lines">
-      ${(o.lines||[]).map(l=>`<div class="line">
-        <span class="line-name"><strong>${vEsc(l.item)}</strong></span>
-        <span class="line-category">${vEsc(l.category)}</span>
-        <span class="line-dot">•</span>
-        <span class="line-qty">×${Number(l.qty||0)}</span>
-        <span class="line-dot">•</span>
-        <span class="line-price">${vMoney(l.unitPrice)} cad.</span>
-        <span class="line-dot">→</span>
-        <span class="line-total">${vMoney(l.lineTotal)}</span>
-      </div>`).join('')}
+      <div class="order-lines-inner">
+        <div class="order-lines-head">
+          <span>Articolo</span><span>Quantità</span><span>Unitario</span><span>Totale</span>
+        </div>
+        ${(o.lines||[]).map(l=>`<div class="line">
+          <div class="line-item">
+            <strong>${vEsc(l.item)}</strong>
+            <span class="line-category">${vEsc(l.category)}</span>
+          </div>
+          <div class="line-qty">×${Number(l.qty||0)}</div>
+          <div class="line-price">${vMoney(l.unitPrice)}</div>
+          <div class="line-total">${vMoney(l.lineTotal)}</div>
+        </div>`).join('')}
+      </div>
     </div>
 
     <div class="card-foot">
-      <span>${vEsc(o.notes||'Nessuna nota')}</span>
-      <span>Aggiornato ${vDate(o.updatedAt)}</span>
+      <div class="order-foot-inner">
+        <span class="order-note">${vEsc(o.notes||'Nessuna nota')}</span>
+        <span>Aggiornato ${vDate(o.updatedAt)}</span>
+      </div>
     </div>
   </article>`).join('');
 }
