@@ -91,14 +91,7 @@
 <div class="toast" id="toast"></div>
 <script>
 window.VAUCLAIR_CONFIG={API_URL:'https://script.google.com/macros/s/AKfycbyQTjkjNZnPFpsxPArYZ2gpELWiHUOVPzRd5eQx1pzhfEjNsb4ejl1p0IrZWzhbMU49/exec'};
-const VAUCFG=window.VAUCLAIR_CONFIG||{},VAU_API_URL=String(VAUCFG.API_URL||''),VAU_LIVE=!!VAU_API_URL;function vEsc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}function vMoney(v){return '$'+Number(v||0).toFixed(2)}function vDate(v){if(!v)return'';const d=new Date(v);return Number.isNaN(d.getTime())?String(v):d.toLocaleString('it-IT',{dateStyle:'short',timeStyle:'short'})}function vToast(msg,good=true){let t=document.getElementById('toast');if(!t){t=document.createElement('div');t.id='toast';t.className='toast';document.body.appendChild(t)}t.textContent=msg;t.style.borderColor=good?'var(--gold)':'var(--bad)';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3200)}function vSetConn(ok,text){const d=document.getElementById('connDot'),t=document.getElementById('connText');if(d)d.className='dot '+(ok?'ok':'bad');if(t)t.textContent=text}function vJsonp(params){return new Promise((resolve,reject)=>{const cb='vauCb_'+Date.now()+'_'+Math.floor(Math.random()*1e6),s=document.createElement('script'),timer=setTimeout(()=>{cleanup();reject(new Error('Timeout API'))},12000);function cleanup(){clearTimeout(timer);delete window[cb];s.remove()}window[cb]=data=>{cleanup();resolve(data)};const q=new URLSearchParams({...params,callback:cb});s.src=VAU_API_URL+'?'+q.toString();s.onerror=()=>{cleanup();reject(new Error('Errore collegamento API'))};document.body.appendChild(s)})}async function vGet(params){
-  let lastErr;
-  for(let attempt=0;attempt<2;attempt++){
-    try{return await vJsonp({...params,_retry:attempt,_t:Date.now()})}
-    catch(e){lastErr=e;if(attempt===0)await new Promise(r=>setTimeout(r,650))}
-  }
-  throw lastErr||new Error('Database non raggiungibile');
-}async function vPost(payload){
+const VAUCFG=window.VAUCLAIR_CONFIG||{},VAU_API_URL=String(VAUCFG.API_URL||''),VAU_LIVE=!!VAU_API_URL;function vEsc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}function vMoney(v){return '$'+Number(v||0).toFixed(2)}function vDate(v){if(!v)return'';const d=new Date(v);return Number.isNaN(d.getTime())?String(v):d.toLocaleString('it-IT',{dateStyle:'short',timeStyle:'short'})}function vToast(msg,good=true){let t=document.getElementById('toast');if(!t){t=document.createElement('div');t.id='toast';t.className='toast';document.body.appendChild(t)}t.textContent=msg;t.style.borderColor=good?'var(--gold)':'var(--bad)';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3200)}function vSetConn(ok,text){const d=document.getElementById('connDot'),t=document.getElementById('connText');if(d)d.className='dot '+(ok?'ok':'bad');if(t)t.textContent=text}function vJsonp(params){return new Promise((resolve,reject)=>{const cb='vauCb_'+Date.now()+'_'+Math.floor(Math.random()*1e6),s=document.createElement('script'),timer=setTimeout(()=>{cleanup();reject(new Error('Timeout API'))},12000);function cleanup(){clearTimeout(timer);delete window[cb];s.remove()}window[cb]=data=>{cleanup();resolve(data)};const q=new URLSearchParams({...params,callback:cb});s.src=VAU_API_URL+'?'+q.toString();s.onerror=()=>{cleanup();reject(new Error('Errore collegamento API'))};document.body.appendChild(s)})}async function vGet(params){try{const q=new URLSearchParams(params),r=await fetch(VAU_API_URL+'?'+q.toString(),{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);return await r.json()}catch(e){return await vJsonp(params)}}async function vPost(payload){
   try{
     const r=await fetch(VAU_API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});
     if(r.ok)return await r.json();
@@ -113,30 +106,16 @@ const VAUCFG=window.VAUCLAIR_CONFIG||{},VAU_API_URL=String(VAUCFG.API_URL||''),V
 }
 </script>
 <script>
-const COLLAB_CACHE_KEY='vauclair_cache_collabs';
 let collabs=[];let collabSaving=false;
-function saveCollabsCache(){
-  try{localStorage.setItem(COLLAB_CACHE_KEY,JSON.stringify({ts:Date.now(),items:collabs}))}catch(e){}
-}
-function loadCollabsCache(){
-  try{
-    const raw=localStorage.getItem(COLLAB_CACHE_KEY);if(!raw)return false;
-    const c=JSON.parse(raw);if(!Array.isArray(c.items))return false;
-    collabs=c.items;renderCollabs();return true;
-  }catch(e){return false}
-}
-function backgroundCollabsSync(delay=1200){setTimeout(()=>loadCollabs(true),delay)}
-async function loadCollabs(silent=false){
+async function loadCollabs(){
   if(!VAU_LIVE){vSetConn(false,'API non configurata');return}
-  if(!silent)vSetConn(true,'Sincronizzazione…');
+  vSetConn(true,'Aggiornamento…');
   try{
     const d=await vGet({action:'collaborations',_t:Date.now()});
     if(!d.ok)throw new Error(d.error||'Errore API');
-    collabs=d.collaborations||[];saveCollabsCache();vSetConn(true,'Sincronizzato');renderCollabs();
+    collabs=d.collaborations||[];vSetConn(true,'Database condiviso collegato');renderCollabs();
   }catch(e){
-    if(!collabs.length){vSetConn(false,'Database non raggiungibile');document.getElementById('collabs').innerHTML='<div class="empty">Impossibile caricare le collaborazioni.</div>'}
-    else vSetConn(false,'Dati locali · sincronizzazione fallita');
-    if(!silent)vToast(e.message,false);
+    vSetConn(false,'Backend da aggiornare');document.getElementById('collabs').innerHTML='<div class="empty">La sezione Collaborazioni richiede il Code.gs finale e una nuova versione del deployment Apps Script.</div>';vToast(e.message,false);
   }
 }
 function statusClass(s){return String(s||'').toLowerCase().replaceAll(' ','-')}
@@ -178,30 +157,28 @@ async function saveCollab(){
   try{
     const r=await vPost(p);if(r&&r.ok===false)throw new Error(r.error||'Errore');
     closeCollabModal();
-    if(r&&r.collaboration){collabs.unshift(r.collaboration);saveCollabsCache();renderCollabs();vToast((r.collaboration.id||'Collaborazione')+' registrata.')}
-    else{vToast('Collaborazione inviata. Il registro si sincronizza in background.');backgroundCollabsSync(1400)}
+    if(r&&r.collaboration){collabs.unshift(r.collaboration);renderCollabs();vToast((r.collaboration.id||'Collaborazione')+' registrata.')}
+    else{vToast('Collaborazione inviata. Sincronizzo il registro…');setTimeout(loadCollabs,550)}
   }catch(e){vToast(e.message,false)}
   finally{collabSaving=false;btn.disabled=false;btn.textContent='Crea collaborazione'}
 }
 async function changeCollabStatus(id,status){
   const old=collabs.find(c=>c.id===id)?.status;
-  const c=collabs.find(x=>x.id===id);
-  if(c){c.status=status;c.updatedAt=new Date().toISOString();saveCollabsCache();renderCollabs()}
-  if(['Completata','Annullata'].includes(status))vToast(id+' spostata in Archivio.');else vToast(id+' → '+status);
+  const c=collabs.find(x=>x.id===id);if(c){c.status=status;c.updatedAt=new Date().toISOString();renderCollabs()}
   try{
     const r=await vPost({action:'updateCollaborationStatus',id,status});if(r&&r.ok===false)throw new Error(r.error||'Errore');
-    backgroundCollabsSync(1600);
-  }catch(e){if(c)c.status=old;saveCollabsCache();renderCollabs();vToast('Sincronizzazione non riuscita: '+e.message,false)}
+    if(['Completata','Annullata'].includes(status))vToast(id+' archiviata.');else vToast(id+' → '+status);
+    setTimeout(loadCollabs,650);
+  }catch(e){if(c)c.status=old;renderCollabs();vToast(e.message,false);setTimeout(loadCollabs,650)}
 }
 async function deleteCollaboration(id){
   if(!confirm('Eliminare definitivamente '+id+'?'))return;
-  const before=collabs.slice();collabs=collabs.filter(c=>c.id!==id);saveCollabsCache();renderCollabs();vToast(id+' rimossa.');
+  const before=collabs.slice();collabs=collabs.filter(c=>c.id!==id);renderCollabs();vToast('Eliminazione in corso…');
   try{
     const r=await vPost({action:'deleteCollaboration',id});if(r&&r.ok===false)throw new Error(r.error||'Errore');
-    backgroundCollabsSync(1600);
-  }catch(e){collabs=before;saveCollabsCache();renderCollabs();vToast('Eliminazione non sincronizzata: '+e.message,false)}
+    vToast(id+' eliminata definitivamente.');setTimeout(loadCollabs,650);
+  }catch(e){collabs=before;renderCollabs();vToast(e.message,false)}
 }
-if(loadCollabsCache())vSetConn(true,'Dati pronti · sincronizzo…');
-loadCollabs(true);
+loadCollabs();
 </script>
 </body></html>
