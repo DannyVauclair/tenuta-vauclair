@@ -1682,6 +1682,15 @@ async function saveSharedOrder(){
   try{
     const res=await sharedPost(payload);
     if(res&&res.ok===false)throw new Error(res.error||'Errore salvataggio');
+    if(res?.order){
+      try{
+        const key='vauclair_cache_orders';
+        const cached=JSON.parse(localStorage.getItem(key)||'{"items":[]}');
+        const items=Array.isArray(cached.items)?cached.items.filter(x=>x.id!==res.order.id):[];
+        items.unshift(res.order);
+        localStorage.setItem(key,JSON.stringify({ts:Date.now(),items}));
+      }catch(e){}
+    }
     status.textContent=res?.order?.id
       ? `${res.order.id} salvato nel registro condiviso.`
       : 'Ordine inviato al registro condiviso.';
