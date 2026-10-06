@@ -199,6 +199,142 @@
   }
 }
 
+
+/* ===== Registro ultra-compatto v2 ===== */
+.shell > .page-bar,
+.shell > .stats,
+.shell > .filters,
+.shell > .cards{
+  width:min(820px,100%);
+  margin-left:auto;
+  margin-right:auto;
+}
+.shell > .page-bar{margin-top:12px;margin-bottom:10px}
+.shell > .stats{margin-top:10px;margin-bottom:10px}
+.shell > .filters{margin-top:10px;margin-bottom:10px}
+.cards{gap:8px}
+
+.card{
+  overflow:hidden;
+  box-shadow:0 4px 14px rgba(0,0,0,.15);
+}
+.card-head{
+  display:grid;
+  grid-template-columns:88px minmax(0,1fr) 176px;
+  gap:10px;
+  align-items:center;
+  padding:9px 11px;
+}
+.card-head > div{min-width:0}
+.card-ident{
+  padding-right:9px;
+  border-right:1px solid rgba(185,133,63,.16);
+}
+.card-main{min-width:0}
+.card-main .title-with-chip{gap:6px;row-gap:3px}
+.card-main .title-strong{font-size:15px;line-height:1.1}
+.card-main .meta{margin-top:2px}
+.card-side{
+  display:grid;
+  gap:5px;
+  justify-items:stretch;
+}
+.card-total{
+  display:flex;
+  justify-content:space-between;
+  align-items:baseline;
+  gap:8px;
+}
+.card-total .money{
+  font-size:15px;
+  line-height:1;
+}
+.card-total .meta{white-space:nowrap}
+.card-actions{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:5px;
+  justify-content:stretch;
+}
+.status-select{
+  width:100%;
+  min-width:0;
+  padding:5px 7px;
+  font-size:11px;
+}
+.btn.small{
+  padding:5px 7px;
+  font-size:8px;
+}
+.code{font-size:13px;line-height:1.1}
+.status-chip{padding:2px 6px;font-size:8px}
+
+.lines{padding:3px 11px 5px}
+.line{
+  grid-template-columns:minmax(0,1fr) 50px 62px 74px;
+  gap:7px;
+  padding:6px 0;
+  align-items:center;
+  font-size:11px;
+}
+.line strong{font-size:12px;line-height:1.05}
+.line .meta{font-size:9px}
+.line .money{text-align:right}
+.card-foot{
+  justify-content:flex-start;
+  align-items:center;
+  gap:10px;
+  padding:6px 11px 7px;
+  flex-wrap:wrap;
+}
+.card-foot span + span{
+  padding-left:10px;
+  border-left:1px solid rgba(185,133,63,.18);
+}
+
+.collab-card .card-head{
+  grid-template-columns:88px minmax(0,1fr) 176px;
+}
+.collab-body{
+  grid-template-columns:minmax(0,1fr) 190px;
+  gap:7px;
+  padding:7px 11px 9px;
+}
+.collab-block{padding:7px 9px}
+.collab-label{margin-bottom:2px}
+
+@media(max-width:900px){
+  .shell > .page-bar,
+  .shell > .stats,
+  .shell > .filters,
+  .shell > .cards{width:100%}
+  .card-head,
+  .collab-card .card-head{grid-template-columns:82px minmax(0,1fr) 165px}
+}
+@media(max-width:700px){
+  .card-head,
+  .collab-card .card-head{grid-template-columns:74px minmax(0,1fr)}
+  .card-side{grid-column:2}
+  .collab-body{grid-template-columns:1fr}
+}
+@media(max-width:520px){
+  .card-head,
+  .collab-card .card-head{display:block}
+  .card-ident{
+    padding-right:0;
+    padding-bottom:6px;
+    margin-bottom:6px;
+    border-right:0;
+    border-bottom:1px solid rgba(185,133,63,.16);
+  }
+  .card-main{margin-bottom:7px}
+  .line{grid-template-columns:minmax(0,1fr) 42px 58px}
+  .line > div:last-child{grid-column:2 / span 2}
+  .card-foot{display:block}
+  .card-foot span{display:block}
+  .card-foot span + span{margin-top:3px;padding-left:0;border-left:0}
+}
+
 </style>
 <link rel="stylesheet" href="vauclair-header.css?v=20261006-2">
 </head>
@@ -321,7 +457,8 @@ function renderOrders(){
   const q=document.getElementById('search').value.trim().toLowerCase();
   const dept=document.getElementById('deptFilter').value,status=document.getElementById('statusFilter').value;
   const f=active.filter(o=>{
-    if(dept&&o.department!==dept)return false;if(status&&o.status!==status)return false;
+    if(dept&&o.department!==dept)return false;
+    if(status&&o.status!==status)return false;
     if(!q)return true;
     return [o.id,o.client,o.department,o.status,o.notes,o.createdBy,...(o.lines||[]).flatMap(l=>[l.item,l.category])].join(' ').toLowerCase().includes(q);
   });
@@ -334,12 +471,20 @@ function renderOrders(){
   if(!f.length){box.innerHTML='<div class="empty">Nessun ordine attivo corrisponde ai filtri. Gli ordini conclusi sono in Archivio.</div>';return}
   box.innerHTML=f.map(o=>`<article class="card">
     <div class="card-head">
-      <div><div class="code">${vEsc(o.id)}</div><div class="meta">${vDate(o.createdAt)}</div></div>
-      <div><div class="title-with-chip"><span class="title-strong">${vEsc(o.client)}</span><span class="status-chip ${statusClass(o.status)}">${vEsc(o.status)}</span></div><div class="meta">${vEsc(o.department)} · inserito da ${vEsc(o.createdBy||'—')}</div></div>
-      <div class="money"><div>${vMoney(o.total)}</div><div class="meta">${Number(o.discount||0)*100}% sconto</div></div>
-      <div class="card-actions">
-        <select class="status-select" onchange="changeOrderStatus('${vEsc(o.id)}',this.value)">${['Nuovo','In lavorazione','Pronto','Consegnato','Annullato'].map(st=>`<option ${o.status===st?'selected':''}>${st}</option>`).join('')}</select>
-        <button class="btn danger small" onclick="deleteOrder('${vEsc(o.id)}')">Elimina</button>
+      <div class="card-ident">
+        <div class="code">${vEsc(o.id)}</div>
+        <div class="meta">${vDate(o.createdAt)}</div>
+      </div>
+      <div class="card-main">
+        <div class="title-with-chip"><span class="title-strong">${vEsc(o.client)}</span><span class="status-chip ${statusClass(o.status)}">${vEsc(o.status)}</span></div>
+        <div class="meta">${vEsc(o.department)} · inserito da ${vEsc(o.createdBy||'—')}</div>
+      </div>
+      <div class="card-side">
+        <div class="card-total"><span class="money">${vMoney(o.total)}</span><span class="meta">${Number(o.discount||0)*100}% sconto</span></div>
+        <div class="card-actions">
+          <select class="status-select" onchange="changeOrderStatus('${vEsc(o.id)}',this.value)">${['Nuovo','In lavorazione','Pronto','Consegnato','Annullato'].map(st=>`<option ${o.status===st?'selected':''}>${st}</option>`).join('')}</select>
+          <button class="btn danger small" onclick="deleteOrder('${vEsc(o.id)}')">Elimina</button>
+        </div>
       </div>
     </div>
     <div class="lines">${(o.lines||[]).map(l=>`<div class="line"><div><strong>${vEsc(l.item)}</strong><div class="meta">${vEsc(l.category)}</div></div><div>×${Number(l.qty||0)}</div><div class="unit meta">${vMoney(l.unitPrice)}</div><div class="money">${vMoney(l.lineTotal)}</div></div>`).join('')}</div>
