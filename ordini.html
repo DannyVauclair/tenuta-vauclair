@@ -92,14 +92,7 @@
 <div class="toast" id="toast"></div>
 <script>
 window.VAUCLAIR_CONFIG={API_URL:'https://script.google.com/macros/s/AKfycbyQTjkjNZnPFpsxPArYZ2gpELWiHUOVPzRd5eQx1pzhfEjNsb4ejl1p0IrZWzhbMU49/exec'};
-const VAUCFG=window.VAUCLAIR_CONFIG||{},VAU_API_URL=String(VAUCFG.API_URL||''),VAU_LIVE=!!VAU_API_URL;function vEsc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}function vMoney(v){return '$'+Number(v||0).toFixed(2)}function vDate(v){if(!v)return'';const d=new Date(v);return Number.isNaN(d.getTime())?String(v):d.toLocaleString('it-IT',{dateStyle:'short',timeStyle:'short'})}function vToast(msg,good=true){let t=document.getElementById('toast');if(!t){t=document.createElement('div');t.id='toast';t.className='toast';document.body.appendChild(t)}t.textContent=msg;t.style.borderColor=good?'var(--gold)':'var(--bad)';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3200)}function vSetConn(ok,text){const d=document.getElementById('connDot'),t=document.getElementById('connText');if(d)d.className='dot '+(ok?'ok':'bad');if(t)t.textContent=text}function vJsonp(params){return new Promise((resolve,reject)=>{const cb='vauCb_'+Date.now()+'_'+Math.floor(Math.random()*1e6),s=document.createElement('script'),timer=setTimeout(()=>{cleanup();reject(new Error('Timeout API'))},12000);function cleanup(){clearTimeout(timer);delete window[cb];s.remove()}window[cb]=data=>{cleanup();resolve(data)};const q=new URLSearchParams({...params,callback:cb});s.src=VAU_API_URL+'?'+q.toString();s.onerror=()=>{cleanup();reject(new Error('Errore collegamento API'))};document.body.appendChild(s)})}async function vGet(params){
-  let lastErr;
-  for(let attempt=0;attempt<2;attempt++){
-    try{return await vJsonp({...params,_retry:attempt,_t:Date.now()})}
-    catch(e){lastErr=e;if(attempt===0)await new Promise(r=>setTimeout(r,650))}
-  }
-  throw lastErr||new Error('Database non raggiungibile');
-}async function vPost(payload){
+const VAUCFG=window.VAUCLAIR_CONFIG||{},VAU_API_URL=String(VAUCFG.API_URL||''),VAU_LIVE=!!VAU_API_URL;function vEsc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}function vMoney(v){return '$'+Number(v||0).toFixed(2)}function vDate(v){if(!v)return'';const d=new Date(v);return Number.isNaN(d.getTime())?String(v):d.toLocaleString('it-IT',{dateStyle:'short',timeStyle:'short'})}function vToast(msg,good=true){let t=document.getElementById('toast');if(!t){t=document.createElement('div');t.id='toast';t.className='toast';document.body.appendChild(t)}t.textContent=msg;t.style.borderColor=good?'var(--gold)':'var(--bad)';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3200)}function vSetConn(ok,text){const d=document.getElementById('connDot'),t=document.getElementById('connText');if(d)d.className='dot '+(ok?'ok':'bad');if(t)t.textContent=text}function vJsonp(params){return new Promise((resolve,reject)=>{const cb='vauCb_'+Date.now()+'_'+Math.floor(Math.random()*1e6),s=document.createElement('script'),timer=setTimeout(()=>{cleanup();reject(new Error('Timeout API'))},12000);function cleanup(){clearTimeout(timer);delete window[cb];s.remove()}window[cb]=data=>{cleanup();resolve(data)};const q=new URLSearchParams({...params,callback:cb});s.src=VAU_API_URL+'?'+q.toString();s.onerror=()=>{cleanup();reject(new Error('Errore collegamento API'))};document.body.appendChild(s)})}async function vGet(params){try{const q=new URLSearchParams(params),r=await fetch(VAU_API_URL+'?'+q.toString(),{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);return await r.json()}catch(e){return await vJsonp(params)}}async function vPost(payload){
   try{
     const r=await fetch(VAU_API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});
     if(r.ok)return await r.json();
@@ -114,36 +107,19 @@ const VAUCFG=window.VAUCLAIR_CONFIG||{},VAU_API_URL=String(VAUCFG.API_URL||''),V
 }
 </script>
 <script>
-const ORDERS_CACHE_KEY='vauclair_cache_orders';
 let orders=[];
 let orderSaving=false;
 
-function saveOrdersCache(){
-  try{localStorage.setItem(ORDERS_CACHE_KEY,JSON.stringify({ts:Date.now(),items:orders}))}catch(e){}
-}
-function loadOrdersCache(){
-  try{
-    const raw=localStorage.getItem(ORDERS_CACHE_KEY);if(!raw)return false;
-    const c=JSON.parse(raw);if(!Array.isArray(c.items))return false;
-    orders=c.items;renderOrders();return true;
-  }catch(e){return false}
-}
-function backgroundOrdersSync(delay=1200){
-  setTimeout(()=>loadOrders(true),delay);
-}
-async function loadOrders(silent=false){
+async function loadOrders(){
   if(!VAU_LIVE){vSetConn(false,'API non configurata');document.getElementById('orders').innerHTML='<div class="empty">Database non configurato.</div>';return}
-  if(!silent)vSetConn(true,'Sincronizzazione…');
+  vSetConn(true,'Aggiornamento…');
   try{
     const data=await vGet({action:'orders',_t:Date.now()});
     if(!data.ok)throw new Error(data.error||'Errore API');
-    orders=data.orders||[];saveOrdersCache();vSetConn(true,'Sincronizzato');renderOrders();
+    orders=data.orders||[];vSetConn(true,'Database condiviso collegato');renderOrders();
   }catch(e){
-    if(!orders.length){
-      vSetConn(false,'Database non raggiungibile');
-      document.getElementById('orders').innerHTML='<div class="empty">Impossibile caricare gli ordini.</div>';
-    }else vSetConn(false,'Dati locali · sincronizzazione fallita');
-    if(!silent)vToast(e.message,false);
+    vSetConn(false,'Database non raggiungibile');
+    document.getElementById('orders').innerHTML='<div class="empty">Impossibile caricare gli ordini.</div>';vToast(e.message,false);
   }
 }
 
@@ -181,26 +157,26 @@ function renderOrders(){
 function clearOrderFilters(){document.getElementById('search').value='';document.getElementById('deptFilter').value='';document.getElementById('statusFilter').value='';renderOrders()}
 async function changeOrderStatus(id,status){
   const old=orders.find(o=>o.id===id)?.status;
-  const o=orders.find(x=>x.id===id);
-  if(o){o.status=status;o.updatedAt=new Date().toISOString();saveOrdersCache();renderOrders()}
-  if(['Consegnato','Annullato'].includes(status))vToast(id+' spostato in Archivio.');
-  else vToast(id+' → '+status);
+  const o=orders.find(x=>x.id===id); if(o){o.status=status;o.updatedAt=new Date().toISOString();renderOrders()}
   try{
     const r=await vPost({action:'updateStatus',id,status});
     if(r&&r.ok===false)throw new Error(r.error||'Errore');
-    backgroundOrdersSync(1600);
+    if(['Consegnato','Annullato'].includes(status))vToast(id+' archiviato.');
+    else vToast(id+' → '+status);
+    setTimeout(loadOrders,650);
   }catch(e){
-    if(o)o.status=old;saveOrdersCache();renderOrders();vToast('Sincronizzazione non riuscita: '+e.message,false);
+    if(o)o.status=old;renderOrders();vToast(e.message,false);setTimeout(loadOrders,650);
   }
 }
 async function deleteOrder(id){
   if(!confirm('Eliminare definitivamente '+id+'? Verranno eliminate anche tutte le righe dell’ordine.'))return;
-  const before=orders.slice();orders=orders.filter(o=>o.id!==id);saveOrdersCache();renderOrders();vToast(id+' rimosso.');
+  const before=orders.slice();orders=orders.filter(o=>o.id!==id);renderOrders();vToast('Eliminazione in corso…');
   try{
     const r=await vPost({action:'deleteOrder',id});
     if(r&&r.ok===false)throw new Error(r.error||'Errore');
-    backgroundOrdersSync(1600);
-  }catch(e){orders=before;saveOrdersCache();renderOrders();vToast('Eliminazione non sincronizzata: '+e.message,false)}
+    vToast(id+' eliminato definitivamente.');
+    setTimeout(loadOrders,650);
+  }catch(e){orders=before;renderOrders();vToast(e.message,false)}
 }
 function openOrderModal(){document.getElementById('orderModal').classList.add('open');document.getElementById('orderLines').innerHTML='';addOrderLine()}
 function closeOrderModal(){document.getElementById('orderModal').classList.remove('open')}
@@ -218,12 +194,11 @@ async function saveManualOrder(){
   try{
     const r=await vPost(p);if(r&&r.ok===false)throw new Error(r.error||'Errore');
     closeOrderModal();
-    if(r&&r.order){orders.unshift(r.order);saveOrdersCache();renderOrders();vToast((r.order.id||'Ordine')+' creato.')}
-    else{vToast('Ordine inviato. Il registro si sincronizza in background.');backgroundOrdersSync(1400)}
+    if(r&&r.order){orders.unshift(r.order);renderOrders();vToast((r.order.id||'Ordine')+' creato.')}
+    else{vToast('Ordine inviato. Sincronizzo il registro…');setTimeout(loadOrders,550)}
   }catch(e){vToast(e.message,false)}
   finally{orderSaving=false;btn.disabled=false;btn.textContent='Crea ordine'}
 }
-if(loadOrdersCache())vSetConn(true,'Dati pronti · sincronizzo…');
-loadOrders(true);
+loadOrders();
 </script>
 </body></html>
