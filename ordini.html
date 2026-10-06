@@ -107,19 +107,36 @@ const VAUCFG=window.VAUCLAIR_CONFIG||{},VAU_API_URL=String(VAUCFG.API_URL||''),V
 }
 </script>
 <script>
+const ORDERS_CACHE_KEY='vauclair_cache_orders';
 let orders=[];
 let orderSaving=false;
 
-async function loadOrders(){
+function saveOrdersCache(){
+  try{localStorage.setItem(ORDERS_CACHE_KEY,JSON.stringify({ts:Date.now(),items:orders}))}catch(e){}
+}
+function loadOrdersCache(){
+  try{
+    const raw=localStorage.getItem(ORDERS_CACHE_KEY);if(!raw)return false;
+    const c=JSON.parse(raw);if(!Array.isArray(c.items))return false;
+    orders=c.items;renderOrders();return true;
+  }catch(e){return false}
+}
+function backgroundOrdersSync(delay=1200){
+  setTimeout(()=>loadOrders(true),delay);
+}
+async function loadOrders(silent=false){
   if(!VAU_LIVE){vSetConn(false,'API non configurata');document.getElementById('orders').innerHTML='<div class="empty">Database non configurato.</div>';return}
-  vSetConn(true,'Aggiornamento…');
+  if(!silent)vSetConn(true,'Sincronizzazione…');
   try{
     const data=await vGet({action:'orders',_t:Date.now()});
     if(!data.ok)throw new Error(data.error||'Errore API');
-    orders=data.orders||[];vSetConn(true,'Database condiviso collegato');renderOrders();
+    orders=data.orders||[];saveOrdersCache();vSetConn(true,'Sincronizzato');renderOrders();
   }catch(e){
-    vSetConn(false,'Database non raggiungibile');
-    document.getElementById('orders').innerHTML='<div class="empty">Impossibile caricare gli ordini.</div>';vToast(e.message,false);
+    if(!orders.length){
+      vSetConn(false,'Database non raggiungibile');
+      document.getElementById('orders').innerHTML='<div class="empty">Impossibile caricare gli ordini.</div>';
+    }else vSetConn(false,'Dati locali · sincronizzazione fallita');
+    if(!silent)vToast(e.message,false);
   }
 }
 
@@ -157,26 +174,26 @@ function renderOrders(){
 function clearOrderFilters(){document.getElementById('search').value='';document.getElementById('deptFilter').value='';document.getElementById('statusFilter').value='';renderOrders()}
 async function changeOrderStatus(id,status){
   const old=orders.find(o=>o.id===id)?.status;
-  const o=orders.find(x=>x.id===id); if(o){o.status=status;o.updatedAt=new Date().toISOString();renderOrders()}
+  const o=orders.find(x=>x.id===id);
+  if(o){o.status=status;o.updatedAt=new Date().toISOString();saveOrdersCache();renderOrders()}
+  if(['Consegnato','Annullato'].includes(status))vToast(id+' spostato in Archivio.');
+  else vToast(id+' → '+status);
   try{
     const r=await vPost({action:'updateStatus',id,status});
     if(r&&r.ok===false)throw new Error(r.error||'Errore');
-    if(['Consegnato','Annullato'].includes(status))vToast(id+' archiviato.');
-    else vToast(id+' → '+status);
-    setTimeout(loadOrders,650);
+    backgroundOrdersSync(1600);
   }catch(e){
-    if(o)o.status=old;renderOrders();vToast(e.message,false);setTimeout(loadOrders,650);
+    if(o)o.status=old;saveOrdersCache();renderOrders();vToast('Sincronizzazione non riuscita: '+e.message,false);
   }
 }
 async function deleteOrder(id){
   if(!confirm('Eliminare definitivamente '+id+'? Verranno eliminate anche tutte le righe dell’ordine.'))return;
-  const before=orders.slice();orders=orders.filter(o=>o.id!==id);renderOrders();vToast('Eliminazione in corso…');
+  const before=orders.slice();orders=orders.filter(o=>o.id!==id);saveOrdersCache();renderOrders();vToast(id+' rimosso.');
   try{
     const r=await vPost({action:'deleteOrder',id});
     if(r&&r.ok===false)throw new Error(r.error||'Errore');
-    vToast(id+' eliminato definitivamente.');
-    setTimeout(loadOrders,650);
-  }catch(e){orders=before;renderOrders();vToast(e.message,false)}
+    backgroundOrdersSync(1600);
+  }catch(e){orders=before;saveOrdersCache();renderOrders();vToast('Eliminazione non sincronizzata: '+e.message,false)}
 }
 function openOrderModal(){document.getElementById('orderModal').classList.add('open');document.getElementById('orderLines').innerHTML='';addOrderLine()}
 function closeOrderModal(){document.getElementById('orderModal').classList.remove('open')}
@@ -194,11 +211,12 @@ async function saveManualOrder(){
   try{
     const r=await vPost(p);if(r&&r.ok===false)throw new Error(r.error||'Errore');
     closeOrderModal();
-    if(r&&r.order){orders.unshift(r.order);renderOrders();vToast((r.order.id||'Ordine')+' creato.')}
-    else{vToast('Ordine inviato. Sincronizzo il registro…');setTimeout(loadOrders,550)}
+    if(r&&r.order){orders.unshift(r.order);saveOrdersCache();renderOrders();vToast((r.order.id||'Ordine')+' creato.')}
+    else{vToast('Ordine inviato. Il registro si sincronizza in background.');backgroundOrdersSync(1400)}
   }catch(e){vToast(e.message,false)}
   finally{orderSaving=false;btn.disabled=false;btn.textContent='Crea ordine'}
 }
-loadOrders();
+if(loadOrdersCache())vSetConn(true,'Dati pronti · sincronizzo…');
+loadOrders(true);
 </script>
 </body></html>
