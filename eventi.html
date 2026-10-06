@@ -80,6 +80,125 @@
 .btn[disabled]{opacity:.55;cursor:wait}
 @media(max-width:900px){.card-actions{justify-content:flex-start}}
 
+
+
+/* --- Registro compatto: ordini + eventi --- */
+.stats,
+.filters,
+.cards{
+  max-width:1080px;
+  margin-left:auto;
+  margin-right:auto;
+}
+.cards{gap:8px}
+.card{
+  box-shadow:0 4px 15px rgba(0,0,0,.16);
+}
+.card-head{
+  grid-template-columns:96px minmax(240px,1fr) 150px 220px;
+  gap:10px;
+  padding:10px 12px;
+  align-items:center;
+}
+.card-head > div{min-width:0}
+.card-head > div:nth-child(2){
+  padding-left:10px;
+  border-left:1px solid rgba(187,139,70,.16);
+}
+.code{
+  font-size:13px;
+  line-height:1.15;
+}
+.title-strong{
+  font-size:15px;
+  line-height:1.15;
+}
+.title-with-chip{
+  gap:6px;
+  row-gap:4px;
+}
+.status-chip{
+  padding:2px 7px;
+  font-size:8px;
+}
+.money{
+  white-space:nowrap;
+}
+.card-actions{
+  justify-content:flex-start;
+  gap:6px;
+}
+.status-select{
+  min-width:132px;
+  padding:6px 8px;
+}
+.btn.small{
+  padding:6px 8px;
+}
+.lines{
+  padding:4px 12px 7px;
+}
+.line{
+  grid-template-columns:minmax(220px,1fr) 60px 78px 88px;
+  gap:10px;
+  padding:6px 0;
+  align-items:center;
+}
+.line .money{
+  min-width:78px;
+}
+.card-foot{
+  justify-content:flex-start;
+  align-items:center;
+  gap:14px;
+  padding:7px 12px 8px;
+  flex-wrap:wrap;
+}
+.card-foot span + span{
+  padding-left:14px;
+  border-left:1px solid rgba(187,139,70,.16);
+}
+.collab-body{
+  grid-template-columns:minmax(0,1fr) 245px;
+  gap:8px;
+  padding:8px 12px 11px;
+}
+.collab-block{
+  padding:8px 10px;
+}
+.collab-label{
+  margin-bottom:3px;
+}
+@media(max-width:1150px){
+  .stats,.filters,.cards{max-width:100%}
+}
+@media(max-width:900px){
+  .card-head{grid-template-columns:1fr auto}
+  .card-head > div:nth-child(2){
+    padding-left:0;
+    border-left:0;
+  }
+  .collab-body{grid-template-columns:1fr 220px}
+}
+@media(max-width:650px){
+  .card-head{display:block}
+  .card-head > div{margin-bottom:8px}
+  .card-head > div:last-child{margin-bottom:0}
+  .line{grid-template-columns:minmax(0,1fr) 52px 76px}
+  .line > div:last-child{
+    grid-column:2 / span 2;
+    text-align:right;
+  }
+  .collab-body{grid-template-columns:1fr}
+  .card-foot{display:block}
+  .card-foot span{display:block}
+  .card-foot span + span{
+    margin-top:4px;
+    padding-left:0;
+    border-left:0;
+  }
+}
+
 </style>
 <link rel="stylesheet" href="vauclair-header.css?v=20261006-2">
 </head>
