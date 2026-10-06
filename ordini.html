@@ -336,129 +336,159 @@
 }
 
 
-/* ===== Registro concentrato v3 ===== */
+/* ===== Registro leggibile e raccolto v4 ===== */
 .shell > .page-bar,
 .shell > .stats,
 .shell > .filters,
 .shell > .cards{
-  width:min(720px,100%);
-  max-width:720px;
-  margin-left:auto;
-  margin-right:auto;
+  width:100%;
+  max-width:none;
+  margin-left:0;
+  margin-right:0;
 }
 
+/* statistiche e filtri: leggibili, non miniaturizzati */
 .stats{
   grid-template-columns:repeat(5,minmax(0,1fr));
-  gap:6px;
+  gap:8px;
 }
 .stat{
-  padding:9px 10px;
+  padding:12px 14px;
 }
 .stat strong{
-  font-size:19px;
+  font-size:24px;
+  line-height:1;
 }
 .stat span{
-  font-size:8px;
+  font-size:10px;
+  line-height:1.2;
 }
-
 .filters{
-  grid-template-columns:minmax(220px,1fr) 120px 130px auto;
-  gap:6px;
+  grid-template-columns:minmax(280px,1fr) 160px 175px auto;
+  gap:8px;
 }
 .filters input,
 .filters select{
-  padding:8px 9px;
+  padding:10px 11px;
+  font-size:14px;
 }
 .filters .btn{
-  padding:8px 10px;
+  padding:10px 13px;
+  font-size:13px;
 }
 
-.cards{gap:7px}
-
+.cards{gap:10px}
 .card{
   overflow:hidden;
 }
+
+/* La card resta larga, ma le informazioni utili sono raccolte tutte nella stessa zona */
+.card-head,
+.lines,
+.card-foot,
+.collab-body{
+  padding-left:16px;
+  padding-right:16px;
+}
 .card-head{
   display:block;
-  padding:9px 11px 8px;
+  padding-top:13px;
+  padding-bottom:11px;
+}
+.order-summary,
+.collab-summary{
+  max-width:780px;
 }
 .order-top,
 .collab-top{
   display:flex;
   align-items:center;
-  gap:8px;
+  gap:10px;
   flex-wrap:wrap;
 }
 .order-top .code,
 .collab-top .code{
-  font-size:13px;
+  font-size:15px;
   line-height:1;
-  padding-right:8px;
-  border-right:1px solid rgba(185,133,63,.24);
+  padding-right:10px;
+  border-right:1px solid rgba(185,133,63,.28);
 }
 .order-top .title-strong,
 .collab-top .title-strong{
-  font-size:16px;
-  line-height:1.05;
+  font-size:20px;
+  line-height:1.08;
+}
+.status-chip{
+  padding:3px 8px;
+  font-size:10px;
+  letter-spacing:.6px;
 }
 .order-top .money{
-  margin-left:2px;
-  font-size:15px;
+  font-size:18px;
   line-height:1;
+  margin-left:2px;
 }
+
 .order-meta,
 .collab-meta{
-  margin-top:4px;
+  margin-top:6px;
   display:flex;
   align-items:center;
-  gap:6px;
+  gap:8px;
   flex-wrap:wrap;
   color:var(--muted);
-  font-size:9px;
+  font-size:12px;
+  line-height:1.25;
 }
-.meta-sep{opacity:.45}
+.meta-sep{
+  opacity:.5;
+  font-size:11px;
+}
+
 .order-controls,
 .collab-controls{
-  margin-top:7px;
+  margin-top:9px;
   display:flex;
   align-items:center;
-  gap:6px;
+  gap:8px;
   flex-wrap:wrap;
 }
 .order-controls .status-select,
 .collab-controls .status-select{
   width:auto;
-  min-width:118px;
-  padding:5px 7px;
+  min-width:145px;
+  padding:7px 9px;
+  font-size:13px;
 }
 .order-controls .btn,
 .collab-controls .btn{
-  padding:5px 8px;
+  padding:7px 10px;
+  font-size:11px;
 }
 
+/* righe articolo: tutto nello stesso campo visivo */
 .lines{
-  padding:3px 11px 6px;
+  padding-top:5px;
+  padding-bottom:8px;
 }
 .line{
   display:flex;
   align-items:baseline;
   justify-content:flex-start;
-  gap:7px;
+  gap:8px;
   flex-wrap:wrap;
-  padding:6px 0;
-  font-size:11px;
-}
-.line > div{
-  width:auto !important;
-  min-width:0 !important;
+  padding:8px 0;
+  font-size:13px;
+  line-height:1.25;
 }
 .line .line-name{
-  font-size:12px;
+  font-size:15px;
 }
 .line .line-category{
   color:var(--muted);
-  font-size:9px;
+  font-size:12px;
 }
+.line .line-qty,
 .line .line-price,
 .line .line-total{
   white-space:nowrap;
@@ -466,6 +496,7 @@
 .line .line-total{
   color:var(--gold2);
   font-weight:700;
+  font-size:14px;
 }
 .line-dot{
   color:var(--muted);
@@ -474,72 +505,77 @@
 
 .card-foot{
   justify-content:flex-start;
-  gap:8px;
-  padding:6px 11px 7px;
-  font-size:9px;
+  gap:10px;
+  padding-top:8px;
+  padding-bottom:10px;
+  font-size:11px;
+  line-height:1.25;
 }
 .card-foot span + span{
-  padding-left:8px;
-  border-left:1px solid rgba(185,133,63,.18);
+  padding-left:10px;
+  border-left:1px solid rgba(185,133,63,.2);
 }
 
+/* eventi/collaborazioni: stessa gerarchia visiva */
 .collab-card .card-head{
   display:block;
 }
 .collab-body{
   display:block;
-  padding:0 11px 8px;
+  padding-top:0;
+  padding-bottom:11px;
 }
 .collab-block{
-  padding:7px 0 0;
+  max-width:780px;
+  padding:9px 0 0;
   border:0;
   background:transparent;
-}
-.collab-block + .collab-block{
-  margin-top:6px;
-  padding-top:6px;
-  border-top:1px dashed var(--soft);
+  font-size:13px;
+  line-height:1.35;
 }
 .collab-label{
-  margin-bottom:2px;
+  margin-bottom:4px;
+  font-size:10px;
 }
 .collab-footer{
   display:flex;
   align-items:center;
-  gap:7px;
+  gap:8px;
   flex-wrap:wrap;
-  margin-top:6px;
+  max-width:780px;
+  margin-top:8px;
+  padding-top:7px;
+  border-top:1px dashed var(--soft);
   color:var(--muted);
-  font-size:9px;
+  font-size:11px;
 }
 
-@media(max-width:760px){
-  .shell > .page-bar,
-  .shell > .stats,
-  .shell > .filters,
-  .shell > .cards{
-    width:100%;
-    max-width:none;
-  }
+@media(max-width:900px){
+  .order-summary,
+  .collab-summary,
+  .collab-block,
+  .collab-footer{max-width:100%}
 }
-@media(max-width:620px){
+@media(max-width:720px){
   .stats{grid-template-columns:repeat(2,1fr)}
   .filters{grid-template-columns:1fr 1fr}
   .filters input{grid-column:1/-1}
-  .order-top .money{margin-left:0}
 }
-@media(max-width:430px){
+@media(max-width:500px){
   .filters{grid-template-columns:1fr}
   .filters input{grid-column:auto}
-  .card-foot span{
-    display:block;
-  }
+  .order-top .title-strong,
+  .collab-top .title-strong{font-size:18px}
+  .order-meta,
+  .collab-meta{font-size:11px}
+  .card-foot{display:block}
+  .card-foot span{display:block}
   .card-foot span + span{
+    margin-top:4px;
     padding-left:0;
     border-left:0;
   }
 }
-
 </style>
 <link rel="stylesheet" href="vauclair-header.css?v=20261006-2">
 </head>
@@ -682,28 +718,30 @@ function renderOrders(){
 
   box.innerHTML=f.map(o=>`<article class="card">
     <div class="card-head">
-      <div class="order-top">
-        <span class="code">${vEsc(o.id)}</span>
-        <span class="title-strong">${vEsc(o.client)}</span>
-        <span class="status-chip ${statusClass(o.status)}">${vEsc(o.status)}</span>
-        <span class="money">${vMoney(o.total)}</span>
-      </div>
+      <div class="order-summary">
+        <div class="order-top">
+          <span class="code">${vEsc(o.id)}</span>
+          <span class="title-strong">${vEsc(o.client)}</span>
+          <span class="status-chip ${statusClass(o.status)}">${vEsc(o.status)}</span>
+          <span class="money">${vMoney(o.total)}</span>
+        </div>
 
-      <div class="order-meta">
-        <span>${vDate(o.createdAt)}</span>
-        <span class="meta-sep">•</span>
-        <span>${vEsc(o.department)}</span>
-        <span class="meta-sep">•</span>
-        <span>Inserito da ${vEsc(o.createdBy||'—')}</span>
-        <span class="meta-sep">•</span>
-        <span>${Number(o.discount||0)*100}% sconto</span>
-      </div>
+        <div class="order-meta">
+          <span>${vDate(o.createdAt)}</span>
+          <span class="meta-sep">•</span>
+          <span>${vEsc(o.department)}</span>
+          <span class="meta-sep">•</span>
+          <span>Inserito da ${vEsc(o.createdBy||'—')}</span>
+          <span class="meta-sep">•</span>
+          <span>${Number(o.discount||0)*100}% sconto</span>
+        </div>
 
-      <div class="order-controls">
-        <select class="status-select" onchange="changeOrderStatus('${vEsc(o.id)}',this.value)">
-          ${['Nuovo','In lavorazione','Pronto','Consegnato','Annullato'].map(st=>`<option ${o.status===st?'selected':''}>${st}</option>`).join('')}
-        </select>
-        <button class="btn danger small" onclick="deleteOrder('${vEsc(o.id)}')">Elimina</button>
+        <div class="order-controls">
+          <select class="status-select" onchange="changeOrderStatus('${vEsc(o.id)}',this.value)">
+            ${['Nuovo','In lavorazione','Pronto','Consegnato','Annullato'].map(st=>`<option ${o.status===st?'selected':''}>${st}</option>`).join('')}
+          </select>
+          <button class="btn danger small" onclick="deleteOrder('${vEsc(o.id)}')">Elimina</button>
+        </div>
       </div>
     </div>
 
@@ -712,7 +750,7 @@ function renderOrders(){
         <span class="line-name"><strong>${vEsc(l.item)}</strong></span>
         <span class="line-category">${vEsc(l.category)}</span>
         <span class="line-dot">•</span>
-        <span>×${Number(l.qty||0)}</span>
+        <span class="line-qty">×${Number(l.qty||0)}</span>
         <span class="line-dot">•</span>
         <span class="line-price">${vMoney(l.unitPrice)} cad.</span>
         <span class="line-dot">→</span>
