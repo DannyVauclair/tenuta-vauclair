@@ -29,41 +29,14 @@ button,input,select{font:inherit}.shell{max-width:1280px;margin:auto;padding:18p
 <h3 class="section-title">Collaborazioni archiviate</h3><div class="cards" id="collabs"></div>
 </div><div class="toast" id="toast"></div><iframe id="postFrame" name="postFrame" style="display:none"></iframe>
 <script>
-const API='https://script.google.com/macros/s/AKfycbyQTjkjNZnPFpsxPArYZ2gpELWiHUOVPzRd5eQx1pzhfEjNsb4ejl1p0IrZWzhbMU49/exec';
-const ORDERS_CACHE_KEY='vauclair_cache_orders',COLLAB_CACHE_KEY='vauclair_cache_collabs';
-let orders=[],collabs=[];
+const API='https://script.google.com/macros/s/AKfycbyQTjkjNZnPFpsxPArYZ2gpELWiHUOVPzRd5eQx1pzhfEjNsb4ejl1p0IrZWzhbMU49/exec';let orders=[],collabs=[];
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const money=v=>'$'+Number(v||0).toFixed(2);const date=v=>{if(!v)return'';const d=new Date(v);return isNaN(d)?String(v):d.toLocaleString('it-IT',{dateStyle:'short',timeStyle:'short'})};const cls=s=>String(s||'').toLowerCase().replaceAll(' ','-');
 function toast(m,b=true){const t=document.getElementById('toast');t.textContent=m;t.style.borderColor=b?'var(--gold)':'var(--danger)';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800)}
 function conn(ok,t){document.getElementById('connDot').className='dot '+(ok?'ok':'bad');document.getElementById('connText').textContent=t}
 function jsonp(p){return new Promise((resolve,reject)=>{const cb='cb'+Date.now()+Math.floor(Math.random()*1e5),s=document.createElement('script');const timer=setTimeout(()=>{delete window[cb];s.remove();reject(new Error('Timeout API'))},10000);window[cb]=d=>{clearTimeout(timer);delete window[cb];s.remove();resolve(d)};s.src=API+'?'+new URLSearchParams({...p,callback:cb});s.onerror=()=>reject(new Error('API non raggiungibile'));document.body.appendChild(s)})}
-async function get(p){
-  let lastErr;
-  for(let attempt=0;attempt<2;attempt++){
-    try{return await jsonp({...p,_retry:attempt,_t:Date.now()})}
-    catch(e){lastErr=e;if(attempt===0)await new Promise(r=>setTimeout(r,650))}
-  }
-  throw lastErr||new Error('Database non raggiungibile');
-}
+async function get(p){try{const r=await fetch(API+'?'+new URLSearchParams(p),{cache:'no-store'});if(!r.ok)throw 0;return await r.json()}catch(e){return await jsonp(p)}}
 async function post(p){try{const r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(p)});if(r.ok)return await r.json()}catch(e){}const form=document.createElement('form');form.method='POST';form.action=API;form.target='postFrame';form.style.display='none';const i=document.createElement('input');i.name='payload';i.value=JSON.stringify(p);form.appendChild(i);document.body.appendChild(form);form.submit();form.remove();await new Promise(r=>setTimeout(r,220));return{ok:true,fallback:true}}
-function saveCaches(){try{localStorage.setItem(ORDERS_CACHE_KEY,JSON.stringify({ts:Date.now(),items:orders}));localStorage.setItem(COLLAB_CACHE_KEY,JSON.stringify({ts:Date.now(),items:collabs}))}catch(e){}}
-function loadCaches(){
-  let found=false;
-  try{const o=JSON.parse(localStorage.getItem(ORDERS_CACHE_KEY)||'null');if(o&&Array.isArray(o.items)){orders=o.items;found=true}}catch(e){}
-  try{const c=JSON.parse(localStorage.getItem(COLLAB_CACHE_KEY)||'null');if(c&&Array.isArray(c.items)){collabs=c.items;found=true}}catch(e){}
-  if(found)render();return found;
-}
-function backgroundSync(delay=1400){setTimeout(()=>loadAll(true),delay)}
-async function loadAll(silent=false){
-  if(!silent)conn(true,'Sincronizzazione…');
-  try{
-    const [o,c]=await Promise.all([get({action:'orders',_t:Date.now()}),get({action:'collaborations',_t:Date.now()})]);
-    if(!o.ok||!c.ok)throw new Error(o.error||c.error||'Errore');
-    orders=o.orders||[];collabs=c.collaborations||[];saveCaches();conn(true,'Archivio sincronizzato');render();
-  }catch(e){
-    if(orders.length||collabs.length)conn(false,'Dati locali · sincronizzazione fallita');else conn(false,'Errore collegamento');
-    if(!silent)toast(e.message,false);
-  }
-}
+async function loadAll(){conn(true,'Aggiornamento…');try{const [o,c]=await Promise.all([get({action:'orders',_t:Date.now()}),get({action:'collaborations',_t:Date.now()})]);if(!o.ok||!c.ok)throw new Error(o.error||c.error||'Errore');orders=o.orders||[];collabs=c.collaborations||[];conn(true,'Archivio sincronizzato');render()}catch(e){conn(false,'Errore collegamento');toast(e.message,false)}}
 function render(){
  const q=document.getElementById('q').value.toLowerCase(),kind=document.getElementById('kind').value;
  const ao=orders.filter(o=>['Consegnato','Annullato'].includes(o.status)).filter(o=>!q||[o.id,o.client,o.notes,o.status,...(o.lines||[]).map(x=>x.item)].join(' ').toLowerCase().includes(q));
@@ -73,28 +46,9 @@ function render(){
  document.getElementById('orders').innerHTML=ao.length?ao.map(o=>`<article class="card"><div class="card-head"><div><div class="code">${esc(o.id)}</div><div class="meta">${date(o.createdAt)}</div></div><div><div class="title-with-chip"><strong>${esc(o.client)}</strong><span class="status-chip ${cls(o.status)}">${esc(o.status)}</span></div><div class="meta">${esc(o.department)}</div></div><div class="money">${money(o.total)}</div><div class="actions"><button class="btn" onclick="restoreOrder('${esc(o.id)}')">Riattiva</button><button class="btn danger" onclick="deleteOrder('${esc(o.id)}')">Elimina</button></div></div><div class="lines">${(o.lines||[]).map(l=>`<div class="line"><div><strong>${esc(l.item)}</strong><div class="meta">${esc(l.category)}</div></div><div>×${l.qty}</div><div class="meta">${money(l.unitPrice)}</div><div class="money">${money(l.lineTotal)}</div></div>`).join('')}</div><div class="card-foot"><span>${esc(o.notes||'Nessuna nota')}</span><span>Aggiornato ${date(o.updatedAt)}</span></div></article>`).join(''):'<div class="empty">Nessun ordine archiviato.</div>';
  document.getElementById('collabs').innerHTML=ac.length?ac.map(c=>`<article class="card"><div class="card-head"><div><div class="code">${esc(c.id)}</div><div class="meta">${esc(c.type)}</div></div><div><div class="title-with-chip"><strong>${esc(c.title)}</strong><span class="status-chip ${cls(c.status)}">${esc(c.status)}</span></div><div class="meta">${esc(c.partner)} · ${esc(c.department)}</div></div><div class="meta">${c.eventDate?date(c.eventDate):'Data non definita'}</div><div class="actions"><button class="btn" onclick="restoreCollab('${esc(c.id)}')">Riattiva</button><button class="btn danger" onclick="deleteCollab('${esc(c.id)}')">Elimina</button></div></div><div class="collab-body"><div class="block"><div class="label">Descrizione</div>${esc(c.description||'Nessuna descrizione')}</div><div class="block"><div class="label">Responsabile</div>${esc(c.responsible||'—')}<div class="meta">Aggiornato ${date(c.updatedAt)}</div></div></div></article>`).join(''):'<div class="empty">Nessuna collaborazione archiviata.</div>';
 }
-async function restoreOrder(id){
-  const o=orders.find(x=>x.id===id),old=o?.status;if(o){o.status='Nuovo';o.updatedAt=new Date().toISOString();saveCaches();render()}toast(id+' riattivato.');
-  try{const r=await post({action:'updateStatus',id,status:'Nuovo'});if(r&&r.ok===false)throw new Error(r.error||'Errore');backgroundSync()}
-  catch(e){if(o)o.status=old;saveCaches();render();toast('Riattivazione non sincronizzata: '+e.message,false)}
-}
-async function restoreCollab(id){
-  const c=collabs.find(x=>x.id===id),old=c?.status;if(c){c.status='Proposta';c.updatedAt=new Date().toISOString();saveCaches();render()}toast(id+' riattivata.');
-  try{const r=await post({action:'updateCollaborationStatus',id,status:'Proposta'});if(r&&r.ok===false)throw new Error(r.error||'Errore');backgroundSync()}
-  catch(e){if(c)c.status=old;saveCaches();render();toast('Riattivazione non sincronizzata: '+e.message,false)}
-}
-async function deleteOrder(id){
-  if(!confirm('Eliminare definitivamente '+id+'?'))return;
-  const before=orders.slice();orders=orders.filter(o=>o.id!==id);saveCaches();render();toast(id+' eliminato.');
-  try{const r=await post({action:'deleteOrder',id});if(r&&r.ok===false)throw new Error(r.error||'Errore');backgroundSync()}
-  catch(e){orders=before;saveCaches();render();toast('Eliminazione non sincronizzata: '+e.message,false)}
-}
-async function deleteCollab(id){
-  if(!confirm('Eliminare definitivamente '+id+'?'))return;
-  const before=collabs.slice();collabs=collabs.filter(c=>c.id!==id);saveCaches();render();toast(id+' eliminata.');
-  try{const r=await post({action:'deleteCollaboration',id});if(r&&r.ok===false)throw new Error(r.error||'Errore');backgroundSync()}
-  catch(e){collabs=before;saveCaches();render();toast('Eliminazione non sincronizzata: '+e.message,false)}
-}
-if(loadCaches())conn(true,'Archivio pronto · sincronizzo…');
-loadAll(true);
+async function restoreOrder(id){await post({action:'updateStatus',id,status:'Nuovo'});toast(id+' riattivato.');setTimeout(loadAll,550)}
+async function restoreCollab(id){await post({action:'updateCollaborationStatus',id,status:'Proposta'});toast(id+' riattivata.');setTimeout(loadAll,550)}
+async function deleteOrder(id){if(!confirm('Eliminare definitivamente '+id+'?'))return;orders=orders.filter(o=>o.id!==id);render();const r=await post({action:'deleteOrder',id});if(r&&r.ok===false){toast(r.error||'Errore',false);loadAll()}else{toast(id+' eliminato.');setTimeout(loadAll,550)}}
+async function deleteCollab(id){if(!confirm('Eliminare definitivamente '+id+'?'))return;collabs=collabs.filter(c=>c.id!==id);render();const r=await post({action:'deleteCollaboration',id});if(r&&r.ok===false){toast(r.error||'Errore',false);loadAll()}else{toast(id+' eliminata.');setTimeout(loadAll,550)}}
+loadAll();
 </script></body></html>
