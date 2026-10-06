@@ -335,6 +335,211 @@
   .card-foot span + span{margin-top:3px;padding-left:0;border-left:0}
 }
 
+
+/* ===== Registro concentrato v3 ===== */
+.shell > .page-bar,
+.shell > .stats,
+.shell > .filters,
+.shell > .cards{
+  width:min(720px,100%);
+  max-width:720px;
+  margin-left:auto;
+  margin-right:auto;
+}
+
+.stats{
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:6px;
+}
+.stat{
+  padding:9px 10px;
+}
+.stat strong{
+  font-size:19px;
+}
+.stat span{
+  font-size:8px;
+}
+
+.filters{
+  grid-template-columns:minmax(220px,1fr) 120px 130px auto;
+  gap:6px;
+}
+.filters input,
+.filters select{
+  padding:8px 9px;
+}
+.filters .btn{
+  padding:8px 10px;
+}
+
+.cards{gap:7px}
+
+.card{
+  overflow:hidden;
+}
+.card-head{
+  display:block;
+  padding:9px 11px 8px;
+}
+.order-top,
+.collab-top{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.order-top .code,
+.collab-top .code{
+  font-size:13px;
+  line-height:1;
+  padding-right:8px;
+  border-right:1px solid rgba(185,133,63,.24);
+}
+.order-top .title-strong,
+.collab-top .title-strong{
+  font-size:16px;
+  line-height:1.05;
+}
+.order-top .money{
+  margin-left:2px;
+  font-size:15px;
+  line-height:1;
+}
+.order-meta,
+.collab-meta{
+  margin-top:4px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  flex-wrap:wrap;
+  color:var(--muted);
+  font-size:9px;
+}
+.meta-sep{opacity:.45}
+.order-controls,
+.collab-controls{
+  margin-top:7px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  flex-wrap:wrap;
+}
+.order-controls .status-select,
+.collab-controls .status-select{
+  width:auto;
+  min-width:118px;
+  padding:5px 7px;
+}
+.order-controls .btn,
+.collab-controls .btn{
+  padding:5px 8px;
+}
+
+.lines{
+  padding:3px 11px 6px;
+}
+.line{
+  display:flex;
+  align-items:baseline;
+  justify-content:flex-start;
+  gap:7px;
+  flex-wrap:wrap;
+  padding:6px 0;
+  font-size:11px;
+}
+.line > div{
+  width:auto !important;
+  min-width:0 !important;
+}
+.line .line-name{
+  font-size:12px;
+}
+.line .line-category{
+  color:var(--muted);
+  font-size:9px;
+}
+.line .line-price,
+.line .line-total{
+  white-space:nowrap;
+}
+.line .line-total{
+  color:var(--gold2);
+  font-weight:700;
+}
+.line-dot{
+  color:var(--muted);
+  opacity:.55;
+}
+
+.card-foot{
+  justify-content:flex-start;
+  gap:8px;
+  padding:6px 11px 7px;
+  font-size:9px;
+}
+.card-foot span + span{
+  padding-left:8px;
+  border-left:1px solid rgba(185,133,63,.18);
+}
+
+.collab-card .card-head{
+  display:block;
+}
+.collab-body{
+  display:block;
+  padding:0 11px 8px;
+}
+.collab-block{
+  padding:7px 0 0;
+  border:0;
+  background:transparent;
+}
+.collab-block + .collab-block{
+  margin-top:6px;
+  padding-top:6px;
+  border-top:1px dashed var(--soft);
+}
+.collab-label{
+  margin-bottom:2px;
+}
+.collab-footer{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  flex-wrap:wrap;
+  margin-top:6px;
+  color:var(--muted);
+  font-size:9px;
+}
+
+@media(max-width:760px){
+  .shell > .page-bar,
+  .shell > .stats,
+  .shell > .filters,
+  .shell > .cards{
+    width:100%;
+    max-width:none;
+  }
+}
+@media(max-width:620px){
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .filters{grid-template-columns:1fr 1fr}
+  .filters input{grid-column:1/-1}
+  .order-top .money{margin-left:0}
+}
+@media(max-width:430px){
+  .filters{grid-template-columns:1fr}
+  .filters input{grid-column:auto}
+  .card-foot span{
+    display:block;
+  }
+  .card-foot span + span{
+    padding-left:0;
+    border-left:0;
+  }
+}
+
 </style>
 <link rel="stylesheet" href="vauclair-header.css?v=20261006-2">
 </head>
@@ -462,33 +667,63 @@ function renderOrders(){
     if(!q)return true;
     return [o.id,o.client,o.department,o.status,o.notes,o.createdBy,...(o.lines||[]).flatMap(l=>[l.item,l.category])].join(' ').toLowerCase().includes(q);
   });
+
   document.getElementById('sAll').textContent=active.length;
   document.getElementById('sNew').textContent=active.filter(o=>o.status==='Nuovo').length;
   document.getElementById('sWork').textContent=active.filter(o=>o.status==='In lavorazione').length;
   document.getElementById('sReady').textContent=active.filter(o=>o.status==='Pronto').length;
   document.getElementById('sValue').textContent=vMoney(active.reduce((sum,o)=>sum+Number(o.total||0),0));
+
   const box=document.getElementById('orders');
-  if(!f.length){box.innerHTML='<div class="empty">Nessun ordine attivo corrisponde ai filtri. Gli ordini conclusi sono in Archivio.</div>';return}
+  if(!f.length){
+    box.innerHTML='<div class="empty">Nessun ordine attivo corrisponde ai filtri. Gli ordini conclusi sono in Archivio.</div>';
+    return;
+  }
+
   box.innerHTML=f.map(o=>`<article class="card">
     <div class="card-head">
-      <div class="card-ident">
-        <div class="code">${vEsc(o.id)}</div>
-        <div class="meta">${vDate(o.createdAt)}</div>
+      <div class="order-top">
+        <span class="code">${vEsc(o.id)}</span>
+        <span class="title-strong">${vEsc(o.client)}</span>
+        <span class="status-chip ${statusClass(o.status)}">${vEsc(o.status)}</span>
+        <span class="money">${vMoney(o.total)}</span>
       </div>
-      <div class="card-main">
-        <div class="title-with-chip"><span class="title-strong">${vEsc(o.client)}</span><span class="status-chip ${statusClass(o.status)}">${vEsc(o.status)}</span></div>
-        <div class="meta">${vEsc(o.department)} · inserito da ${vEsc(o.createdBy||'—')}</div>
+
+      <div class="order-meta">
+        <span>${vDate(o.createdAt)}</span>
+        <span class="meta-sep">•</span>
+        <span>${vEsc(o.department)}</span>
+        <span class="meta-sep">•</span>
+        <span>Inserito da ${vEsc(o.createdBy||'—')}</span>
+        <span class="meta-sep">•</span>
+        <span>${Number(o.discount||0)*100}% sconto</span>
       </div>
-      <div class="card-side">
-        <div class="card-total"><span class="money">${vMoney(o.total)}</span><span class="meta">${Number(o.discount||0)*100}% sconto</span></div>
-        <div class="card-actions">
-          <select class="status-select" onchange="changeOrderStatus('${vEsc(o.id)}',this.value)">${['Nuovo','In lavorazione','Pronto','Consegnato','Annullato'].map(st=>`<option ${o.status===st?'selected':''}>${st}</option>`).join('')}</select>
-          <button class="btn danger small" onclick="deleteOrder('${vEsc(o.id)}')">Elimina</button>
-        </div>
+
+      <div class="order-controls">
+        <select class="status-select" onchange="changeOrderStatus('${vEsc(o.id)}',this.value)">
+          ${['Nuovo','In lavorazione','Pronto','Consegnato','Annullato'].map(st=>`<option ${o.status===st?'selected':''}>${st}</option>`).join('')}
+        </select>
+        <button class="btn danger small" onclick="deleteOrder('${vEsc(o.id)}')">Elimina</button>
       </div>
     </div>
-    <div class="lines">${(o.lines||[]).map(l=>`<div class="line"><div><strong>${vEsc(l.item)}</strong><div class="meta">${vEsc(l.category)}</div></div><div>×${Number(l.qty||0)}</div><div class="unit meta">${vMoney(l.unitPrice)}</div><div class="money">${vMoney(l.lineTotal)}</div></div>`).join('')}</div>
-    <div class="card-foot"><span>${vEsc(o.notes||'Nessuna nota')}</span><span>Aggiornato ${vDate(o.updatedAt)}</span></div>
+
+    <div class="lines">
+      ${(o.lines||[]).map(l=>`<div class="line">
+        <span class="line-name"><strong>${vEsc(l.item)}</strong></span>
+        <span class="line-category">${vEsc(l.category)}</span>
+        <span class="line-dot">•</span>
+        <span>×${Number(l.qty||0)}</span>
+        <span class="line-dot">•</span>
+        <span class="line-price">${vMoney(l.unitPrice)} cad.</span>
+        <span class="line-dot">→</span>
+        <span class="line-total">${vMoney(l.lineTotal)}</span>
+      </div>`).join('')}
+    </div>
+
+    <div class="card-foot">
+      <span>${vEsc(o.notes||'Nessuna nota')}</span>
+      <span>Aggiornato ${vDate(o.updatedAt)}</span>
+    </div>
   </article>`).join('');
 }
 function clearOrderFilters(){document.getElementById('search').value='';document.getElementById('deptFilter').value='';document.getElementById('statusFilter').value='';renderOrders()}
