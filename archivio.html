@@ -100,10 +100,37 @@ const API='https://script.google.com/macros/s/AKfycbyQTjkjNZnPFpsxPArYZ2gpELWiHU
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const money=v=>'$'+Number(v||0).toFixed(2);const date=v=>{if(!v)return'';const d=new Date(v);return isNaN(d)?String(v):d.toLocaleString('it-IT',{dateStyle:'short',timeStyle:'short'})};const cls=s=>String(s||'').toLowerCase().replaceAll(' ','-');
 function toast(m,b=true){const t=document.getElementById('toast');t.textContent=m;t.style.borderColor=b?'var(--gold)':'var(--danger)';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800)}
 function conn(ok,t){document.getElementById('connDot').className='dot '+(ok?'ok':'bad');document.getElementById('connText').textContent=t}
-function jsonp(p){return new Promise((resolve,reject)=>{const cb='cb'+Date.now()+Math.floor(Math.random()*1e5),s=document.createElement('script');const timer=setTimeout(()=>{delete window[cb];s.remove();reject(new Error('Timeout API'))},10000);window[cb]=d=>{clearTimeout(timer);delete window[cb];s.remove();resolve(d)};s.src=API+'?'+new URLSearchParams({...p,callback:cb});s.onerror=()=>reject(new Error('API non raggiungibile'));document.body.appendChild(s)})}
+function jsonp(p){return new Promise((resolve,reject)=>{const cb='cb'+Date.now()+Math.floor(Math.random()*1e5),s=document.createElement('script');const timer=setTimeout(()=>{delete window[cb];s.remove();reject(new Error('Timeout API'))},20000);window[cb]=d=>{clearTimeout(timer);delete window[cb];s.remove();resolve(d)};s.src=API+'?'+new URLSearchParams({...p,callback:cb});s.onerror=()=>reject(new Error('API non raggiungibile'));document.body.appendChild(s)})}
 async function get(p){try{const r=await fetch(API+'?'+new URLSearchParams(p),{cache:'no-store'});if(!r.ok)throw 0;return await r.json()}catch(e){return await jsonp(p)}}
 async function post(p){try{const r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(p)});if(r.ok)return await r.json()}catch(e){}const form=document.createElement('form');form.method='POST';form.action=API;form.target='postFrame';form.style.display='none';const i=document.createElement('input');i.name='payload';i.value=JSON.stringify(p);form.appendChild(i);document.body.appendChild(form);form.submit();form.remove();await new Promise(r=>setTimeout(r,220));return{ok:true,fallback:true}}
-async function loadAll(){conn(true,'Aggiornamento…');try{const [o,c]=await Promise.all([get({action:'orders',_t:Date.now()}),get({action:'collaborations',_t:Date.now()})]);if(!o.ok||!c.ok)throw new Error(o.error||c.error||'Errore');orders=o.orders||[];collabs=c.collaborations||[];conn(true,'Archivio sincronizzato');render()}catch(e){conn(false,'Errore collegamento');toast(e.message,false)}}
+async function getRetry(p,attempts=3){
+  let lastErr;
+  for(let i=0;i<attempts;i++){
+    try{return await get({...p,_t:Date.now()})}
+    catch(e){
+      lastErr=e;
+      if(i<attempts-1){
+        conn(true,i===0?'Avvio database…':'Riconnessione…');
+        await new Promise(r=>setTimeout(r,i===0?900:1800));
+      }
+    }
+  }
+  throw lastErr||new Error('Database non raggiungibile');
+}
+async function loadAll(){
+  conn(true,'Collegamento al database…');
+  try{
+    const o=await getRetry({action:'orders'},3);
+    if(!o.ok)throw new Error(o.error||'Errore ordini');
+    const c=await getRetry({action:'collaborations'},3);
+    if(!c.ok)throw new Error(c.error||'Errore collaborazioni');
+    orders=o.orders||[];collabs=c.collaborations||[];
+    conn(true,'Archivio sincronizzato');render();
+  }catch(e){
+    conn(false,'Database non raggiungibile');
+    toast('Il database non ha risposto dopo più tentativi.',false);
+  }
+}
 function render(){
  const q=document.getElementById('q').value.toLowerCase(),kind=document.getElementById('kind').value;
  const ao=orders.filter(o=>['Consegnato','Annullato'].includes(o.status)).filter(o=>!q||[o.id,o.client,o.notes,o.status,...(o.lines||[]).map(x=>x.item)].join(' ').toLowerCase().includes(q));
@@ -117,5 +144,12 @@ async function restoreOrder(id){await post({action:'updateStatus',id,status:'Nuo
 async function restoreCollab(id){await post({action:'updateCollaborationStatus',id,status:'Proposta'});toast(id+' riattivata.');setTimeout(loadAll,550)}
 async function deleteOrder(id){if(!confirm('Eliminare definitivamente '+id+'?'))return;orders=orders.filter(o=>o.id!==id);render();const r=await post({action:'deleteOrder',id});if(r&&r.ok===false){toast(r.error||'Errore',false);loadAll()}else{toast(id+' eliminato.');setTimeout(loadAll,550)}}
 async function deleteCollab(id){if(!confirm('Eliminare definitivamente '+id+'?'))return;collabs=collabs.filter(c=>c.id!==id);render();const r=await post({action:'deleteCollaboration',id});if(r&&r.ok===false){toast(r.error||'Errore',false);loadAll()}else{toast(id+' eliminata.');setTimeout(loadAll,550)}}
+let lastArchiveWake=Date.now();
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='visible' && Date.now()-lastArchiveWake>60000){
+    lastArchiveWake=Date.now();
+    loadAll();
+  }
+});
 loadAll();
 </script></body></html>
