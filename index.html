@@ -723,6 +723,7 @@
     <div class="toolbar-tools">
       <div class="mini-status" id="miniStatus">Armeria · 49 voci</div>
       <button class="tool-btn" id="compactBtn" type="button" onclick="toggleCompact()">Vista compatta</button>
+      <button class="tool-btn" id="collapseAllBtn" type="button" onclick="collapseAllCategories()" title="Chiudi tutte le sezioni visibili">Chiudi sezioni</button>
       <button class="tool-btn" type="button" onclick="openHistory()">Registro</button>
     </div>
   </section>
@@ -1354,6 +1355,12 @@ function toggleCompact(){
   document.body.classList.toggle('compact',active);
   document.getElementById('compactBtn').classList.toggle('active',active);
   safeSet(STORE.compact,active);
+}
+
+function collapseAllCategories(){
+  document.querySelectorAll('#categories .category').forEach(section=>{
+    section.classList.add('collapsed');
+  });
 }
 
 function renderQuickbar(){
