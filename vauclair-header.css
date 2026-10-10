@@ -1,22 +1,35 @@
-/* TENUTA VAUCLAIR · HEADER UNICO
-   Questo file è volutamente condiviso da tutte le pagine.
-   Non modificare l'header nelle singole pagine. */
+/* TENUTA VAUCLAIR · TESTATA E GRAFICA CONDIVISA */
+body{
+  background-color:#0e0d0f !important;
+  background-image:
+    linear-gradient(rgba(12,10,11,.70),rgba(12,10,11,.80)),
+    url('assets/vauclair-background.webp?v=20261010-4') !important;
+  background-size:cover !important;
+  background-position:center top !important;
+  background-repeat:no-repeat !important;
+  background-attachment:fixed !important;
+}
+
 .masthead{
   position:relative !important;
   width:100% !important;
   max-width:1280px !important;
+  min-height:164px !important;
   margin:0 auto !important;
+  display:block !important;
   text-align:center !important;
-  padding:18px 14px 20px !important;
+  padding:38px 210px 34px 170px !important;
   border:1px solid rgba(185,133,63,.30) !important;
   border-top:2px solid #b9853f !important;
   border-bottom:2px solid #b9853f !important;
   background:
     linear-gradient(90deg,transparent,rgba(185,133,63,.06) 22%,rgba(185,133,63,.10) 50%,rgba(185,133,63,.06) 78%,transparent),
-    rgba(24,21,22,.92) !important;
+    rgba(19,17,17,.91) !important;
   box-shadow:0 10px 34px rgba(0,0,0,.38),inset 0 0 34px rgba(0,0,0,.16) !important;
-  overflow:hidden !important;
+  overflow:visible !important;
+  z-index:30 !important;
 }
+
 .masthead::before,.masthead::after{
   content:"" !important;
   position:absolute !important;
@@ -28,39 +41,31 @@
 }
 .masthead::before{left:4% !important}
 .masthead::after{right:4% !important;transform:scaleX(-1) !important}
-.mast-ornament{
-  width:44px !important;
-  height:44px !important;
-  margin:0 auto 8px !important;
-  display:grid !important;
-  place-items:center !important;
-  border:1px solid #b9853f !important;
-  transform:rotate(45deg) !important;
-  color:inherit !important;
-  font-size:initial !important;
-  box-shadow:inset 0 0 0 3px rgba(185,133,63,.07),0 0 18px rgba(185,133,63,.08) !important;
-}
-.mast-ornament span{
-  display:block !important;
-  transform:rotate(-45deg) !important;
-  font-family:'Cinzel',serif !important;
-  color:#d8ad63 !important;
-  font-size:22px !important;
-  font-weight:400 !important;
-  line-height:1 !important;
-}
+
+.mast-ornament{display:none !important}
+
 .masthead h1{
-  margin:0 !important;
+  display:block !important;
+  width:100% !important;
+  margin:0 auto !important;
+  padding:0 !important;
+  text-align:center !important;
   font-family:'Cormorant Garamond',Georgia,serif !important;
   font-size:clamp(37px,5.2vw,60px) !important;
-  line-height:1.15 !important;
+  line-height:1.05 !important;
   font-weight:600 !important;
   letter-spacing:2px !important;
   color:#d8ad63 !important;
   text-shadow:0 2px 14px rgba(0,0,0,.55) !important;
 }
+
 .masthead .subtitle{
-  margin:7px 0 0 !important;
+  display:block !important;
+  position:static !important;
+  width:100% !important;
+  margin:9px auto 0 !important;
+  padding:0 !important;
+  text-align:center !important;
   color:#c0ad90 !important;
   font-family:'Cinzel',serif !important;
   font-size:11.5px !important;
@@ -70,7 +75,145 @@
   text-transform:uppercase !important;
 }
 
-/* Anche la navigazione fa parte della testata visiva: identica ovunque. */
+.vau-logo-wrap{
+  position:absolute;
+  right:24px;
+  top:50%;
+  transform:translateY(-50%);
+  width:142px;
+  height:142px;
+  display:grid;
+  place-items:center;
+  pointer-events:none;
+  filter:drop-shadow(0 8px 18px rgba(0,0,0,.55));
+  z-index:3;
+}
+.vau-logo-wrap img{
+  display:block;
+  max-width:100%;
+  max-height:100%;
+  width:auto;
+  height:auto;
+  object-fit:contain;
+}
+
+.vau-notify-wrap{
+  position:absolute;
+  right:188px;
+  top:50%;
+  transform:translateY(-50%);
+  z-index:50;
+  font-family:'Libre Baskerville',Georgia,serif;
+  text-transform:none;
+  letter-spacing:normal;
+}
+.vau-bell-btn{
+  width:54px;
+  height:54px;
+  padding:0;
+  border-radius:50%;
+  border:1px solid #b9853f;
+  background:rgba(25,21,21,.95);
+  color:#d8ad63;
+  cursor:pointer;
+  display:grid;
+  place-items:center;
+  font-size:23px;
+  line-height:1;
+  box-shadow:0 8px 20px rgba(0,0,0,.30),inset 0 0 0 4px rgba(185,133,63,.05);
+}
+.vau-bell-btn:hover{background:#231b19;color:#efd092}
+.vau-notify-badge{
+  position:absolute;
+  right:-5px;
+  top:-6px;
+  min-width:24px;
+  height:24px;
+  padding:0 6px;
+  border-radius:20px;
+  background:#9f332d;
+  border:2px solid #e3c68f;
+  color:#fff;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  font:700 12px/1 'Libre Baskerville',Georgia,serif;
+  box-shadow:0 3px 8px rgba(0,0,0,.35);
+}
+.vau-notify-panel{
+  position:absolute;
+  right:0;
+  top:66px;
+  width:360px;
+  max-height:min(520px,70vh);
+  overflow:auto;
+  display:none;
+  background:linear-gradient(180deg,#251f1d,#171414);
+  border:1px solid rgba(185,133,63,.34);
+  border-top:2px solid #b9853f;
+  box-shadow:0 18px 42px rgba(0,0,0,.50);
+  text-align:left;
+  color:#f1e8d8;
+}
+.vau-notify-panel.open{display:block}
+.vau-notify-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  padding:12px 14px;
+  border-bottom:1px solid rgba(241,232,216,.12);
+}
+.vau-notify-head strong{
+  color:#d8ad63;
+  font:600 12px 'Cinzel',serif;
+  letter-spacing:.7px;
+  text-transform:uppercase;
+}
+.vau-notify-head span{color:#bfae91;font-size:10px}
+.vau-notify-item{padding:12px 14px;border-bottom:1px solid rgba(241,232,216,.12)}
+.vau-notify-top{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.vau-notify-code{color:#d8ad63;font-weight:700;font-size:12px}
+.vau-notify-time{color:#9e8c73;font-size:9.5px;white-space:nowrap}
+.vau-notify-client{margin-top:3px;color:#f1e8d8;font-weight:700;font-size:12.5px}
+.vau-notify-meta{margin-top:4px;color:#bfae91;font-size:10.5px;line-height:1.4}
+.vau-notify-actions{display:flex;gap:7px;margin-top:9px}
+.vau-notify-action{
+  border:1px solid rgba(185,133,63,.34);
+  background:#191617;
+  color:#f1e8d8;
+  padding:6px 8px;
+  cursor:pointer;
+  font:600 9px 'Cinzel',serif;
+  letter-spacing:.25px;
+}
+.vau-notify-action:hover{border-color:#b9853f;color:#d8ad63}
+.vau-notify-action.primary{background:linear-gradient(180deg,#5c211e,#351311);border-color:#b9853f}
+.vau-notify-action[disabled]{opacity:.55;cursor:wait}
+.vau-notify-empty,.vau-notify-error{padding:18px 14px;color:#bfae91;font-size:11px;line-height:1.5}
+.vau-notify-error{color:#d47b71}
+.vau-notify-footer{
+  display:block;
+  text-align:center;
+  padding:10px 12px;
+  text-decoration:none;
+  color:#d8ad63;
+  border-top:1px solid rgba(241,232,216,.12);
+  font:600 9.5px 'Cinzel',serif;
+  letter-spacing:.55px;
+  text-transform:uppercase;
+}
+.vau-notify-footer:hover{background:rgba(185,133,63,.055)}
+.vau-notify-live{
+  position:absolute;
+  width:1px;
+  height:1px;
+  overflow:hidden;
+  clip:rect(0 0 0 0);
+  white-space:nowrap;
+}
+
+/* Navigazione condivisa */
 .site-nav{
   width:100% !important;
   max-width:1280px !important;
@@ -100,11 +243,34 @@
   background:linear-gradient(180deg,#5c211e,#351311) !important;
 }
 
+@media(max-width:900px){
+  .masthead{padding-left:120px !important;padding-right:160px !important}
+  .vau-logo-wrap{width:112px;height:112px;right:16px}
+  .vau-notify-wrap{right:142px}
+}
 @media(max-width:680px){
-  .masthead{padding:14px 8px 16px !important}
+  body{background-attachment:scroll !important}
+  .masthead{
+    min-height:190px !important;
+    padding:30px 16px 78px !important;
+  }
   .masthead::before,.masthead::after{width:24% !important;top:31px !important}
-  .mast-ornament{width:38px !important;height:38px !important;margin-bottom:7px !important}
-  .mast-ornament span{font-size:19px !important}
+  .vau-logo-wrap{
+    width:78px;height:78px;
+    right:18px;top:auto;bottom:5px;
+    transform:none;
+  }
+  .vau-notify-wrap{
+    right:auto;left:18px;
+    top:auto;bottom:18px;
+    transform:none;
+  }
+  .vau-bell-btn{width:46px;height:46px;font-size:20px}
+  .vau-notify-panel{
+    left:0;right:auto;
+    width:min(350px,calc(100vw - 36px));
+    top:57px;
+  }
   .site-nav{grid-template-columns:1fr 1fr !important}
 }
 @media(max-width:430px){
