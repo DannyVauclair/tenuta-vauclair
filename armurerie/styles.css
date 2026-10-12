@@ -218,3 +218,52 @@ html{scroll-padding-top:118px}
   .nav a{font-size:10px}
   .nav .last{padding:7px 10px}
 }
+
+
+/* Campanella Vauclair — argento brunito, ottone e bordeaux */
+.header-tools{display:flex;align-items:center;gap:16px;margin-left:auto}
+.notification-shell{position:relative;flex:0 0 auto}
+.notification-toggle{position:relative;display:grid;place-items:center;width:48px;height:48px;padding:0;background:linear-gradient(150deg,#30221c,#1c1513);border:1px solid rgba(215,180,117,.55);color:var(--gold);border-radius:2px;box-shadow:inset 0 0 0 3px rgba(215,180,117,.035),0 2px 12px rgba(0,0,0,.24);transition:background .16s,border-color .16s,color .16s}
+.notification-toggle:after{content:"✦";position:absolute;bottom:2px;right:4px;font:8px var(--serif);color:rgba(221,180,113,.55);pointer-events:none}
+.notification-toggle:hover,.notification-toggle[aria-expanded="true"]{background:#463027;border-color:var(--gold);color:#f1d09b}
+.notification-toggle svg{width:26px;height:26px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.28))}
+.notification-count{position:absolute;min-width:20px;height:20px;top:-8px;right:-8px;padding:0 4px;border:1px solid #d2aa78;border-radius:11px;background:#7f2929;color:#fff3de;font:700 10px/18px var(--display);text-align:center;box-shadow:0 3px 8px #100b09}
+.notification-panel{position:absolute;top:calc(100% + 13px);right:0;width:348px;max-width:calc(100vw - 30px);background:linear-gradient(160deg,#2e211c,#1a1412 65%);border:1px solid rgba(215,180,117,.55);box-shadow:0 20px 50px rgba(0,0,0,.5);z-index:80;overflow:hidden}
+.notification-panel:before{content:"";position:absolute;top:6px;left:6px;right:6px;bottom:6px;border:1px solid rgba(207,161,95,.10);pointer-events:none}
+.notification-top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:19px 18px 15px;border-bottom:1px solid var(--border);position:relative}
+.notification-top span{display:block;color:var(--gold2);font:600 8px var(--display);letter-spacing:1.2px}
+.notification-top strong{display:block;margin-top:5px;color:#f2dfc6;font:600 26px/1 var(--serif)}
+.notification-top button{background:transparent;border:0;color:var(--gold);font:600 9px/1.4 var(--display);padding:4px 0;text-align:right;white-space:nowrap}
+.notification-top button:not(:disabled):hover{color:#f8d9a7}
+.notification-top button:disabled{color:#786756;cursor:default}
+.notification-list{max-height:335px;overflow-y:auto}
+.notification-empty{padding:32px 18px;color:var(--muted);font:italic 19px/1.4 var(--serif)}
+.notification-item{display:flex;align-items:flex-start;gap:10px;padding:15px 18px;border-bottom:1px solid rgba(205,158,90,.13);color:#ead9c1;text-decoration:none;transition:background .15s}
+.notification-item:hover{background:rgba(196,143,77,.12);color:#f9e2c5}
+.notification-item.unread{background:rgba(166,101,49,.075)}
+.notification-item-mark{font:15px/1 var(--serif);color:var(--gold2);padding-top:3px;opacity:.35}
+.notification-item.unread .notification-item-mark{color:#e2be82;opacity:1}
+.notification-item-body{display:block;min-width:0;flex:1}
+.notification-item strong{display:block;font:600 18px/1.2 var(--serif);color:#f5e6d0}
+.notification-item-desc{display:block;margin-top:5px;font:10px/1.75 var(--book);color:#bfae98;overflow-wrap:anywhere}
+.notification-item small{display:block;margin-top:8px;font:9px var(--display);color:var(--gold2)}
+.notification-bottom{padding:12px 18px;text-align:right;border-top:1px solid var(--border);background:rgba(13,10,9,.20)}
+.notification-bottom a{color:#e6c38e;font:600 10px var(--display);letter-spacing:.2px}
+.notification-bottom span{margin-left:7px}
+.notification-bottom a:hover{color:#ffe0ad}
+[hidden]{display:none!important}
+@media(max-width:900px){.header-tools{gap:11px}}
+@media(max-width:790px){.header-tools{gap:10px}.notification-toggle{width:44px;height:44px}.notification-toggle svg{width:24px;height:24px}}
+@media(max-width:640px){
+  .header-inner{height:auto;min-height:126px;flex-wrap:wrap;padding:9px 0}
+  .brand{width:100%}
+  .header-tools{width:100%;justify-content:flex-end;gap:12px}
+  .header-tools .nav{width:auto;flex:0 1 auto;gap:14px;justify-content:flex-end;padding:0 2px}
+  .notification-panel{right:0}
+  html{scroll-padding-top:150px}
+}
+@media(max-width:390px){
+  .header-tools .nav{gap:8px}
+  .header-tools .nav a{font-size:9px}
+  .notification-panel{max-width:calc(100vw - 30px)}
+}
