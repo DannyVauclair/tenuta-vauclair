@@ -87,70 +87,70 @@ window.VAUCLAIR_WEAPONS = Object.freeze([
   {
     "id": "a13",
     "name": "Fucile Springfield",
-    "cat": "Fucili e repeater",
+    "cat": "Fucili",
     "buy": 240,
     "tag": "proiezione"
   },
   {
     "id": "a14",
     "name": "Fucile Bolt Action",
-    "cat": "Fucili e repeater",
+    "cat": "Fucili",
     "buy": 245,
     "tag": "ipotesi"
   },
   {
     "id": "a15",
     "name": "Fucile Varmint",
-    "cat": "Fucili e repeater",
+    "cat": "Fucili",
     "buy": 95,
     "tag": "attuale"
   },
   {
     "id": "a16",
     "name": "Repeater Carabina",
-    "cat": "Fucili e repeater",
+    "cat": "Repeater",
     "buy": 120,
     "tag": "attuale"
   },
   {
     "id": "a17",
     "name": "Repeater Henry",
-    "cat": "Fucili e repeater",
+    "cat": "Repeater",
     "buy": 205,
     "tag": "attuale"
   },
   {
     "id": "a18",
     "name": "Repeater Evans",
-    "cat": "Fucili e repeater",
+    "cat": "Repeater",
     "buy": 210,
     "tag": "attuale"
   },
   {
     "id": "a19",
     "name": "Repeater Winchester",
-    "cat": "Fucili e repeater",
+    "cat": "Repeater",
     "buy": 240,
     "tag": "proiezione"
   },
   {
     "id": "a20",
     "name": "Doppietta a canna liscia",
-    "cat": "Fucili e repeater",
+    "cat": "Fucili",
     "buy": 205,
     "tag": "proiezione"
   },
   {
     "id": "a21",
     "name": "Fucile a pompa a ripetizione",
-    "cat": "Fucili e repeater",
+    "cat": "Fucili",
     "buy": 195,
     "tag": "proiezione"
   },
   {
     "id": "a22",
     "name": "Fucile Elephant",
-    "cat": "Fucili e repeater",
+    "cat": "Fucili",
     "buy": 360,
     "tag": "proiezione"
   }
