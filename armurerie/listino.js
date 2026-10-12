@@ -89,6 +89,10 @@ document.querySelectorAll("[data-cat]").forEach(btn=>btn.addEventListener("click
   document.querySelectorAll("[data-cat]").forEach(other=>{const active=other===btn;other.classList.toggle("active",active);other.setAttribute("aria-pressed",String(active))});
   update();
 }));
+$("collapseAllCategories").addEventListener("click",()=>{
+  expanded.clear();
+  update();
+});
 $("startOrder").addEventListener("click",()=>{
   const lines=weapons.filter(w=>pick.has(w.id)).map(w=>({id:w.id,qty:pick.get(w.id)}));
   if(!lines.length)return;
