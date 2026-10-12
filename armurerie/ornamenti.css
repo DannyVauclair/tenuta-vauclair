@@ -29,14 +29,15 @@
 
 /* Navigazione: piccoli simboli oro — come le voci della Tenuta.
    I glifi sono decorativi; non nascondono testo né cambiano la navigazione. */
-.nav a[href="./"],.nav a[href="ordini.html"]{
+.nav a[href="./"],.nav a[href="ordini.html"],.nav a[href="riservata.html"]{
   display:inline-flex;
   align-items:center;
   justify-content:center;
   gap:7px;
 }
 .nav a[href="./"]::before,
-.nav a[href="ordini.html"]::before {
+.nav a[href="ordini.html"]::before,
+.nav a[href="riservata.html"]::before {
   display:inline-block;
   flex:0 0 auto;
   font-family:Georgia,"Times New Roman",serif;
@@ -49,6 +50,9 @@
 }
 .nav a[href="./"]::before{content:"✦"}
 .nav a[href="ordini.html"]::before{content:"▣";font-size:11px}
+.nav a[href="riservata.html"]::before{content:"◇";font-size:12px}
+/* Evidenziazione senza la linea sotto la voce attiva. */
+.nav a.current{text-decoration:none;text-underline-offset:0}
 
 /* Sottili filetti sopra il titolo, ai due lati come nel frontespizio
    della Tenuta. Il testo resta esattamente nella stessa posizione. */
@@ -202,13 +206,29 @@
 }
 
 @media (max-width:640px){
-  .nav a[href="./"],.nav a[href="ordini.html"]{gap:5px}
-  .nav a[href="./"]::before,.nav a[href="ordini.html"]::before{font-size:10px}
+  .nav a[href="./"],.nav a[href="ordini.html"],.nav a[href="riservata.html"]{gap:5px}
+  .nav a[href="./"]::before,.nav a[href="ordini.html"]::before,.nav a[href="riservata.html"]::before{font-size:10px}
   .compact-hero .wrap::before,.compact-hero .wrap::after{width:22%;top:12px}
   .weapon-category-title::before{min-width:15px;margin-right:3px;font-size:13px;vertical-align:2px}
   .filters button[data-cat]::before,.filters button[data-private-cat]::before{font-size:10px;margin-right:4px}
 }
 @media (max-width:390px){
-  .nav a[href="./"],.nav a[href="ordini.html"]{gap:4px}
-  .nav a[href="./"]::before,.nav a[href="ordini.html"]::before{font-size:9px}
+  .nav a[href="./"],.nav a[href="ordini.html"],.nav a[href="riservata.html"]{gap:4px}
+  .nav a[href="./"]::before,.nav a[href="ordini.html"]::before,.nav a[href="riservata.html"]::before{font-size:9px}
+}
+
+/* Terza voce Registro: link al login, dati mai presenti nell'HTML pubblico. */
+.nav a[href="riservata.html"]{color:#d4ba99;white-space:nowrap}
+.nav a[href="riservata.html"]:hover,.nav a[href="riservata.html"].current{color:var(--gold)}
+@media (max-width:640px){
+  .header-tools{gap:8px}
+  .header-tools .nav{gap:9px}
+  .nav a[href="riservata.html"]{font-size:9px}
+}
+@media (max-width:390px){
+  .header-tools{gap:6px}
+  .header-tools .nav{gap:6px}
+  .header-tools .nav a{font-size:8.5px}
+  .header-tools .nav .last{padding:6px 8px}
+  .notification-toggle{width:39px;height:39px}
 }
