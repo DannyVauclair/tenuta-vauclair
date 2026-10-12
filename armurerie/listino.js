@@ -11,20 +11,35 @@ function update(){
   const root=$("catalog");root.replaceChildren();
   const visible=weapons.filter(w=>(category==="Tutte"||category===w.cat)&&normalized(w.name).includes(normalized(filter)));
   if(!visible.length)root.append(n("div","empty","Nessun modello trovato."));
-  for(const w of visible){
-    const row=n("article","weapon"),name=n("div"),price=n("div","price"),qty=n("div","qty");
-    name.append(n("strong","weapon-name",w.name));
-    const description=w.tag==="attuale"?"Costo del wipe attuale":w.tag==="proiezione"?"Proiezione dal vecchio wipe":"Stima per analogia";
-    name.append(n("small",w.tag==="proiezione"?"estimate":w.tag==="ipotesi"?"guess":"",description));
-    price.append(n("span","","Acquisto"),n("b","",money(w.buy)));
-    const minus=n("button","","−"),count=n("output","",pick.get(w.id)||0),plus=n("button","","+");
-    minus.type=plus.type="button";
-    minus.setAttribute("aria-label","Rimuovi una "+w.name);
-    plus.setAttribute("aria-label","Aggiungi una "+w.name);
-    minus.disabled=!(pick.get(w.id)||0);
-    minus.addEventListener("click",()=>change(w.id,-1));
-    plus.addEventListener("click",()=>change(w.id,1));
-    qty.append(minus,count,plus);row.append(name,price,qty);root.append(row);
+  const groups=["Revolver","Pistole","Fucili","Repeater"];
+  for(const groupName of groups){
+    const members=visible.filter(w=>w.cat===groupName);
+    if(!members.length)continue;
+    const section=n("section","weapon-category");
+    section.setAttribute("aria-label",groupName);
+    const header=n("div","weapon-category-header");
+    const heading=n("h3","weapon-category-title",groupName);
+    const count=n("span","weapon-category-count",members.length===1?"1 modello":members.length+" modelli");
+    header.append(heading,count);
+    section.append(header);
+    const groupList=n("div","weapon-category-items");
+    for(const w of members){
+      const row=n("article","weapon"),name=n("div"),price=n("div","price"),qty=n("div","qty");
+      name.append(n("strong","weapon-name",w.name));
+      const description=w.tag==="attuale"?"Costo del wipe attuale":w.tag==="proiezione"?"Proiezione dal vecchio wipe":"Stima per analogia";
+      name.append(n("small",w.tag==="proiezione"?"estimate":w.tag==="ipotesi"?"guess":"",description));
+      price.append(n("span","","Acquisto"),n("b","",money(w.buy)));
+      const minus=n("button","","−"),count=n("output","",pick.get(w.id)||0),plus=n("button","+","+");
+      minus.type=plus.type="button";
+      minus.setAttribute("aria-label","Rimuovi una "+w.name);
+      plus.setAttribute("aria-label","Aggiungi una "+w.name);
+      minus.disabled=!(pick.get(w.id)||0);
+      minus.addEventListener("click",()=>change(w.id,-1));
+      plus.addEventListener("click",()=>change(w.id,1));
+      qty.append(minus,count,plus);row.append(name,price,qty);groupList.append(row);
+    }
+    section.append(groupList);
+    root.append(section);
   }
   const selected=$("selected");selected.replaceChildren();
   let sum=0,quantity=0;
