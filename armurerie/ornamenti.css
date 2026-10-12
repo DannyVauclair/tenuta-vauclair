@@ -1,0 +1,214 @@
+/*
+ * Vauclair Armurerie — piccoli ornamenti tipografici, ispirati alla Tenuta.
+ * Nessun intervento sulla disposizione di catalogo, ordini o archivio privato.
+ * Caricato dopo styles.css, soltanto dalle pagine nella cartella armurerie/.
+ */
+
+/* Intestazione: filetto d'ottone e breve fregio sotto il marchio. */
+.header::before {
+  content:"";
+  position:absolute;
+  top:0;
+  left:max(16px, calc((100% - 1120px) / 2));
+  right:max(16px, calc((100% - 1120px) / 2));
+  height:1px;
+  background:linear-gradient(90deg, transparent, rgba(219,174,105,.82) 12%, #d9ad70 50%, rgba(219,174,105,.82) 88%, transparent);
+  pointer-events:none;
+}
+.brand strong{position:relative}
+.brand strong::after {
+  content:"";
+  position:absolute;
+  left:1px;
+  bottom:-9px;
+  width:min(82%,244px);
+  height:1px;
+  background:linear-gradient(90deg,rgba(225,181,111,.66),rgba(225,181,111,.16) 67%,transparent);
+  pointer-events:none;
+}
+
+/* Navigazione: piccoli simboli oro — come le voci della Tenuta.
+   I glifi sono decorativi; non nascondono testo né cambiano la navigazione. */
+.nav a[href="./"],.nav a[href="ordini.html"]{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+}
+.nav a[href="./"]::before,
+.nav a[href="ordini.html"]::before {
+  display:inline-block;
+  flex:0 0 auto;
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:12px;
+  font-weight:400;
+  line-height:1;
+  color:#dfb778;
+  text-decoration:none;
+  text-shadow:0 0 9px rgba(232,181,98,.12);
+}
+.nav a[href="./"]::before{content:"✦"}
+.nav a[href="ordini.html"]::before{content:"▣";font-size:11px}
+
+/* Sottili filetti sopra il titolo, ai due lati come nel frontespizio
+   della Tenuta. Il testo resta esattamente nella stessa posizione. */
+.compact-hero .wrap::before,
+.compact-hero .wrap::after {
+  content:"";
+  position:absolute;
+  top:18px;
+  width:min(27%,235px);
+  height:1px;
+  pointer-events:none;
+}
+.compact-hero .wrap::before {
+  left:0;
+  background:linear-gradient(90deg,transparent,rgba(225,182,109,.61));
+}
+.compact-hero .wrap::after {
+  right:0;
+  background:linear-gradient(90deg,rgba(225,182,109,.61),transparent);
+}
+.compact-hero h1{position:relative}
+.compact-hero h1::after {
+  content:"";
+  position:absolute;
+  left:0;
+  bottom:-8px;
+  width:min(325px,72%);
+  height:1px;
+  background:linear-gradient(90deg,rgba(226,180,111,.72),rgba(226,180,111,.29) 73%,transparent);
+  pointer-events:none;
+}
+
+/* Fregi piccoli, senza icone grandi o emoji colorate. */
+.catalog .section-top .label::before,
+.order-head .label::before,
+.private-workspace-head .label::before,
+.quote > .label::before,
+.order-form h3::before {
+  content:"✦";
+  display:inline-block;
+  margin-right:8px;
+  color:#d6a76a;
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:10px;
+  line-height:1;
+  vertical-align:1px;
+}
+.order-head .label::before{content:"▣"}
+.private-workspace-head .label::before{content:"◇"}
+.quote > .label::before{content:"✧"}
+.order-form h3::before{content:"✦";font-size:13px;vertical-align:3px}
+
+.catalog .section-top > div::after,
+.order-head > div:first-child::after,
+.private-workspace-head > div:first-child::after {
+  content:"";
+  display:block;
+  width:min(220px,90%);
+  height:1px;
+  margin-top:10px;
+  background:linear-gradient(90deg,rgba(216,171,102,.63),rgba(216,171,102,.18),transparent);
+  pointer-events:none;
+}
+
+/* Catalogo: un emblema discreto per ciascuna categoria.
+   Funziona anche sul registro privato, senza ritoccare i suoi script. */
+.weapon-category-title::before{
+  content:"✦";
+  display:inline-block;
+  min-width:19px;
+  margin-right:6px;
+  color:#e0b576;
+  font:400 15px/1 Georgia,"Times New Roman",serif;
+  vertical-align:3px;
+  text-align:center;
+  text-shadow:0 0 9px rgba(238,190,116,.12);
+}
+.weapon-category[aria-label="Pistole"] .weapon-category-title::before {content:"◇"}
+.weapon-category[aria-label="Fucili"] .weapon-category-title::before {content:"✧"}
+.weapon-category[aria-label="Repeater"] .weapon-category-title::before {content:"◈"}
+.weapon-category-header::after{
+  content:"";
+  position:absolute;
+  top:9px;
+  right:11px;
+  width:43px;
+  height:1px;
+  background:linear-gradient(90deg,transparent,rgba(221,179,110,.37));
+  pointer-events:none;
+}
+.weapon-category-toggle{position:relative;z-index:1}
+
+/* Filtri: minime icone monocromatiche prima dei nomi. */
+.filters button[data-cat]::before,
+.filters button[data-private-cat]::before {
+  display:inline-block;
+  font:400 11px/1 Georgia,"Times New Roman",serif;
+  color:#d7aa70;
+  margin-right:6px;
+  vertical-align:0;
+}
+.filters button[data-cat="Tutte"]::before,
+.filters button[data-private-cat="Tutte"]::before{content:"✣"}
+.filters button[data-cat="Revolver"]::before,
+.filters button[data-private-cat="Revolver"]::before{content:"✦"}
+.filters button[data-cat="Pistole"]::before,
+.filters button[data-private-cat="Pistole"]::before{content:"◇"}
+.filters button[data-cat="Fucili"]::before,
+.filters button[data-private-cat="Fucili"]::before{content:"✧"}
+.filters button[data-cat="Repeater"]::before,
+.filters button[data-private-cat="Repeater"]::before{content:"◈"}
+.filters .collapse-all-btn::before{
+  content:"−";
+  display:inline-block;
+  margin-right:6px;
+  color:#dcb375;
+  font:700 12px/1 Georgia,"Times New Roman",serif;
+}
+
+/* Micro-filetti decorativi sugli elementi di riepilogo, senza
+   spostare le colonne o ridimensionare i controlli. */
+.quote,
+.private-quote,
+.order-stat,
+.order-card {position:relative}
+.quote::before {
+  content:"";
+  position:absolute;
+  top:8px;
+  left:11px;
+  right:11px;
+  height:1px;
+  background:linear-gradient(90deg,transparent,rgba(225,181,108,.34),transparent);
+  pointer-events:none;
+}
+.order-stat::before {
+  content:"✦";
+  position:absolute;
+  right:12px;
+  top:11px;
+  font:11px/1 Georgia,"Times New Roman",serif;
+  color:rgba(221,176,105,.53);
+  pointer-events:none;
+}
+.footer-inner strong::before{
+  content:"✦";
+  margin-right:10px;
+  font:400 14px/1 Georgia,"Times New Roman",serif;
+  color:#d9ae72;
+  vertical-align:3px;
+}
+
+@media (max-width:640px){
+  .nav a[href="./"],.nav a[href="ordini.html"]{gap:5px}
+  .nav a[href="./"]::before,.nav a[href="ordini.html"]::before{font-size:10px}
+  .compact-hero .wrap::before,.compact-hero .wrap::after{width:22%;top:12px}
+  .weapon-category-title::before{min-width:15px;margin-right:3px;font-size:13px;vertical-align:2px}
+  .filters button[data-cat]::before,.filters button[data-private-cat]::before{font-size:10px;margin-right:4px}
+}
+@media (max-width:390px){
+  .nav a[href="./"],.nav a[href="ordini.html"]{gap:4px}
+  .nav a[href="./"]::before,.nav a[href="ordini.html"]::before{font-size:9px}
+}
