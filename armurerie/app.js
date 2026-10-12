@@ -1,184 +1,177 @@
-/* Vauclair Armurerie — Dossier dimostrativo, nessuna chiamata esterna.
-   Prezzi di riferimento: Wildlands Proiezione Prezzi, tab "01 - Proposta commerciale".
-   Ricarico export proposto = prezzo d'acquisto di riferimento * 2,20.
-   Le stime non equivalgono a valori reali confermati dal server.
-*/
+/* Vauclair Armurerie — vetrina commerciale.
+   Non è un sistema d'ordine remoto: prepara testi copiabili, senza inviare dati.
+   Il listino di acquisto indicativo proviene da catalogo.js; non contiene tariffe export. */
 (() => {
-  "use strict";
-  const DATA = [
-    {name:"Revolver Cattleman",status:"REALE",retail:80,buy:70,blip:154},
-    {name:"Revolver Double Action",status:"REALE",retail:90,buy:75,blip:165},
-    {name:"Colt M1892",status:"REALE",retail:95,buy:80,blip:176},
-    {name:"Colt M1873",status:"REALE",retail:120,buy:100,blip:220},
-    {name:"Revolver Schofield",status:"REALE",retail:140,buy:120,blip:264},
-    {name:"Revolver LeMat",status:"STIMA",retail:120.60,buy:105,blip:231},
-    {name:"Revolver Navy",status:"STIMA",retail:170.26,buy:145,blip:319},
-    {name:"Revolver Navy Crossover",status:"ANALOGIA",retail:187.28,buy:160,blip:352},
-    {name:"Pistola semiautomatica",status:"REALE",retail:125,buy:105,blip:231},
-    {name:"Pistola M1899",status:"REALE",retail:145,buy:125,blip:275},
-    {name:"Pistola Mauser",status:"STIMA",retail:148.98,buy:125,blip:275},
-    {name:"Pistola Volcanic",status:"ANALOGIA",retail:125,buy:105,blip:231},
-    {name:"Fucile Springfield",status:"STIMA",retail:269.57,buy:240,blip:528},
-    {name:"Fucile Bolt Action",status:"ANALOGIA",retail:283.76,buy:245,blip:539},
-    {name:"Fucile Varmint",status:"REALE",retail:100,buy:95,blip:209},
-    {name:"Repeater Carabina",status:"REALE",retail:140,buy:120,blip:264},
-    {name:"Repeater Henry",status:"REALE",retail:240,buy:205,blip:451},
-    {name:"Repeater Evans",status:"REALE",retail:245,buy:210,blip:462},
-    {name:"Repeater Winchester",status:"STIMA",retail:283.76,buy:240,blip:528},
-    {name:"Doppietta a canna liscia",status:"STIMA",retail:227.01,buy:205,blip:451},
-    {name:"Fucile a pompa a ripetizione",status:"STIMA",retail:227.01,buy:195,blip:429},
-    {name:"Fucile Elephant",status:"STIMA",retail:425.64,buy:360,blip:792}
-  ];
-  const expected = {"REALE":11,"STIMA":8,"ANALOGIA":3};
-  for (const row of DATA) {
-    if (Math.abs(row.blip - row.buy * 2.2) > .001) {
-      throw new Error("Errore nel ricarico export: " + row.name);
+  'use strict';
+  const items = Array.isArray(window.VAUCLAIR_CATALOG) ? window.VAUCLAIR_CATALOG : [];
+  const money = new Intl.NumberFormat('it-IT', {style:'currency',currency:'USD',currencyDisplay:'narrowSymbol',minimumFractionDigits:0,maximumFractionDigits:2});
+  const key='vauclair.armurerie.offerta.v1';
+  const selection = new Map();
+  try {
+    const saved=JSON.parse(localStorage.getItem(key)||'{}');
+    for(const item of items) {
+      const n=Number(saved[item.id]);
+      if(Number.isSafeInteger(n)&&n>0&&n<=999)selection.set(item.id,n);
     }
+  } catch (_) {}
+  let group='Tutte', query='', prepared='';
+  const byId=id=>document.getElementById(id);
+  const nameEl=byId('catalogList'), offerEl=byId('offerItems');
+  const canQuote=item=>item.status==='attuale';
+  const slug=str=>str.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+  function persist() {
+    try {localStorage.setItem(key,JSON.stringify(Object.fromEntries(selection)));} catch(_) {}
   }
-  for (const [status, count] of Object.entries(expected)) {
-    if (DATA.filter(item => item.status === status).length !== count) {
-      throw new Error("Conteggio armi non corretto: " + status);
-    }
+  function element(tag,cls,text){
+    const node=document.createElement(tag);
+    if(cls)node.className=cls;
+    if(text!==undefined)node.textContent=text;
+    return node;
   }
-  const money = new Intl.NumberFormat("it-IT", {
-    style:"currency",currency:"USD",currencyDisplay:"narrowSymbol",
-    minimumFractionDigits:0,maximumFractionDigits:2
-  });
-  const num = new Intl.NumberFormat("it-IT",{maximumFractionDigits:0});
-  const preset = ["Revolver Cattleman","Revolver Schofield","Repeater Carabina","Repeater Henry","Repeater Evans"];
-  const quantity = new Map(DATA.map(row => [row.name,preset.includes(row.name) ? 1 : 0]));
-  const state = {filter:"all",query:"",mode:"wholesale"};
-
-  const el = id => document.getElementById(id);
-  const body = el("catalogBody");
-  const resultCount = el("resultCount");
-  const searchInput = el("searchInput");
-  const searchText = value => value.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLocaleLowerCase("it-IT");
-  const statusName = s => s === "REALE" ? "Confermato" : s === "STIMA" ? "Stima" : "Ipotesi";
-
-  function td(className,text){
-    const cell = document.createElement("td");
-    if(className)cell.className=className;
-    cell.textContent=text;
-    return cell;
+  function badge(status){
+    const labels={attuale:'Quotazione di riferimento',stimato:'In valutazione',ipotetico:'Su richiesta'};
+    const b=element('small','quote-status '+status,labels[status]||'In valutazione');
+    return b;
   }
-
-  function renderCatalog() {
-    body.replaceChildren();
-    const filtered=DATA.filter(item=>(state.filter==="all" || item.status===state.filter)
-      && searchText(item.name).includes(searchText(state.query)));
+  function addItem(id,delta) {
+    const current=selection.get(id)||0;
+    const next=Math.max(0,Math.min(999,current+delta));
+    if(next)selection.set(id,next);else selection.delete(id);
+    prepared='';byId('copyProposal').disabled=true;byId('proposalStatus').textContent='Distinta modificata: prepara nuovamente il messaggio per aggiornarlo.';
+    persist();renderCatalog();renderOffer();renderPreview();
+  }
+  function renderCatalog(){
+    if(!nameEl)return;
+    nameEl.replaceChildren();
+    const filtered=items.filter(item=>(group==='Tutte'||group===item.group)&&slug(item.name).includes(slug(query)));
+    byId('catalogInfo').textContent = filtered.length+' modelli visualizzati · I prezzi esposti sono indicativi e soggetti a conferma. I modelli non ancora disponibili sono mostrati solo per richiesta informazioni.';
     if(!filtered.length){
-      const empty = document.createElement("tr");
-      const cell = td("empty-row","Nessuna arma corrisponde alla ricerca.");
-      cell.colSpan=6;empty.append(cell);body.append(empty);
+      const empty=element('div','empty-results','Nessun modello trovato. Modifica la ricerca.');
+      nameEl.append(empty);return;
     }
     for(const item of filtered){
-      const row=document.createElement("tr");
-      const name=td("name-cell","");
-      const title=document.createElement("strong");
-      title.className="weapon-name";
-      title.textContent=item.name + (item.status==="STIMA"?" *":item.status==="ANALOGIA"?" †":"");
-      const tag=document.createElement("span");
-      tag.className="weapon-tag";tag.textContent=statusName(item.status);
-      name.append(title,tag);row.append(name);
-      row.append(td("",money.format(item.retail)));
-      row.append(td("",money.format(item.buy)));
-      row.append(td("blip-value",money.format(item.blip)));
-      row.append(td("profit-value",money.format(item.blip-item.buy)));
-      const qtyCell=td("","");
-      const container=document.createElement("div");container.className="qty-control";
-      const minus=document.createElement("button");
-      minus.type="button";minus.textContent="−";
-      minus.disabled=(quantity.get(item.name)||0)===0;
-      minus.setAttribute("aria-label","Rimuovi una unità di "+item.name);
-      minus.addEventListener("click",()=>{
-        quantity.set(item.name,Math.max(0,(quantity.get(item.name)||0)-1));
-        renderCatalog();renderTotals();
-      });
-      const count=document.createElement("output");
-      count.setAttribute("aria-label","Quantità di "+item.name);
-      count.textContent=String(quantity.get(item.name)||0);
-      const plus=document.createElement("button");
-      plus.type="button";plus.textContent="+";
-      plus.setAttribute("aria-label","Aggiungi una unità di "+item.name);
-      plus.addEventListener("click",()=>{
-        quantity.set(item.name,(quantity.get(item.name)||0)+1);
-        renderCatalog();renderTotals();
-      });
-      container.append(minus,count,plus);qtyCell.append(container);row.append(qtyCell);
-      body.append(row);
+      const row=element('article','weapon-row');
+      const left=element('div','weapon-identity');
+      left.append(element('span','weapon-mark',item.group==='Revolver'?'R':item.group==='Pistole'?'P':'F'));
+      const meta=element('div','weapon-meta');
+      meta.append(element('strong','weapon-name',item.name),badge(item.status));
+      left.append(meta);
+      const value=element('div','weapon-valuation');
+      value.append(element('small','',canQuote(item)?'Acquisto indicativo':'Quotazione'));
+      value.append(element('strong','',canQuote(item)?money.format(item.buy):'Da concordare'));
+      const control=element('div','weapon-action');
+      if(selection.has(item.id)){
+        const minus=element('button','qty-button','−');
+        minus.type='button';minus.setAttribute('aria-label','Rimuovi un '+item.name);
+        minus.addEventListener('click',()=>addItem(item.id,-1));
+        const count=element('output','qty-count',String(selection.get(item.id)));
+        const plus=element('button','qty-button','+');
+        plus.type='button';plus.setAttribute('aria-label','Aggiungi un '+item.name);
+        plus.addEventListener('click',()=>addItem(item.id,1));
+        control.append(minus,count,plus);
+      } else {
+        const add=element('button','add-weapon','+ Aggiungi');
+        add.type='button';add.setAttribute('aria-label','Aggiungi '+item.name+' alla proposta');
+        add.addEventListener('click',()=>addItem(item.id,1));
+        control.append(add);
+      }
+      row.append(left,value,control);nameEl.append(row);
     }
-    resultCount.textContent=num.format(filtered.length)+(filtered.length===1?" modello":" modelli");
   }
-
-  function renderTotals(){
-    let count=0,cost=0,revenue=0;
-    for(const item of DATA){
-      const n=quantity.get(item.name)||0;
-      count+=n;
-      cost+=n*(state.mode==="wholesale"?item.buy:item.retail);
-      revenue+=n*item.blip;
+  function renderOffer(){
+    if(!offerEl)return;
+    offerEl.replaceChildren();let total=0,unknown=0;
+    for(const [id,qty] of selection){
+      const item=items.find(x=>x.id===id);
+      if(!item)continue;
+      const line=element('div','offer-line');
+      const label=element('div','offer-line-name');
+      label.append(element('strong','',item.name),element('small','',qty+' × '+(canQuote(item)?money.format(item.buy):'su richiesta')));
+      const minus=element('button','remove-line','×');minus.type='button';minus.setAttribute('aria-label','Rimuovi '+item.name);
+      minus.addEventListener('click',()=>{selection.delete(id);persist();renderOffer();renderCatalog();renderPreview();prepared='';byId('copyProposal').disabled=true;});
+      line.append(label,minus);offerEl.append(line);
+      if(canQuote(item))total+=qty*item.buy;else unknown+=qty;
     }
-    const profit=Math.round((revenue-cost)*100)/100;
-    el("simCount").textContent=num.format(count);
-    el("simCost").textContent=money.format(cost);
-    el("simRevenue").textContent=money.format(revenue);
-    el("simProfit").textContent=money.format(profit);
-    const comp=el("simComparison");
-    comp.textContent=count
-      ?"Con il doppio delle stesse armi: "+money.format(profit*2)+" di margine lordo."
-      :"Seleziona una o più armi dalla tabella per iniziare.";
+    if(!offerEl.children.length)offerEl.append(element('div','offer-empty','Nessuna arma selezionata.'));
+    byId('offerTotal').textContent = money.format(total)+(unknown?' + valutazioni': '');
   }
-
-  function wire(){
-    searchInput.addEventListener("input",()=>{
-      state.query=searchInput.value.trim();
+  function renderPreview(){
+    const area=byId('proposalPreview');
+    const line=[];
+    for(const [id,qty] of selection){
+      const item=items.find(x=>x.id===id);
+      if(item)line.push(qty+' × '+item.name+(canQuote(item)?' ('+money.format(item.buy)+' cad. indicativi)':' (prezzo da concordare)'));
+    }
+    area.textContent=line.length ? 'Armi selezionate:\n'+line.join('\n') : 'Nessun modello aggiunto alla distinta. Puoi comunque preparare una richiesta di informazioni.';
+  }
+  function createText(){
+    const name=byId('contactName').value.trim(),supplier=byId('supplierType').value,
+      place=byId('contactPlace').value.trim(),contact=byId('contactHandle').value.trim(),
+      condition=byId('weaponCondition').value, notes=byId('proposalNotes').value.trim();
+    let list=[...selection].map(([id,qty])=>{
+      const item=items.find(x=>x.id===id);
+      if(!item)return null;
+      return '• '+qty+' × '+item.name;
+    }).filter(Boolean);
+    const manual=byId('weaponSelect').value;
+    if(manual && !selection.has(manual)){
+      const item=items.find(x=>x.id===manual);
+      if(item)list.push('• 1 × '+item.name+' (da definire)');
+    }
+    const text=[
+      'VAUCLAIR ARMURERIE — RICHIESTA COMMERCIALE',
+      'Referente: '+name,
+      'Fornitore: '+supplier,
+      place?'Luogo: '+place:null,
+      contact?'Recapito RP: '+contact:null,
+      'Condizioni: '+condition,
+      '',
+      'Armi proposte:',
+      list.length?list.join('\n'):'• Da definire con Daniel Vauclair',
+      notes?'':'',notes?'Dettagli: '+notes:null,
+      '',
+      'Prezzi e disponibilità da concordare direttamente con Daniel Vauclair.'
+    ].filter(x=>x!==null).join('\n').trim();
+    return text;
+  }
+  async function copyText(){
+    if(!prepared)return;
+    try{
+      await navigator.clipboard.writeText(prepared);
+      byId('proposalStatus').textContent='Testo copiato. Ora puoi incollarlo nel messaggio RP o su Discord.';
+    } catch(_) {
+      const ta=element('textarea','copy-fallback');
+      ta.value=prepared;ta.setAttribute('aria-label','Testo della richiesta');
+      byId('proposalForm').append(ta);ta.focus();ta.select();
+      try{document.execCommand('copy');byId('proposalStatus').textContent='Testo selezionato e copiato, se il browser lo consente.';}
+      catch(__){byId('proposalStatus').textContent='Seleziona e copia manualmente il testo mostrato.';}
+    }
+  }
+  function init(){
+    if(!nameEl)return;
+    byId('searchInput').addEventListener('input',e=>{query=e.target.value;renderCatalog();});
+    document.querySelectorAll('.filter').forEach(button=>button.addEventListener('click',()=>{
+      group=button.dataset.filter;
+      document.querySelectorAll('.filter').forEach(b=>{const on=b===button;b.classList.toggle('active',on);b.setAttribute('aria-pressed',String(on));});
       renderCatalog();
-    });
-    document.querySelectorAll(".filter-btn").forEach(button=>{
-      button.addEventListener("click",()=>{
-        state.filter=button.dataset.filter;
-        document.querySelectorAll(".filter-btn").forEach(el=>{
-          const chosen=el===button;el.classList.toggle("active",chosen);
-          el.setAttribute("aria-pressed",String(chosen));
-        });
-        renderCatalog();
-      });
-    });
-    document.querySelectorAll(".mode-btn").forEach(button=>{
-      button.addEventListener("click",()=>{
-        state.mode=button.dataset.mode;
-        document.querySelectorAll(".mode-btn").forEach(el=>{
-          const chosen=el===button;el.classList.toggle("active",chosen);
-          el.setAttribute("aria-pressed",String(chosen));
-        });
-        renderTotals();
-      });
-    });
-    el("presetButton").addEventListener("click",()=>{
-      for(const item of DATA)quantity.set(item.name,preset.includes(item.name)?1:0);
-      renderCatalog();renderTotals();
-    });
-    el("clearButton").addEventListener("click",()=>{
-      for(const item of DATA)quantity.set(item.name,0);
-      renderCatalog();renderTotals();
-    });
-    const menuButton=el("menuButton");
-    const nav=el("mobileNav");
-    menuButton.addEventListener("click",()=>{
-      const expanded=menuButton.getAttribute("aria-expanded")==="true";
-      menuButton.setAttribute("aria-expanded",String(!expanded));
-      menuButton.setAttribute("aria-label",expanded?"Apri il menu":"Chiudi il menu");
-      nav.hidden=expanded;
-    });
-    nav.querySelectorAll("a").forEach(link=>link.addEventListener("click",()=>{
-      nav.hidden=true;menuButton.setAttribute("aria-expanded","false");
-      menuButton.setAttribute("aria-label","Apri il menu");
     }));
-    el("simProfit").setAttribute("aria-live","polite");
+    byId('clearOffer').addEventListener('click',()=>{selection.clear();prepared='';byId('copyProposal').disabled=true;persist();renderCatalog();renderOffer();renderPreview();});
+    const select=byId('weaponSelect');
+    for(const item of items){const option=element('option','',item.name);option.value=item.id;select.append(option);}
+    byId('proposalForm').addEventListener('submit',async e=>{
+      e.preventDefault();
+      if(!e.target.reportValidity())return;
+      prepared=createText();
+      byId('proposalPreview').textContent=prepared;
+      byId('copyProposal').disabled=false;
+      byId('proposalStatus').textContent='Messaggio preparato. Copialo e invialo a Daniel: nessuna richiesta è stata inviata automaticamente.';
+      await copyText();
+    });
+    byId('copyProposal').addEventListener('click',copyText);
+    const menuButton=byId('menuButton'),menu=byId('mobileMenu');
+    menuButton.addEventListener('click',()=>{menu.hidden=!menu.hidden;menuButton.setAttribute('aria-expanded',String(!menu.hidden));});
+    menu.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{menu.hidden=true;menuButton.setAttribute('aria-expanded','false');}));
+    renderCatalog();renderOffer();renderPreview();
   }
-  if(!body || !el("simProfit"))return;
-  wire();
-  renderCatalog();
-  renderTotals();
+  init();
 })();
