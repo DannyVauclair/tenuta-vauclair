@@ -91,7 +91,13 @@ document.querySelectorAll("[data-cat]").forEach(btn=>btn.addEventListener("click
 }));
 $("collapseAllCategories").addEventListener("click",()=>{
   expanded.clear();
-  update();
+  // Chiude subito le sezioni correnti, senza ricreare il catalogo
+  // e senza perdere selezione, quantità o posizione di scorrimento.
+  document.querySelectorAll("#catalog .weapon-category-toggle").forEach(toggle=>{
+    toggle.setAttribute("aria-expanded","false");
+    const list=document.getElementById(toggle.getAttribute("aria-controls"));
+    if(list)list.hidden=true;
+  });
 });
 $("startOrder").addEventListener("click",()=>{
   const lines=weapons.filter(w=>pick.has(w.id)).map(w=>({id:w.id,qty:pick.get(w.id)}));
