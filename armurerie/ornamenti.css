@@ -238,7 +238,9 @@
  * L'ordine dei link in HTML è Registro | Listino acquisti | Ordini.
  * Il Registro apre un login, non rende pubblici i dati privati.
  */
-.header .nav a.last{
+/* Tutte le voci, incluse le pagine attive, hanno un identico aspetto. */
+.header .nav a.last,
+.header .nav a.last.current{
   display:inline-flex;
   align-items:center;
   justify-content:center;
@@ -249,18 +251,12 @@
   background:linear-gradient(155deg,rgba(87,36,42,.54),rgba(34,22,27,.84));
   color:#e6c99f;
   text-decoration:none !important;
+  text-underline-offset:0;
   white-space:nowrap;
   box-shadow:inset 0 1px 0 rgba(255,237,194,.04);
 }
-.header .nav a.last.current{
-  border-color:#d6a264;
-  background:linear-gradient(155deg,#5f2930,#351e25);
-  color:#f2d09c;
-  text-decoration:none !important;
-  text-underline-offset:0;
-  box-shadow:inset 0 1px 0 rgba(246,216,173,.09);
-}
-.header .nav a.last:hover{
+.header .nav a.last:hover,
+.header .nav a.last.current:hover{
   border-color:#e6b779;
   background:linear-gradient(155deg,#6b3036,#3e232a);
   color:#ffe0ad;
