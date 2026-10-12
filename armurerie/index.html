@@ -1,265 +1,162 @@
 <!doctype html>
 <html lang="it">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#14100f">
-  <meta name="description" content="Vauclair Armurerie — proposta per un'attività commerciale custom di acquisto ed esportazione di armi da fuoco su Wildlands RP 1900.">
-  <title>Vauclair Armurerie — Dossier di presentazione · Wildlands 1900</title>
-  <link rel="icon" type="image/webp" href="../assets/vauclair-logo.webp">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
-  <script src="app.js" defer></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#161110">
+<meta name="description" content="Vauclair Armurerie: acquisto di armi da fuoco, forniture commerciali e servizi di personalizzazione nell'America del 1900.">
+<title>Vauclair Armurerie | Maison Vauclair · 1900</title>
+<link rel="icon" href="../assets/vauclair-logo.webp" type="image/webp">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<script src="catalogo.js" defer></script><script src="app.js" defer></script>
 </head>
 <body>
-  <div class="site-texture" aria-hidden="true"></div>
-  <a class="skip-link" href="#main">Vai al contenuto</a>
-  <header class="topbar">
-    <div class="topbar-inner wrap">
-      <a class="brand" href="#inizio" aria-label="Vauclair Armurerie, inizio">
-        <img src="../assets/vauclair-logo.webp" alt="Stemma della famiglia Vauclair" width="58" height="58">
-        <span class="brand-copy"><strong>Vauclair</strong><small>ARMURERIE · 1900</small></span>
-      </a>
-      <nav class="nav" aria-label="Navigazione principale">
-        <a href="#progetto">Il progetto</a>
-        <a href="#filiera">La filiera</a>
-        <a href="#economia">Economia</a>
-        <a href="#listino">Listino</a>
-      </nav>
-      <a class="nav-cta" href="#richiesta">La proposta <span aria-hidden="true">↗</span></a>
-      <button class="mobile-toggle" id="menuButton" type="button" aria-label="Apri il menu" aria-controls="mobileNav" aria-expanded="false"><span></span><span></span><span></span></button>
+<a class="skip" href="#main">Vai ai contenuti</a>
+<div class="ambient" aria-hidden="true"></div>
+<header class="site-header">
+  <div class="wrap header-row">
+    <a class="site-logo" href="index.html" aria-label="Vauclair Armurerie — pagina iniziale">
+      <img src="../assets/vauclair-logo.webp" width="55" height="55" alt="">
+      <span><strong>Vauclair</strong><small>ARMURERIE · MAISON FRANÇAISE</small></span>
+    </a>
+    <nav class="main-nav" aria-label="Navigazione principale"><a href="#maison">La Maison</a><a href="#servizi">Servizi</a><a href="#listino">Valutazioni</a><a href="#fornitura">Forniture</a></nav>
+    <a class="header-action" href="#proposta">Proponi un'arma <span aria-hidden="true">↗</span></a>
+    <button class="mobile-menu-btn" id="menuButton" aria-expanded="false" aria-controls="mobileMenu" aria-label="Apri il menu" type="button"><span></span><span></span><span></span></button>
+  </div>
+  <nav id="mobileMenu" class="mobile-menu" aria-label="Navigazione mobile" hidden><a href="#maison">La Maison</a><a href="#servizi">Servizi</a><a href="#listino">Valutazioni</a><a href="#fornitura">Forniture</a><a href="#proposta">Proponi un'arma</a><a href="registro.html">Banco commerciale</a></nav>
+</header>
+<main id="main">
+<section class="hero" id="inizio">
+  <div class="hero-shade"></div>
+  <div class="wrap hero-layout">
+    <div class="hero-copy">
+      <div class="line-eyebrow"><span></span> MAISON VAUCLAIR · DAL 1900 <span></span></div>
+      <p class="hero-overline">COMMERCIO · VALUTAZIONI · ESPORTAZIONI</p>
+      <h1>La tradizione<br><em>non conosce confini.</em></h1>
+      <p class="hero-lead">Le armi hanno una storia. Noi diamo loro una nuova destinazione.</p>
+      <p class="hero-paragraph">Vauclair Armurerie acquista armi da fuoco da privati, armerie e banchi dei pegni, organizzando forniture destinate al commercio della famiglia in Francia.</p>
+      <div class="hero-ctas"><a class="btn btn-primary" href="#listino">Consulta le valutazioni <span aria-hidden="true">↗</span></a><a class="btn btn-ghost" href="#proposta">Presenta un'offerta <span aria-hidden="true">→</span></a></div>
+      <p class="small-quiet">Filiale commerciale di Daniel Vauclair · Rhodes, New Hanover e territori limitrofi</p>
     </div>
-    <nav class="mobile-nav" id="mobileNav" aria-label="Navigazione mobile" hidden>
-      <a href="#progetto">Il progetto</a><a href="#filiera">La filiera</a><a href="#economia">Economia</a><a href="#listino">Listino</a><a href="#richiesta">La proposta</a>
-    </nav>
-  </header>
+    <aside class="seal-panel" aria-label="Emblema della Maison">
+      <span class="seal-top">M A I S O N &nbsp; V A U C L A I R</span>
+      <img src="../assets/vauclair-logo.webp" alt="Stemma della famiglia Vauclair" width="190" height="190">
+      <div class="seal-rule"></div>
+      <strong>Armurerie</strong>
+      <em>Maison de commerce</em>
+      <small>ÉTABLISSEMENT AMÉRICAIN · 1900</small>
+      <div class="seal-bottom">ARMES DE QUALITÉ · HONNEUR & TRADITION</div>
+    </aside>
+  </div>
+  <div class="hero-foot" aria-hidden="true"><span>✦</span> LA MAISON VAUCLAIR <span>✦</span></div>
+</section>
 
-  <main id="main">
-    <section class="hero" id="inizio" aria-labelledby="heroTitle">
-      <div class="hero-shade"></div>
-      <div class="wrap hero-inner">
-        <div class="hero-copy">
-          <div class="eyebrow"><span class="orn-line"></span> PROPOSTA DI ATTIVITÀ CUSTOM <span class="orn-line"></span></div>
-          <div class="hero-kicker">WILDLANDS · ANNO 1900 · DOSSIER COMMERCIALE</div>
-          <h1 id="heroTitle">Vauclair <em>Armurerie</em></h1>
-          <p class="hero-subhead">Dall'America alla Francia. Un mercato nuovo per le armi, senza sostituire le attività già esistenti.</p>
-          <p class="hero-description">Un progetto pensato per trasformare la produzione e il recupero di armi da fuoco in accordi commerciali, forniture e nuove occasioni di gioco di ruolo.</p>
-          <div class="hero-actions">
-            <a class="btn btn-primary" href="#progetto">Scopri il progetto <span>↗</span></a>
-            <a class="btn btn-outline" href="#listino">Esamina i prezzi <span>↓</span></a>
-          </div>
-          <p class="hero-quiet">Proposta da valutare con lo staff · Nessuna meccanica già approvata</p>
-        </div>
-        <aside class="hero-dossier" aria-label="Scheda della proposta">
-          <div class="dossier-top"><span>MAISON VAUCLAIR</span><span>N° 001 / 1900</span></div>
-          <img class="dossier-logo" src="../assets/vauclair-logo.webp" alt="" width="136" height="136">
-          <div class="dossier-rule"></div>
-          <div class="dossier-kicker">DIVISION COMMERCIALE</div>
-          <div class="dossier-title">Exportation<br>des armes</div>
-          <div class="dossier-caption">Filiale americana della famiglia Vauclair</div>
-          <div class="dossier-stamp">PROPOSTA<br><small>IN ESAME</small></div>
-        </aside>
-      </div>
-      <div class="hero-bottom" aria-hidden="true">✦ <span>MAISON VAUCLAIR · COMMERCE D'ARMES</span> ✦</div>
-    </section>
+<div class="credentials"><div class="wrap cred-grid">
+  <div><span class="cred-icon">✥</span><strong>TRADIZIONE FRANCESE</strong><small>Una famiglia di armaioli</small></div>
+  <div><span class="cred-icon">✧</span><strong>VALUTAZIONI RISERVATE</strong><small>Accordi diretti con Daniel</small></div>
+  <div><span class="cred-icon">✦</span><strong>FORNITURE COMMERCIALI</strong><small>Singoli pezzi o lotti</small></div>
+  <div><span class="cred-icon">⚜</span><strong>DESTINAZIONE EUROPA</strong><small>Commercio transatlantico</small></div>
+</div></div>
 
-    <section class="stat-ribbon" aria-label="Caratteristiche del progetto">
-      <div class="wrap stat-grid">
-        <div class="stat"><span class="stat-number">22</span><span class="stat-label">Modelli esaminati nel listino</span></div>
-        <div class="stat"><span class="stat-number">+120%</span><span class="stat-label">Ricarico export proposto</span></div>
-        <div class="stat"><span class="stat-number">0</span><span class="stat-label">Limiti artificiali richiesti</span></div>
-        <div class="stat"><span class="stat-number">1</span><span class="stat-label">Configurazione iniziale del blip</span></div>
-      </div>
-    </section>
+<section class="section maison-section" id="maison">
+<div class="wrap split-maison">
+  <div class="copy-block">
+    <span class="chapter">01 — LA NOSTRA STORIA</span>
+    <h2>Un nome costruito<br><em>con il ferro e la fiducia.</em></h2>
+    <p class="featured-p">Dalla Francia agli Stati Uniti, il nome Vauclair porta con sé la tradizione della manifattura delle armi, della cura nei dettagli e degli accordi mantenuti.</p>
+    <p>La filiale americana, diretta da <strong>Daniel Vauclair</strong>, raccoglie armamenti prodotti o recuperati sul territorio per destinarli alla rete commerciale della famiglia oltre l'Atlantico.</p>
+    <p>Non siamo qui per prendere il posto delle armerie locali. Al contrario, vogliamo offrire loro nuove commissioni e un compratore affidabile, anche quando gli ordini ordinari sono pochi.</p>
+    <a class="text-link" href="#fornitura">Scopri come lavorare con noi <span>↗</span></a>
+  </div>
+  <div class="maison-art">
+    <div class="art-frame">
+      <span>MAISON VAUCLAIR</span>
+      <img src="../assets/vauclair-logo.webp" width="220" height="220" alt="Emblema decorativo Vauclair">
+      <strong>Qualité &amp; confiance</strong>
+      <small>FRANCE · ÉTATS-UNIS</small>
+    </div>
+    <div class="side-inscription">EST. MDCCCC · ARMURERIE FRANÇAISE</div>
+  </div>
+</div>
+</section>
 
-    <section class="section introduction" id="progetto">
-      <div class="wrap">
-        <div class="section-head two-head">
-          <div><span class="section-index">CAPITOLO I · L'IDEA</span><h2>Non un'altra armeria.<br><em>Un'altra opportunità.</em></h2></div>
-          <div class="head-aside"><span class="flourish">✣</span><p>Il commercio delle armi può generare gioco anche quando le vendite ai normali clienti diminuiscono.</p></div>
-        </div>
-        <div class="intro-grid">
-          <div class="intro-narrative">
-            <p class="lead">Daniel Vauclair proviene da una famiglia francese legata da generazioni alla produzione di armi. La proposta è aprire una filiale commerciale in America, incaricata di acquistare armamenti destinati all'esportazione verso l'attività di famiglia in Francia.</p>
-            <p>Oggi le armerie producono soprattutto per i giocatori. Nei periodi di minore affluenza, però, gli ordini scarseggiano. Vauclair Armurerie diventerebbe <strong>un cliente aggiuntivo</strong>: potrebbe commissionare lotti alle armerie, acquistare armi da privati oppure recuperarle tramite accordi con i banchi dei pegni.</p>
-            <p>Daniel non avrebbe bisogno di un'altra produzione, di raccogliere materiali o di sostituirsi agli armaioli. Il suo lavoro sarebbe <strong>comprare, negoziare, organizzare le forniture ed esportare</strong>.</p>
-            <div class="quote-panel"><span aria-hidden="true">“</span><p>Non voglio togliere clienti alle armerie. Voglio diventare un cliente in più per loro.</p></div>
-          </div>
-          <div class="intro-column">
-            <div class="labelled-card">
-              <div class="card-ordinal">I</div>
-              <div><h3>Solo armi da fuoco</h3><p>Niente archi, coltelli, materiali generici o merce da raccolta: il commercio rimane legato al mestiere della famiglia.</p></div>
-            </div>
-            <div class="labelled-card">
-              <div class="card-ordinal">II</div>
-              <div><h3>Nuove e usurate</h3><p>Acquisto di armi indipendentemente dalla provenienza, nei limiti delle meccaniche effettivamente disponibili sul server.</p></div>
-            </div>
-            <div class="labelled-card">
-              <div class="card-ordinal">III</div>
-              <div><h3>Esportazione, non produzione</h3><p>La merce viene acquistata e consegnata a un blip dedicato, con un prezzo prefissato per ciascun modello.</p></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+<section class="section service-section" id="servizi">
+<div class="wrap">
+  <div class="section-head center-head"><span class="chapter">02 — LA NOSTRA ATTIVITÀ</span><h2>Una casa di commercio.<br><em>Tre servizi.</em></h2><p>Dall'acquisto occasionale agli accordi con i professionisti del territorio.</p></div>
+  <div class="services-grid">
+    <article class="service-card"><span class="service-no">I / ACQUISIZIONE</span><span class="service-glyph">⚒</span><h3>Acquisto armi</h3><p>Ritiriamo armi da fuoco nuove e usate, acquistate o recuperate da privati. Ogni proposta viene valutata in base al modello e all'accordo commerciale.</p><a href="#listino">Consulta il listino <span>↗</span></a></article>
+    <article class="service-card"><span class="service-no">II / PARTNERSHIP</span><span class="service-glyph">✣</span><h3>Forniture dalle armerie</h3><p>Commissioniamo lotti di armamenti ai produttori locali: un'occasione per lavorare su ordinazione anche senza attendere clienti al banco.</p><a href="#fornitura">Come collaborare <span>↗</span></a></article>
+    <article class="service-card"><span class="service-no">III / SAVOIR-FAIRE</span><span class="service-glyph">⚜</span><h3>Personalizzazioni</h3><p>Un servizio dedicato alle rifiniture e alle skin puramente estetiche, da concordare secondo le possibilità tecniche disponibili.</p><a href="#finiture">Scopri il servizio <span>↗</span></a></article>
+  </div>
+</div>
+</section>
 
-    <section class="section section-contrast" id="filiera">
-      <div class="wrap">
-        <div class="section-head centered">
-          <span class="section-index">CAPITOLO II · LA FILIERA</span>
-          <h2>Un mercato che <em>collega</em> i giocatori</h2>
-          <p>Tre possibili canali di approvvigionamento. Una sola attività incaricata dell'esportazione.</p>
-        </div>
-        <div class="supplier-grid">
-          <article class="supplier-card">
-            <span class="supplier-icon" aria-hidden="true">⚒</span>
-            <div class="supplier-no">01 / FORNITORE</div>
-            <h3>Armerie</h3>
-            <p>Daniel può commissionare una fornitura: per esempio cinque Evans, dieci Cattleman o un lotto misto. L'armaiolo produce e riceve il compenso concordato.</p>
-            <strong>Un cliente in più anche nei periodi di magra.</strong>
-          </article>
-          <article class="supplier-card">
-            <span class="supplier-icon" aria-hidden="true">⚖</span>
-            <div class="supplier-no">02 / FORNITORE</div>
-            <h3>Banchi dei pegni</h3>
-            <p>Un'alternativa allo scrafting. Per esempio, se una Carabina rende materiali per $54, il banco può valutare di cederla direttamente a Daniel.</p>
-            <strong>Una seconda possibilità di ricavo sulle armi ritirate.</strong>
-          </article>
-          <article class="supplier-card">
-            <span class="supplier-icon" aria-hidden="true">✧</span>
-            <div class="supplier-no">03 / FORNITORE</div>
-            <h3>Privati</h3>
-            <p>Un giocatore può proporre un'arma che non utilizza, recuperata o acquistata in precedenza. Il prezzo dipende dall'accordo con Daniel.</p>
-            <strong>Un interlocutore commerciale in più per i giocatori.</strong>
-          </article>
-        </div>
-        <div class="flow-diagram" aria-label="Flusso della merce">
-          <div><small>FASE I</small><strong>Fornitore</strong><span>Produce o consegna l'arma</span></div>
-          <span class="flow-arrow" aria-hidden="true">→</span>
-          <div><small>FASE II</small><strong>Vauclair Armurerie</strong><span>Acquista e organizza il lotto</span></div>
-          <span class="flow-arrow" aria-hidden="true">→</span>
-          <div><small>FASE III</small><strong>Export Francia</strong><span>Blip a prezzo fisso</span></div>
-        </div>
-      </div>
-    </section>
+<section class="section catalog-section" id="listino">
+<div class="wrap">
+  <div class="section-head catalog-heading"><div><span class="chapter">03 — LISTINO ACQUISTI</span><h2>Il valore di<br><em>ogni arma.</em></h2></div><p>Quotazioni di riferimento per acquisti commerciali. Non siamo un negozio di rivendita al pubblico: <strong>questi sono prezzi che proponiamo di pagare</strong>, soggetti a trattativa e disponibilità.</p></div>
+  <div class="catalog-toolbar">
+    <label class="search-control"><span aria-hidden="true">⌕</span><input id="searchInput" type="search" placeholder="Cerca un modello..." autocomplete="off"></label>
+    <div class="filter-buttons" role="group" aria-label="Filtri categoria">
+      <button type="button" class="filter active" data-filter="Tutte" aria-pressed="true">Tutte</button>
+      <button type="button" class="filter" data-filter="Revolver" aria-pressed="false">Revolver</button>
+      <button type="button" class="filter" data-filter="Pistole" aria-pressed="false">Pistole</button>
+      <button type="button" class="filter" data-filter="Fucili e repeater" aria-pressed="false">Fucili e repeater</button>
+    </div>
+  </div>
+  <div class="catalog-grid">
+    <div class="catalog-list" id="catalogList" aria-live="polite"></div>
+    <aside class="offer-sidebar">
+      <div class="sidebar-heading"><span>LA TUA PROPOSTA</span><strong>Distinta di conferimento</strong><p>Seleziona uno o più modelli dal listino.</p></div>
+      <div class="offer-items" id="offerItems"><div class="offer-empty">Nessuna arma selezionata.</div></div>
+      <div class="offer-total"><span>Valutazione indicativa</span><strong id="offerTotal">$0</strong></div>
+      <p class="offer-disclaimer">Valore orientativo, non un'offerta vincolante. La quotazione definitiva viene concordata con Daniel.</p>
+      <a class="btn btn-primary btn-block" href="#proposta" id="compileOffer">Prepara la proposta <span>→</span></a>
+      <button type="button" class="subtle-btn" id="clearOffer">Azzera selezione</button>
+    </aside>
+  </div>
+  <p class="catalog-note" id="catalogInfo">* Per i modelli senza dati attuali, l'eventuale quotazione è ancora da confermare. Le armi non disponibili sul server non sono acquistabili finché non introdotte.</p>
+</div>
+</section>
 
-    <section class="section economics" id="economia">
-      <div class="wrap">
-        <div class="section-head"><span class="section-index">CAPITOLO III · IL BILANCIAMENTO</span><h2>Una proposta <em>basata sui numeri</em></h2><p>Il principio è simile a quello delle attività di intermediazione già presenti nel server, ma le armi non arrivano con la frequenza di pesce, carne o prodotti agricoli.</p></div>
-        <div class="economy-grid">
-          <div class="economy-method">
-            <div class="formula-label">01 · PREZZO D'ACQUISTO</div>
-            <h3>Una vera fornitura all'ingrosso</h3>
-            <p>Come riferimento, Vauclair pagherebbe circa l'<strong>85% del prezzo pubblico</strong>, correggendo il valore quando il costo prudenziale di produzione renderebbe lo sconto troppo penalizzante per l'armaiolo.</p>
-            <div class="equation"><span>Prezzo pubblico</span><b>→</b><span>Acquisto Vauclair</span></div>
-            <div class="formula-label second-label">02 · PREZZO DEL BLIP</div>
-            <h3>Un prezzo fisso per arma</h3>
-            <p>Si propone un <strong>ricarico del 120%</strong> sul prezzo d'acquisto di riferimento. Il valore viene definito inizialmente per ogni modello e poi impostato nel blip una volta sola.</p>
-            <div class="big-formula">Blip <span>=</span> Acquisto <span>×</span> 2,20</div>
-            <p class="method-foot">Se Daniel ottiene uno sconto da un fornitore, il valore del blip rimane invariato e aumenta il suo margine.</p>
-          </div>
-          <aside class="economy-card">
-            <div class="economy-card-top">ESEMPIO DI CALCOLO · REPEATER EVANS</div>
-            <div class="calc-line"><span>Costo reale di produzione</span><strong>$176,50</strong></div>
-            <div class="calc-line"><span>Prezzo normale in armeria</span><strong>$245</strong></div>
-            <div class="calc-separator"></div>
-            <div class="calc-line"><span>Vauclair acquista</span><strong>$210</strong></div>
-            <div class="calc-line"><span>Blip export francese</span><strong>$462</strong></div>
-            <div class="calc-highlight"><span>Margine di Daniel</span><strong>$252</strong></div>
-            <div class="calc-sub">L'armaiolo ricava $33,50 rispetto al costo reale di produzione, prima di eventuali altre spese.</div>
-          </aside>
-        </div>
-        <div class="compare-band">
-          <div><span class="compare-kicker">IL RIFERIMENTO ESISTENTE</span><h3>Manzanita</h3><p>Il pesce dell'esempio viene acquistato a $41 e rivenduto al blip a $58,67: un ricarico del <b>43,10%</b>. Il blip paga circa 2,05 volte il prezzo NPC ordinario di $28,56.</p></div>
-          <div class="compare-middle" aria-hidden="true">≠</div>
-          <div><span class="compare-kicker">LA PROPOSTA VAUCLAIR</span><h3>Armurerie</h3><p>Il ricarico proposto è del <b>120%</b> sull'acquisto commerciale. È superiore perché la merce trattata è diversa e presumibilmente meno frequente. I modelli non sono equivalenti né garantiscono gli stessi volumi.</p></div>
-        </div>
-      </div>
-    </section>
+<section class="section supply-section" id="fornitura">
+<div class="wrap">
+  <div class="section-head center-head"><span class="chapter">04 — COLLABORAZIONI</span><h2>Una filiera costruita<br><em>sulle persone.</em></h2><p>Non è necessario essere clienti occasionali. Le attività del territorio possono diventare fornitori regolari.</p></div>
+  <div class="supply-grid">
+    <div class="supply-card"><span class="supply-count">01</span><div><h3>Armerie e armaioli</h3><p>Ordini programmati, lotti misti o richieste per modelli specifici. Un accordo all'ingrosso può garantire lavoro anche quando la domanda dei privati cala.</p><span class="supply-detail">FORNITURE SU COMMISSIONE</span></div></div>
+    <div class="supply-card"><span class="supply-count">02</span><div><h3>Banchi dei pegni</h3><p>Un'arma ritirata non deve necessariamente essere smontata. Valutiamo l'acquisto diretto quando può essere conveniente per entrambe le attività.</p><span class="supply-detail">ACCORDI DI RECUPERO</span></div></div>
+    <div class="supply-card"><span class="supply-count">03</span><div><h3>Privati cittadini</h3><p>Armi inutilizzate, ereditate o di cui si desidera disfarsi. Una proposta, una valutazione, un accordo tra persone.</p><span class="supply-detail">CESSIONI INDIVIDUALI</span></div></div>
+  </div>
+  <div class="supply-strip"><span>LA NOSTRA PROMESSA</span><p>Ogni fornitura viene prima concordata. Prezzo, quantità e modalità di consegna devono essere chiari a entrambe le parti.</p><a href="#proposta">Contattaci per una fornitura ↗</a></div>
+</div>
+</section>
 
-    <section class="section catalog-section" id="listino">
-      <div class="wrap">
-        <div class="section-head">
-          <span class="section-index">CAPITOLO IV · IL LISTINO</span>
-          <h2>Ventidue armi. <em>Una sola regola.</em></h2>
-          <p>Prezzi proposti da discutere con lo staff. Il catalogo distingue dati verificati, stime dei vecchi costi e valori ricavati per analogia.</p>
-        </div>
-        <div class="catalog-toolbar">
-          <label class="search-field"><span aria-hidden="true">⌕</span><input type="search" id="searchInput" placeholder="Cerca un'arma..." autocomplete="off" aria-label="Cerca un'arma"></label>
-          <div class="filter-buttons" role="group" aria-label="Filtra armi per attendibilità">
-            <button class="filter-btn active" data-filter="all" type="button" aria-pressed="true">Tutte <span>22</span></button>
-            <button class="filter-btn" data-filter="REALE" type="button" aria-pressed="false">Confermate <span>11</span></button>
-            <button class="filter-btn" data-filter="STIMA" type="button" aria-pressed="false">Stimate <span>8</span></button>
-            <button class="filter-btn" data-filter="ANALOGIA" type="button" aria-pressed="false">Da verificare <span>3</span></button>
-          </div>
-        </div>
-        <div class="catalog-main">
-          <div class="catalog-area">
-            <div class="catalog-table-scroll" role="region" aria-label="Tabella dei prezzi delle armi" tabindex="0">
-              <table class="catalog-table">
-                <thead><tr><th>Arma da fuoco</th><th>Prezzo armeria</th><th>Vauclair acquista</th><th>Blip export</th><th>Margine Daniel</th><th>Nel lotto</th></tr></thead>
-                <tbody id="catalogBody"></tbody>
-              </table>
-            </div>
-            <p class="table-help"><span id="resultCount">22 modelli</span> · Prezzi in dollari del server, non euro · I dati con * sono stime, quelli con † sono ipotesi.</p>
-          </div>
-          <aside class="simulator" aria-labelledby="simTitle">
-            <div class="sim-label">SIMULAZIONE INTERATTIVA</div>
-            <h3 id="simTitle">Una fornitura per la Francia</h3>
-            <p>Modifica le quantità nel listino e scegli come acquistare le armi. Il prezzo del blip non cambia.</p>
-            <div class="mode-group" role="group" aria-label="Modalità di acquisto">
-              <button class="mode-btn active" data-mode="wholesale" type="button" aria-pressed="true">All'ingrosso</button>
-              <button class="mode-btn" data-mode="retail" type="button" aria-pressed="false">Prezzo pieno</button>
-            </div>
-            <div class="sim-figures">
-              <div class="sim-figure"><span>Armi nella fornitura</span><b id="simCount">5</b></div>
-              <div class="sim-figure"><span>Pagamento fornitori</span><b id="simCost">$725</b></div>
-              <div class="sim-figure"><span>Incasso blip</span><b id="simRevenue">$1.595</b></div>
-            </div>
-            <div class="sim-gain"><span>Margine commerciale lordo</span><strong id="simProfit">$870</strong></div>
-            <div class="sim-compare" id="simComparison">Con 10 armi dello stesso assortimento: $1.740 di margine.</div>
-            <div class="sim-actions"><button id="presetButton" type="button">Esempio 5 armi</button><button id="clearButton" type="button">Azzera</button></div>
-            <p class="sim-caveat">Solo una simulazione: nessuna consegna reale, nessun ricavo giornaliero garantito e nessun dato inviato.</p>
-          </aside>
-        </div>
-        <div class="quality-legend">
-          <div><span class="status-tag real">CONFERMATO</span><p>11 armi: costo e prezzo al pubblico attuali.</p></div>
-          <div><span class="status-tag estimate">STIMATO</span><p>8 armi: proiezione dal precedente wipe tramite l'aumento Evans (+41,88%).</p></div>
-          <div><span class="status-tag analogy">IPOTESI</span><p>3 armi: ricostruzione per analogia, senza costo storico verificato.</p></div>
-        </div>
-      </div>
-    </section>
+<section class="section finish-section" id="finiture">
+<div class="wrap finish-layout">
+  <div class="finish-art"><img src="../assets/vauclair-logo.webp" alt="Stemma della Maison Vauclair" width="190" height="190"><span>LE SAVOIR-FAIRE</span></div>
+  <div class="finish-copy"><span class="chapter">05 — RIFINITURE</span><h2>Ogni arma<br><em>ha il suo carattere.</em></h2><p>La Maison desidera offrire anche un servizio di personalizzazione estetica delle armi, per impreziosire impugnature, finiture e decorazioni secondo i gusti del proprietario.</p><p>Il servizio non cambierebbe le prestazioni in gioco ed è subordinato alle possibilità tecniche e all'autorizzazione del server.</p><a class="text-link" href="#proposta">Richiedi informazioni <span>↗</span></a></div>
+</div>
+</section>
 
-    <section class="section section-contrast extras" id="personalizzazioni">
-      <div class="wrap extras-grid">
-        <div>
-          <span class="section-index">CAPITOLO V · SERVIZIO AGGIUNTIVO</span>
-          <h2>La cura dell'arma<br><em>è parte della famiglia.</em></h2>
-          <p>Accanto al commercio, mi piacerebbe poter realizzare e applicare skin puramente estetiche sulle armi dei clienti, nei limiti concessi dallo staff. Sarebbe un servizio separato dall'esportazione e senza vantaggi alle statistiche delle armi.</p>
-          <p>È un modo per rappresentare in gioco anche l'eleganza, la rifinitura e la tradizione artigianale che caratterizzano la famiglia Vauclair.</p>
-        </div>
-        <div class="extras-art" aria-hidden="true"><span class="extras-star">✥</span><div>MAISON<br>VAUCLAIR</div><small>ÉLÉGANCE · TRADITION · SAVOIR-FAIRE</small></div>
-      </div>
-    </section>
-
-    <section class="section closing" id="richiesta">
-      <div class="wrap">
-        <div class="closing-border">
-          <div class="closing-copy">
-            <span class="section-index">LA RICHIESTA ALLO STAFF</span>
-            <h2>Un'attività da costruire<br><em>insieme, non a discapito di altre.</em></h2>
-            <p>Questa pagina presenta una proposta di <strong>attività custom a pagamento</strong>. Se fattibile, l'armeria attualmente gestita da Daniel verrebbe riassegnata e Vauclair Armurerie diventerebbe un'attività principalmente commerciale.</p>
-            <p>La richiesta tecnica è volutamente essenziale: <strong>un blip di esportazione con prezzi predefiniti per ogni arma da fuoco</strong>, senza limiti di conferimento e senza continui aggiornamenti da parte dello staff. Il servizio di skin sarebbe un'aggiunta da valutare separatamente.</p>
-            <p>I prezzi sono una base di discussione, non un listino imposto. In particolare, il blip riconoscerebbe prezzi superiori a quelli delle armerie: questo può incentivare produzioni destinate all'export e va valutato apertamente rispetto al resto dell'economia del server.</p>
-            <div class="closing-action"><a class="btn btn-primary" href="#listino">Rivedi i prezzi <span>↑</span></a><span>Prima richiesta: <strong>fattibilità e disponibilità dello staff a discuterne.</strong></span></div>
-          </div>
-          <div class="closing-seal"><img src="../assets/vauclair-logo.webp" alt="Emblema della famiglia Vauclair" width="180" height="180"><span>UN PROGETTO PER WILDLANDS</span></div>
-        </div>
-      </div>
-    </section>
-  </main>
-  <footer class="footer"><div class="wrap foot-inner"><div><strong>VAUCLAIR ARMURERIE</strong><small>MAISON VAUCLAIR · ANNO 1900</small></div><p>Dossier non ufficiale · Proposta di attività RP per Wildlands · Nessuna funzione di acquisto o pagamento sul sito.</p><a href="#inizio">Torna all'inizio ↑</a></div></footer>
+<section class="section contact-section" id="proposta">
+<div class="wrap contact-layout">
+ <div class="contact-aside"><span class="chapter">06 — CONTATTI & FORNITURE</span><h2>Parliamone<br><em>di persona.</em></h2><p>Hai un'arma da proporre, gestisci un'armeria oppure desideri discutere una fornitura?</p><p>Prepara qui i dettagli dell'accordo. Potrai copiare un messaggio già compilato e inviarlo a Daniel tramite i canali RP disponibili.</p><div class="contact-card"><span>INTERLOCUTORE COMMERCIALE</span><strong>Daniel Vauclair</strong><small>Vauclair Armurerie · Rhodes</small><i>Le richieste non vengono inviate automaticamente: copia il testo e consegnalo al destinatario.</i></div></div>
+ <div class="form-panel">
+   <div class="form-header"><span>MAISON VAUCLAIR · MOD. 01</span><strong>Richiesta di valutazione</strong><p>Prepara una proposta di vendita o una fornitura.</p></div>
+   <form id="proposalForm">
+     <div class="form-row two"><label>Nome del referente <input id="contactName" name="name" required maxlength="70" autocomplete="name" placeholder="Nome e cognome"></label><label>Tipologia di fornitore <select id="supplierType" name="supplier" required><option value="Privato">Privato</option><option value="Armeria">Armeria</option><option value="Banco dei pegni">Banco dei pegni</option></select></label></div>
+     <div class="form-row two"><label>Luogo di riferimento <input id="contactPlace" name="place" maxlength="80" placeholder="Es. Rhodes"></label><label>Contatto / recapito RP <input id="contactHandle" name="contact" maxlength="100" placeholder="Facoltativo"></label></div>
+     <div class="form-row two"><label>Modello principale <select id="weaponSelect" name="weapon"><option value="">Seleziona o scegli dal listino</option></select></label><label>Condizioni dell'arma <select id="weaponCondition" name="condition"><option value="Da valutare">Da valutare</option><option value="Nuova">Nuova</option><option value="Usata">Usata</option></select></label></div>
+     <div class="form-row"><label>Dettagli o condizioni della fornitura <textarea id="proposalNotes" name="notes" maxlength="1000" rows="4" placeholder="Descrivi la merce, il lotto, eventuali accordi o i pezzi non presenti nel listino."></textarea></label></div>
+     <div class="form-preview" id="proposalPreview" aria-live="polite">La distinta delle armi selezionate apparirà qui.</div>
+     <div class="form-actions"><button class="btn btn-primary" type="submit">Prepara il messaggio <span>↗</span></button><button class="btn btn-ghost" type="button" id="copyProposal" disabled>Copia il testo</button></div>
+     <p class="form-status" id="proposalStatus" role="status">Il modulo non invia dati a un server. Genera un testo da condividere in gioco o su Discord.</p>
+   </form>
+ </div>
+</div>
+</section>
+</main>
+<footer class="footer"><div class="wrap footer-main"><div class="footer-brand"><img src="../assets/vauclair-logo.webp" width="74" height="74" alt=""><div><strong>Vauclair Armurerie</strong><span>MAISON FRANÇAISE · 1900</span></div></div><div class="footer-links"><a href="#maison">La Maison</a><a href="#listino">Valutazioni</a><a href="#proposta">Contatti</a><a href="registro.html">Banco commerciale <span aria-hidden="true">↗</span></a></div></div><div class="wrap footer-bottom"><p>Un'idea della famiglia Vauclair per Wildlands RP. Funzioni e tariffe soggette all'approvazione dello staff.</p><span>© MAISON VAUCLAIR · MDCCCC</span></div></footer>
 </body>
 </html>
