@@ -275,3 +275,60 @@
 @media(max-width:390px){
   .header .nav a.last{min-height:34px;padding:7px 6px;gap:4px;font-size:8.5px}
 }
+
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   BANNER COORDINATI · Listino / Ordini / Registro
+   Identica geometria, griglia e posizione di titolo,
+   occhiello e descrizione in tutte e tre le pagine.
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.compact-hero .wrap,
+.private-hero .wrap {
+  box-sizing:border-box;
+  height:244px;
+  min-height:244px;
+  padding:0;
+  display:grid;
+  grid-template-rows:28px 88px 34px;
+  align-content:center;
+  justify-items:start;
+  row-gap:0;
+}
+.compact-hero .label{
+  display:block;
+  margin:0;
+  line-height:1.7;
+  align-self:start;
+}
+.compact-hero h1{
+  margin:0;
+  line-height:.94;
+  align-self:start;
+}
+.compact-hero p{
+  margin:0;
+  line-height:1.9;
+  align-self:start;
+}
+@media(max-width:530px){
+  .compact-hero .wrap,
+  .private-hero .wrap{
+    height:278px;
+    min-height:278px;
+    padding:27px 0 0;
+    align-content:start;
+    grid-template-rows:minmax(28px,auto) minmax(108px,auto) minmax(75px,auto);
+  }
+}
+@media(max-width:390px){
+  .compact-hero .wrap,
+  .private-hero .wrap{
+    height:300px;
+    min-height:300px;
+    padding-top:29px;
+    grid-template-rows:minmax(34px,auto) minmax(113px,auto) minmax(96px,auto);
+  }
+  .compact-hero h1{
+    font-size:clamp(42px,10vw,52px);
+  }
+}
