@@ -4,7 +4,7 @@ Sito commerciale distinto dal gestionale originale **Tenuta Vauclair**. Tutti i 
 
 - **Listino acquisti:** `index.html`, prezzi di acquisto pubblici per 22 armi, categorie richiudibili, ricerca, filtri, quantità e carrello.
 - **Ordini:** `ordini.html`, registro locale con fornitori, forniture, stati e backup JSON.
-- **Registro privato esportazioni:** `riservata.html`, login Supabase e dati del blip visibili **esclusivamente ad account approvati**. La pagina non è nella navigazione pubblica, ma URL e HTML sono comunque pubblici: la protezione vera è la Row Level Security del database.
+- **Registro esportazioni:** `riservata.html`, terza voce della navigazione Armurerie. L'indirizzo è pubblico e mostra una schermata di accesso, ma **le tariffe del blip sono leggibili unicamente dall'account proprietario** grazie alla Row Level Security Supabase.
 
 Sito pubblico: https://dannyvauclair.github.io/tenuta-vauclair/armurerie/
 
@@ -28,15 +28,14 @@ Backend: Supabase (progetto esistente Wildlands, tabelle nuove e isolate dal sis
 
 - `public.vauclair_export_prices`: 22 valori privati. SELECT soltanto agli utenti autenticati che compaiono nella tabella di accesso.
 - `public.vauclair_private_members`: elenco degli UUID Supabase abilitati. Nessun utente pubblico o autenticato può autoaggiungersi o modificare le tariffe; per gli utenti non approvati le policy RLS restituiscono zero righe.
-- Le tabelle sono state create senza membri iniziali: **nessuno può vedere i prezzi finché il proprietario non viene esplicitamente autorizzato**.
+- Un solo account è stato verificato tramite conferma email e autorizzato nel database. L'accesso ai prezzi è negato a tutti gli altri account, anche se registrati.
 - La chiave `sb_publishable_` utilizzata nel frontend è pubblica per definizione; **non usare mai service_role né altre chiavi segrete nei file GitHub**.
 
-### Attivazione account proprietario (una volta sola)
+### Accesso proprietario già attivato
 
-1. In Supabase > Authentication > URL Configuration, aggiungere tra i redirect consentiti `https://dannyvauclair.github.io/tenuta-vauclair/armurerie/riservata.html` (per confermare l'email e tornare alla pagina).
-2. Aprire il registro privato, scegliere **Registrati**, inserire la propria email/password e confermare l'email se richiesto. **Non condividere mai la password**.
-3. Una volta autenticato, appare il proprio UUID nella schermata “In attesa di autorizzazione”; copiare l'UUID e comunicarlo all'amministratore.
-4. L'amministratore inserisce esclusivamente quell'UUID in `public.vauclair_private_members`, dopo aver verificato che appartenga al proprietario. Quindi premere **Verifica di nuovo**: la pagina mostra i prezzi.
+L'unico account registrato è risultato **email confermata** ed è già presente tra i membri autorizzati. Aprire **Registro** dalla navigazione del sito Armurerie ed effettuare il login con l'email e la password già utilizzate: non occorre una seconda registrazione né un nuovo link di conferma.
+
+L'email di conferma ricevuta inizialmente non ha riportato alla pagina per via della configurazione di redirect del progetto, ma l'account è già confermato lato Supabase. Se un giorno si vorrà riattivare la registrazione da questa interfaccia, prima configurare i redirect dell'applicazione in Supabase > Authentication > URL Configuration.
 
 Per revocare l'accesso si elimina il membro autorizzato dal database. Non abilitare policy di INSERT/UPDATE/DELETE per i ruoli `anon` o `authenticated`.
 
@@ -51,7 +50,7 @@ Fogli condivisi `styles.css`: bordeaux scuro, ottone brunito, dettagli e tipogra
 ## File
 
 - `index.html`, `ordini.html`, `riservata.html`: le tre pagine.
-- `styles.css`: stile condiviso.
+- `styles.css` e `ornamenti.css`: stile condiviso, fregi oro e icone. La voce di navigazione corrente non ha più una sottolineatura.
 - `catalogo.js`: **solo** i 22 prezzi pubblici di acquisto.
 - `listino.js`: catalogo, quantità, categorie, carrello.
 - `ordini.js`: gestione locale ordini.
