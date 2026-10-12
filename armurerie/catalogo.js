@@ -39,21 +39,21 @@ window.VAUCLAIR_WEAPONS = Object.freeze([
     "id": "a6",
     "name": "Revolver LeMat",
     "cat": "Revolver",
-    "buy": 105,
+    "buy": 125,
     "tag": "proiezione"
   },
   {
     "id": "a7",
     "name": "Revolver Navy",
     "cat": "Revolver",
-    "buy": 145,
+    "buy": 170,
     "tag": "proiezione"
   },
   {
     "id": "a8",
     "name": "Revolver Navy Crossover",
     "cat": "Revolver",
-    "buy": 160,
+    "buy": 180,
     "tag": "ipotesi"
   },
   {
@@ -74,28 +74,28 @@ window.VAUCLAIR_WEAPONS = Object.freeze([
     "id": "a11",
     "name": "Pistola Mauser",
     "cat": "Pistole",
-    "buy": 125,
+    "buy": 140,
     "tag": "proiezione"
   },
   {
     "id": "a12",
     "name": "Pistola Volcanic",
     "cat": "Pistole",
-    "buy": 105,
+    "buy": 135,
     "tag": "ipotesi"
   },
   {
     "id": "a13",
     "name": "Fucile Springfield",
     "cat": "Fucili",
-    "buy": 240,
+    "buy": 265,
     "tag": "proiezione"
   },
   {
     "id": "a14",
     "name": "Fucile Bolt Action",
     "cat": "Fucili",
-    "buy": 245,
+    "buy": 275,
     "tag": "ipotesi"
   },
   {
@@ -130,28 +130,28 @@ window.VAUCLAIR_WEAPONS = Object.freeze([
     "id": "a19",
     "name": "Repeater Winchester",
     "cat": "Repeater",
-    "buy": 240,
+    "buy": 265,
     "tag": "proiezione"
   },
   {
     "id": "a20",
     "name": "Doppietta a canna liscia",
     "cat": "Fucili",
-    "buy": 205,
+    "buy": 225,
     "tag": "proiezione"
   },
   {
     "id": "a21",
     "name": "Fucile a pompa a ripetizione",
     "cat": "Fucili",
-    "buy": 195,
+    "buy": 200,
     "tag": "proiezione"
   },
   {
     "id": "a22",
     "name": "Fucile Elephant",
     "cat": "Fucili",
-    "buy": 360,
+    "buy": 390,
     "tag": "proiezione"
   }
 ]);
