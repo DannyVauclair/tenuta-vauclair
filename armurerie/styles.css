@@ -286,3 +286,12 @@ html{scroll-padding-top:118px}
   .weapon-category-title{font-size:25px}
   .weapon-category-count{font-size:8px}
 }
+/* Pulsante Chiudi sezioni — stesso comportamento del listino armeria */
+.catalog-actions{display:flex;align-items:center;justify-content:flex-end;gap:9px;flex-wrap:wrap}
+.collapse-all-btn{flex:0 0 auto;min-height:38px;padding:10px 13px;background:linear-gradient(145deg,#2c211c,#1e1714);border:1px solid var(--gold2);color:var(--gold);font:600 10px var(--display);white-space:nowrap;cursor:pointer;transition:background .15s,border-color .15s}
+.collapse-all-btn:hover{background:#483027;border-color:var(--gold);color:#f1d09b}
+@media(max-width:530px){
+  .catalog-actions{display:block}
+  .catalog-actions .filters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .collapse-all-btn{display:block;width:100%;margin-top:9px}
+}
