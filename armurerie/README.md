@@ -1,28 +1,40 @@
-# Vauclair Armurerie — sito commerciale
+# Vauclair Armurerie
 
-Un **unico sito pubblico**, con homepage, spiegazione dell'attività, listino acquisti e modulo per copiare una proposta commerciale. Tutto è contenuto in \`index.html\`; non ci sono altri gestionali o pagine secondarie.
+Un unico sito della Maison Vauclair, con due pagine essenziali:
 
-Sito: https://dannyvauclair.github.io/tenuta-vauclair/armurerie/
+- **Listino acquisti** (\`index.html\`): tutte le 22 armi da fuoco, prezzo indicativo di acquisto Vauclair, ricerca, categorie e selezione delle quantità.
+- **Ordini** (\`ordini.html\`): creazione di forniture, fornitore/controparte, armi e quantità, prezzo concordato, elenco ordini, modifica dello stato (Da valutare, Confermato, In corso, Ricevuto, Annullato) e backup JSON.
 
-## Cosa fa
+Dal listino, il pulsante **Continua negli Ordini** apre la pagina Ordini con la distinta delle armi già inserita.
 
-- Presenta l'attività RP di Daniel Vauclair (acquisto ed esportazione di sole armi da fuoco).
-- Mostra un **prezzo indicativo di acquisto per tutte le 22 armi**, incluse le non ancora disponibili.
-- Evidenzia l'origine del prezzo: 11 costruiti da costi del wipe attuale, 8 da proiezione dei vecchi costi, 3 per analogia.
-- Consente di filtrare le armi, selezionare le quantità e preparare una proposta commerciale da copiare e condividere via Discord/RP.
+## Indirizzo unico del sito
 
-Il sito **non invia automaticamente richieste**, non crea ordini remoti e non mostra prezzi o margini del blip di esportazione. Il sito Tenuta Vauclair alla radice del repository non è stato modificato.
+https://dannyvauclair.github.io/tenuta-vauclair/armurerie/
 
-## Metodo dei prezzi
+La pagina Ordini è una sezione interna dello stesso sito, non un secondo progetto o dominio. Nessuna modifica al gestionale Tenuta Vauclair nella radice del repository.
 
-Sorgente: Google Sheet "Wildlands Proiezione Prezzi", schede "Proiezione costi" e "01 - Proposta commerciale"; costi attuali da \`vauclair-production-costs.js\` in questo repository.
+## Listino e proiezioni
 
-Per l'Evans, il costo storico è $124,40 e quello attuale $176,50, con moltiplicatore **1,418810289** (+41,88%). Il medesimo incremento è applicato ai costi storici per le armi non ancora craftabili. Per armi craftabili oggi, il costo di riferimento è il maggiore tra il costo reale e quello proiettato. Per le tre armi senza dati passati (Navy Crossover, Volcanic, Bolt Action), sono state applicate analogie, da verificare.
+I prezzi sono i valori del Google Sheet “Wildlands Proiezione Prezzi”, tab “01 - Proposta commerciale”, preparati a partire dal tab “Proiezione costi”.
 
-Il prezzo di acquisto all'ingrosso è stato calcolato, nel foglio, come arrotondamento ai $5 più vicini del maggiore fra:
-- 85% del prezzo pubblico reale o proiettato;
-- costo prudenziale + il maggiore fra $5 e un quarto della differenza fra prezzo pubblico e costo prudenziale.
+- 11 armi: il costo attuale è consultabile dal file \`vauclair-production-costs.js\` del repository Tenuta Vauclair.
+- 8 armi: costo stimato applicando il moltiplicatore **176,50 / 124,40 = 1,418810289**, ossia +41,88% rispetto al wipe precedente. Per prudenza, tra costo attuale e costo proiettato è stato preso il maggiore.
+- 3 armi senza dato storico sufficiente: Navy Crossover, Volcanic, Bolt Action; prezzi proposti mediante analogia con armi comparabili.
 
-Tutti i prezzi indicati sul sito sono **proposte di acquisto**, non prezzi già autorizzati dallo staff. Per 11 armi i costi attuali sono verificati, ma i prezzi d'acquisto della nuova attività rimangono comunque prezzi da concordare.
+Il prezzo d'acquisto all'ingrosso nasce da circa l'85% del prezzo pubblico di riferimento, corretto per remunerare il costo prudenziale del produttore. Le stime sono contrassegnate sulla pagina. Tutti i 22 modelli hanno un prezzo d'acquisto indicativo.
 
-Immagini del sito: \`../assets/vauclair-logo.webp\`, \`../assets/vauclair-background.webp\`.
+**Non vengono pubblicati né il prezzo del blip export né i margini del proprietario**: è un sito commerciale destinato ai fornitori/giocatori.
+
+## Limitazioni dell'attuale versione Ordini
+
+Il registro è utilizzabile, ma gli ordini sono salvati soltanto nel **localStorage del browser locale**: non si sincronizzano tra dispositivi o dipendenti. Il comando “Esporta backup” salva un file JSON come copia, ma non è ancora prevista la reimportazione nell'interfaccia. Non ci sono login o database condivisi. Per la gestione condivisa servirà un backend con autenticazione e permessi adeguati; non riutilizzare il database del sito della Tenuta senza un accordo esplicito.
+
+I dati del carrello vengono trasferiti temporaneamente dal listino agli ordini nello stesso browser/tab tramite sessionStorage. Il prezzo di ciascuna arma è fotografato quando si registra l'ordine, mentre il prezzo totale può essere modificato per riflettere una trattativa.
+
+## Struttura
+
+- \`index.html\` e \`ordini.html\` — due pagine dello stesso sito
+- \`styles.css\` — grafica condivisa, stile Maison Vauclair
+- \`catalogo.js\` — 22 prezzi di acquisto e origine (attuale/proiezione/ipotesi)
+- \`listino.js\` — filtri, selezione e trasferimento delle quantità agli Ordini
+- \`ordini.js\` — salvataggio locale, stati, ricerca e backup
