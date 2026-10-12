@@ -16,7 +16,7 @@ function update(){
     name.append(n("strong","weapon-name",w.name));
     const description=w.tag==="attuale"?"Costo del wipe attuale":w.tag==="proiezione"?"Proiezione dal vecchio wipe":"Stima per analogia";
     name.append(n("small",w.tag==="proiezione"?"estimate":w.tag==="ipotesi"?"guess":"",description));
-    price.append(n("span","","Vauclair acquista"),n("b","",money(w.buy)));
+    price.append(n("span","","Acquisto"),n("b","",money(w.buy)));
     const minus=n("button","","−"),count=n("output","",pick.get(w.id)||0),plus=n("button","","+");
     minus.type=plus.type="button";
     minus.setAttribute("aria-label","Rimuovi una "+w.name);
