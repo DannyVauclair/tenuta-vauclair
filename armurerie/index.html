@@ -9,22 +9,38 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600;1,700&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
-<script src="catalogo.js" defer></script><script src="listino.js" defer></script>
+<script src="catalogo.js" defer></script><script src="notifiche.js" defer></script><script src="listino.js" defer></script>
 </head>
 <body>
 <a class="skip" href="#listino">Vai al listino</a>
 <header class="header"><div class="wrap header-inner">
 <a class="brand" href="./" aria-label="Vauclair Armurerie — Listino acquisti"><img src="../assets/vauclair-logo.webp" alt="Stemma Vauclair" width="96" height="96"><span><strong>Vauclair <em>Armurerie</em></strong></span></a>
-<nav class="nav" aria-label="Navigazione"><a class="current" href="./" aria-current="page">Listino acquisti</a><a class="last" href="ordini.html">Ordini →</a></nav>
+<div class="header-tools"><nav class="nav" aria-label="Navigazione"><a class="current" href="./" aria-current="page">Listino acquisti</a><a class="last" href="ordini.html">Ordini →</a></nav><div class="notification-shell">
+  <button class="notification-toggle" id="notificationBell" type="button" aria-label="Apri notifiche ordini" aria-haspopup="true" aria-expanded="false" aria-controls="notificationPanel">
+    <svg viewBox="0 0 32 32" fill="none" aria-hidden="true" focusable="false">
+      <path d="M16 5.5c-4.3 0-7 3.1-7 7.3v3.3c0 3.6-1.2 5.3-3.3 7.1h20.6c-2.1-1.8-3.3-3.5-3.3-7.1v-3.3c0-4.2-2.7-7.3-7-7.3Z" stroke="currentColor" stroke-width="1.55" stroke-linejoin="round"/>
+      <path d="M16 2.8v2.7M12.5 26.2a3.5 3.5 0 0 0 7 0" stroke="currentColor" stroke-width="1.55" stroke-linecap="round"/>
+    </svg>
+    <span class="notification-count" id="notificationCount" hidden>0</span>
+  </button>
+  <div class="notification-panel" id="notificationPanel" role="region" aria-label="Notifiche degli ordini" hidden>
+    <div class="notification-top">
+      <div><span>REGISTRO VAUCLAIR</span><strong>Notifiche ordini</strong></div>
+      <button type="button" id="markNotificationsRead">Segna lette</button>
+    </div>
+    <div class="notification-list" id="notificationList"><div class="notification-empty">Nessuna notifica al momento.</div></div>
+    <div class="notification-bottom"><a href="ordini.html">Vai agli ordini <span aria-hidden="true">↗</span></a></div>
+  </div>
+</div></div>
 </div></header>
 <main>
-<section class="compact-hero"><div class="wrap"><span class="label">ANNO 1900 · RHODES</span>
-<h1>Listino <em>acquisti.</em></h1><p>La Vauclair Armurerie acquista armi da fuoco da privati, armerie e banchi dei pegni. Seleziona i modelli per preparare una nuova fornitura.</p>
+<section class="compact-hero"><div class="wrap">
+<h1>Listino <em>acquisti.</em></h1><p>Armieri da generazioni. L’eccellenza nelle armi da fuoco.</p>
 </div></section>
 <section class="catalog" id="listino"><div class="wrap">
 <div class="section-top"><div><span class="label">CATALOGO COMMERCIALE</span><h2>Le nostre <em>valutazioni.</em></h2></div></div>
 <div class="toolbar"><input class="search" id="search" type="search" aria-label="Cerca un'arma" placeholder="Cerca un'arma..." autocomplete="off">
-<div class="filters" role="group" aria-label="Categorie"><button type="button" data-cat="Tutte" class="active" aria-pressed="true">Tutte</button><button type="button" data-cat="Revolver" aria-pressed="false">Revolver</button><button type="button" data-cat="Pistole" aria-pressed="false">Pistole</button><button type="button" data-cat="Fucili e repeater" aria-pressed="false">Fucili / Repeater</button></div></div>
+<div class="filters" role="group" aria-label="Categorie"><button type="button" data-cat="Tutte" class="active" aria-pressed="true">Tutte</button><button type="button" data-cat="Revolver" aria-pressed="false">Revolver</button><button type="button" data-cat="Pistole" aria-pressed="false">Pistole</button><button type="button" data-cat="Fucili" aria-pressed="false">Fucili</button><button type="button" data-cat="Repeater" aria-pressed="false">Repeater</button></div></div>
 <div class="catalog-layout">
 <div class="price-list" id="catalog" aria-label="Modelli e prezzi d'acquisto"><div class="empty">Caricamento listino…</div></div>
 <aside class="quote"><span class="label">NUOVA FORNITURA</span><h3>Armi selezionate</h3><p>Seleziona quantità e modelli, poi apri la pagina Ordini per registrare la fornitura.</p>
