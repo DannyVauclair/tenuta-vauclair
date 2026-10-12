@@ -42,8 +42,6 @@ function update(){
     for(const w of members){
       const row=n("article","weapon"),name=n("div"),price=n("div","price"),qty=n("div","qty");
       name.append(n("strong","weapon-name",w.name));
-      const description=w.tag==="attuale"?"Costo del wipe attuale":w.tag==="proiezione"?"Stima da confermare":"Ipotesi da confermare";
-      name.append(n("small",w.tag==="proiezione"?"estimate":w.tag==="ipotesi"?"guess":"",description));
       price.append(n("span","","Acquisto"),n("b","",money(w.buy)));
       const minus=n("button","","−"),count=n("output","",pick.get(w.id)||0),plus=n("button","+","+");
       minus.type=plus.type="button";
