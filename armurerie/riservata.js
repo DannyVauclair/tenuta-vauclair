@@ -11,7 +11,7 @@ const normalize=s=>String(s).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toL
 const groups=["Revolver","Pistole","Fucili","Repeater"];
 const expanded=new Set(["Revolver"]);
 const quantities=new Map();
-let weapons=[],client=null,filter="",category="Tutte",registerMode=false,version=0;
+let weapons=[],client=null,filter="",category="Tutte",version=0;
 const show=panel=>{
   for(const id of ["authPanel","awaitingApproval","privateWorkspace"])$(id).hidden=id!==panel;
 };
@@ -92,8 +92,8 @@ async function sync(){
     if(request!==version)return;
     if(member.error)throw member.error;
     if(!member.data){
-      failSafe();$("privateUid").textContent=user.id;
-      msg("approvalMessage","Account "+(user.email||"")+" · autorizzazione non ancora concessa.");
+      failSafe();
+      msg("approvalMessage","Questo account non è autorizzato. Accedi con l’account del proprietario.");
       show("awaitingApproval");return;
     }
     const {data,error:readError}=await client.from("vauclair_export_prices")
@@ -116,51 +116,34 @@ async function logout(){
   const {error}=await client.auth.signOut();if(error)notify("Impossibile disconnettersi: "+error.message);
 }
 async function submitAuth(event){
-  event.preventDefault();const btn=$("privateSubmit");
+  event.preventDefault();
+  const btn=$("privateSubmit");
   const email=$("privateEmail").value.trim(),password=$("privatePassword").value;
-  if(!email||password.length<8){notify("Inserisci un'email valida e almeno 8 caratteri per la password.");return;}
-  btn.disabled=true;notify(registerMode?"Creazione dell'account…":"Verifica delle credenziali…");
+  if(!email||password.length<8){
+    notify("Inserisci l’email e la password dell’account già registrato.");
+    return;
+  }
+  btn.disabled=true;
+  notify("Verifica delle credenziali…");
   try{
-    if(registerMode){
-      const {data,error}=await client.auth.signUp({
-        email,password,
-        options:{emailRedirectTo:window.location.origin+window.location.pathname}
-      });
-      if(error)throw error;
-      if(!data.session){
-        notify("Richiesta ricevuta. Controlla la tua email e conferma l'account; poi torna qui ad accedere.");
-      }else{
-        notify("");await sync();
-      }
-    }else{
-      const {error}=await client.auth.signInWithPassword({email,password});
-      if(error)throw error;
-      notify("");await sync();
-    }
-  }catch(error){notify("Accesso non riuscito: "+(error?.message||"riprovare più tardi"));}
-  finally{btn.disabled=false;}
-}
-function toggleRegister(){
-  registerMode=!registerMode;
-  $("privateSubmit").textContent=registerMode?"Crea account →":"Accedi al registro →";
-  $("privateRegister").textContent=registerMode?"Hai già un account? Accedi":"Devi creare il tuo accesso? Registrati";
-  $("privatePassword").autocomplete=registerMode?"new-password":"current-password";
-  notify("");
-}
-async function copyUid(){
-  try{await navigator.clipboard.writeText($("privateUid").textContent);msg("approvalMessage","Codice account copiato. Consegnalo all'amministratore per attivare l'accesso.");}
-  catch{msg("approvalMessage","Seleziona e copia il codice account mostrato sopra.");}
+    const {error}=await client.auth.signInWithPassword({email,password});
+    if(error)throw error;
+    notify("");
+    await sync();
+  }catch(error){
+    notify("Accesso non riuscito: "+(error?.message||"riprovare più tardi"));
+  }finally{
+    btn.disabled=false;
+  }
 }
 if(!window.supabase||typeof window.supabase.createClient!=="function"){
   notify("Il servizio di autenticazione non si è caricato. Controlla la connessione e ricarica la pagina.");return;
 }
 client=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 $("authForm").addEventListener("submit",submitAuth);
-$("privateRegister").addEventListener("click",toggleRegister);
 $("privateLogout").addEventListener("click",logout);
 $("pendingLogout").addEventListener("click",logout);
 $("retryApproval").addEventListener("click",sync);
-$("copyPrivateUid").addEventListener("click",copyUid);
 $("privateSearch").addEventListener("input",e=>{filter=e.target.value;if(filter.trim())for(const w of weapons)if(normalize(w.weapon_name).includes(normalize(filter)))expanded.add(w.category);rerender();});
 document.querySelectorAll("[data-private-cat]").forEach(btn=>btn.addEventListener("click",()=>{category=btn.dataset.privateCat;
   if(category!=="Tutte")expanded.add(category);
