@@ -26,6 +26,7 @@ function rerender(){
     const groupItems=active.filter(w=>w.category===group);
     if(!groupItems.length)continue;
     const section=node("section","weapon-category");
+    section.setAttribute("aria-label",group);
     const header=node("h3","weapon-category-header");
     const toggle=node("button","weapon-category-toggle");
     const body=node("div","weapon-category-items");
