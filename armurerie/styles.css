@@ -190,3 +190,31 @@ label textarea{resize:vertical;min-height:100px}
 .order-status{border:1px solid var(--gold2);color:var(--gold);font:9px var(--display);padding:5px 9px;display:inline-block}
 @media(max-width:740px){.order-stats{gap:7px}.order-stat{padding:12px}.order-stat strong{font-size:29px}.order-card-bottom{align-items:flex-start;flex-direction:column}.order-card-bottom>div{width:100%}.order-form{padding:17px}}
 @media(max-width:530px){.compact-hero .wrap{padding:32px 0}.compact-hero h1{font-size:52px}.catalog .section-top h2{font-size:40px}.order-area{padding-top:27px}.order-head h2{font-size:39px}.order-stats{grid-template-columns:repeat(3,1fr)}.order-stat small{font-size:8px}.order-stat strong{font-size:27px}.order-filter{display:block}.order-filter input,.order-filter select{width:100%;margin-bottom:7px}.order-builder{grid-template-columns:1fr 85px}.order-builder button{grid-column:1/-1}.order-card{padding:15px}.order-card-head h3{font-size:24px}.order-card-head{display:block}.order-card-head .order-status{margin-top:9px}.order-top-actions{flex-wrap:wrap}}
+
+
+/* Identità unica Vauclair Armurerie · stemma più importante */
+html{scroll-padding-top:118px}
+.header-inner{height:116px;gap:26px}
+.brand{gap:15px;min-width:0}
+.brand img{width:96px;height:96px;flex:0 0 96px;object-fit:contain;filter:drop-shadow(0 5px 8px rgba(0,0,0,.40)) drop-shadow(0 0 5px rgba(217,173,105,.17))}
+.brand strong{font:600 38px/1.08 var(--serif);color:var(--gold);white-space:nowrap}
+.brand strong em{font-style:normal;font-weight:600}
+.nav{flex-shrink:0}
+.catalog .section-top{margin-bottom:20px}
+@media(max-width:790px){
+  html{scroll-padding-top:107px}
+  .header-inner{height:104px;gap:12px}
+  .brand img{width:82px;height:82px;flex-basis:82px}
+  .brand strong{font-size:30px}
+  .brand{gap:10px}
+}
+@media(max-width:530px){
+  html{scroll-padding-top:140px}
+  .header-inner{height:auto;min-height:137px;padding:9px 0 8px;gap:3px;flex-wrap:wrap}
+  .brand{width:100%;gap:12px}
+  .brand img{width:78px;height:78px;flex-basis:78px}
+  .brand strong{font-size:31px;white-space:normal;line-height:1.03}
+  .nav{width:100%;justify-content:flex-end;gap:17px;padding:0 2px 4px}
+  .nav a{font-size:10px}
+  .nav .last{padding:7px 10px}
+}
