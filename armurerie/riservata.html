@@ -10,15 +10,32 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600;1,700&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css?v=20261012-restyle1">
-<link rel="stylesheet" href="ornamenti.css?v=20261012-nav4">
+<link rel="stylesheet" href="ornamenti.css?v=20261012-nav5">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.89.0/dist/umd/supabase.js" defer></script>
+<script src="notifiche.js?v=20261012-bell1" defer></script>
 <script src="riservata.js?v=20261012-owner2" defer></script>
 </head>
 <body class="private-page">
 <a class="skip" href="#contenuto">Vai al contenuto</a>
 <header class="header"><div class="wrap header-inner">
 <a class="brand" href="./" aria-label="Vauclair Armurerie — Listino acquisti"><img src="../assets/vauclair-logo.webp" alt="Stemma Vauclair" width="96" height="96"><span><strong>Vauclair <em>Armurerie</em></strong></span></a>
-<div class="header-tools"><nav class="nav" aria-label="Navigazione"><a class="last current" href="riservata.html" aria-current="page">Registro</a><a class="last" href="./">Listino acquisti</a><a class="last" href="ordini.html">Ordini →</a></nav></div>
+<div class="header-tools"><nav class="nav" aria-label="Navigazione"><a class="last current" href="riservata.html" aria-current="page">Registro</a><a class="last" href="./">Listino acquisti</a><a class="last" href="ordini.html">Ordini →</a></nav><div class="notification-shell">
+  <button class="notification-toggle" id="notificationBell" type="button" aria-label="Apri notifiche ordini" aria-haspopup="true" aria-expanded="false" aria-controls="notificationPanel">
+    <svg viewBox="0 0 32 32" fill="none" aria-hidden="true" focusable="false">
+      <path d="M16 5.5c-4.3 0-7 3.1-7 7.3v3.3c0 3.6-1.2 5.3-3.3 7.1h20.6c-2.1-1.8-3.3-3.5-3.3-7.1v-3.3c0-4.2-2.7-7.3-7-7.3Z" stroke="currentColor" stroke-width="1.55" stroke-linejoin="round"/>
+      <path d="M16 2.8v2.7M12.5 26.2a3.5 3.5 0 0 0 7 0" stroke="currentColor" stroke-width="1.55" stroke-linecap="round"/>
+    </svg>
+    <span class="notification-count" id="notificationCount" hidden>0</span>
+  </button>
+  <div class="notification-panel" id="notificationPanel" role="region" aria-label="Notifiche degli ordini" hidden>
+    <div class="notification-top">
+      <div><span>REGISTRO VAUCLAIR</span><strong>Notifiche ordini</strong></div>
+      <button type="button" id="markNotificationsRead">Segna lette</button>
+    </div>
+    <div class="notification-list" id="notificationList"><div class="notification-empty">Nessuna notifica al momento.</div></div>
+    <div class="notification-bottom"><a href="ordini.html">Vai agli ordini <span aria-hidden="true">↗</span></a></div>
+  </div>
+</div></div>
 </div></header>
 <main id="contenuto">
 <section class="compact-hero private-hero"><div class="wrap">
