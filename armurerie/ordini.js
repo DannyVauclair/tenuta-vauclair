@@ -93,7 +93,11 @@ function render(){
     for(const opt of STATES){const el=node("option","",opt);el.value=opt;el.selected=opt===r.status;select.append(el);}
     select.addEventListener("change",()=>{
       const before=r.status;r.status=select.value;
+      if(before===r.status)return;
       if(!persist()){r.status=before;select.value=before;return;}
+      if(window.VAUCLAIR_NOTIFY){
+        window.VAUCLAIR_NOTIFY("Stato dell’ordine aggiornato",r.supplier+" · "+before+" → "+r.status,r.id);
+      }
       render();
     });
     const copy=node("button","","Copia");copy.type="button";copy.addEventListener("click",async()=>{
@@ -150,6 +154,10 @@ function init(){
     if(!validOrder(record)){notice("Controlla i dati dell'ordine.");return;}
     const before=orders;orders=[record,...orders];
     if(!persist()){orders=before;return;}
+    if(window.VAUCLAIR_NOTIFY){
+      const pieces=record.lines.reduce((sum,item)=>sum+item.qty,0);
+      window.VAUCLAIR_NOTIFY("Nuovo ordine registrato",record.supplier+" · "+pieces+" armi · "+money(record.price),record.id);
+    }
     closePanel();render();$("orderList").scrollIntoView({behavior:"smooth",block:"start"});
   });
   load();render();updateLines();startDraft();
