@@ -298,7 +298,7 @@ async function setOrderOwner(id,owner,select){
       title:ORDER_OWNER_MARKER+id,
       partner:'Registro ordini interno',
       department:'Tenuta',
-      type:'Assegnazione ordine',
+      type:'Altro',
       eventDate:'',
       location:'',
       responsible:owner,
@@ -308,7 +308,9 @@ async function setOrderOwner(id,owner,select){
     if(r&&r.ok===false)throw new Error(r.error||'Errore');
 
     if(r&&r.collaboration){
-      orderOwnerRecords.push(r.collaboration);
+      const saved={...r.collaboration};
+      if(!saved.createdAt&&!saved.updatedAt)saved.updatedAt=new Date().toISOString();
+      orderOwnerRecords.push(saved);
     }else{
       await new Promise(res=>setTimeout(res,500));
       await loadOrderOwners();
