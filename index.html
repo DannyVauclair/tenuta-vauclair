@@ -1550,6 +1550,7 @@ function calculate(){
 function resetAll(skipConfirm=false){
   if(!skipConfirm && getActiveItems().length && !confirm('Svuotare l’ordine corrente?')) return;
   Object.keys(quantities).forEach(k=>delete quantities[k]);
+  itemNotes={};
   discountPercent=0;
   document.getElementById('customDiscount').value='';
   document.querySelectorAll('.discount-btn').forEach(b=>b.classList.toggle('active',Number(b.dataset.discount)===0));
@@ -1648,10 +1649,10 @@ function getHistory(){ return safeGet(STORE.history,[])||[]; }
 function archiveOrder(){
   const active=getActiveItems(); if(!active.length){document.getElementById('copyStatus').textContent='L’ordine è vuoto.';return;}
   const subtotal=active.reduce((s,a)=>s+a.value,0),dv=subtotal*discountPercent/100,total=subtotal-dv;
-  const entry={code:orderCode(),orderNumber:currentOrderNumber,timestamp:Date.now(),customer:getCustomer(),note:getNote(),discount:discountPercent,subtotal,total,items:active.map(a=>({notes:a.notes||'',key:a.key,view:a.view,cat:a.cat,name:a.name,qty:a.qty,unit:a.unit,value:a.value}))};
+  const entry={code:orderCode(),orderNumber:currentOrderNumber,timestamp:Date.now(),customer:getCustomer(),note:getNote(),discount:discountPercent,subtotal,total,items:active.map(a=>({notes:a.notes||'',noteKey:a.noteKey||itemNoteKey(a.view,a.cat,a.name),key:a.key,view:a.view,cat:a.cat,name:a.name,qty:a.qty,unit:a.unit,value:a.value}))};
   const history=getHistory(); history.unshift(entry); safeSet(STORE.history,history.slice(0,60));
   const next=currentOrderNumber+1; safeSet(STORE.next,next); currentOrderNumber=next;
-  Object.keys(quantities).forEach(k=>delete quantities[k]); discountPercent=0;
+  Object.keys(quantities).forEach(k=>delete quantities[k]); itemNotes={}; discountPercent=0;
   document.getElementById('customerName').value=''; document.getElementById('orderNote').value=''; document.getElementById('customDiscount').value='';
   document.querySelectorAll('.discount-btn').forEach(b=>b.classList.toggle('active',Number(b.dataset.discount)===0));
   renderCatalog(); saveDraft();
@@ -1668,7 +1669,7 @@ async function copyArchived(i){ const h=getHistory()[i]; if(!h)return; const lin
 function loadArchived(i){
   const h=getHistory()[i]; if(!h)return;
   if(getActiveItems().length&&!confirm('Sostituire l’ordine corrente con una copia di quello archiviato?'))return;
-  Object.keys(quantities).forEach(k=>delete quantities[k]); h.items.forEach(x=>{if(x.key)quantities[x.key]=x.qty});
+  Object.keys(quantities).forEach(k=>delete quantities[k]); itemNotes={}; h.items.forEach(x=>{if(x.key)quantities[x.key]=x.qty; if(x.notes){itemNotes[x.noteKey||itemNoteKey(x.view,x.cat,x.name)]=x.notes;}});
   discountPercent=Number(h.discount)||0; document.getElementById('customerName').value=h.customer||''; document.getElementById('orderNote').value=h.note||'';
   if([0,5,10,15,20].includes(discountPercent)){document.getElementById('customDiscount').value='';document.querySelectorAll('.discount-btn').forEach(b=>b.classList.toggle('active',Number(b.dataset.discount)===discountPercent));}else{document.querySelectorAll('.discount-btn').forEach(b=>b.classList.remove('active'));document.getElementById('customDiscount').value=discountPercent||'';}
   closeHistory(); renderCatalog(); saveDraft();
