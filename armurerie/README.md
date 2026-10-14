@@ -20,7 +20,7 @@ I 22 prezzi massimi d'acquisto pubblici sono in `catalogo.js`. Solo in Supabase 
 
 Qualità delle basi di costo: **11 reali, 4 ricostruite con ricette storiche, 4 stime per confronto e 3 analogie**. Il vecchio calcolo universale sull'Evans è stato eliminato. Per le 11 armi non ancora rilasciate i valori restano provvisori.
 
-**Il +120% per le esportazioni è una proposta economica allo staff e NON una tariffa già approvata nel gioco.**
+**Il +150% sul prezzo d'acquisto di riferimento è la nuova proposta di esportazione allo staff, NON una tariffa già approvata nel gioco.** Il precedente +120% è mantenuto solo come confronto storico nel foglio di calcolo.
 
 ## Sicurezza registro esportazioni
 
