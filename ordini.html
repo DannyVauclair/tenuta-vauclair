@@ -76,9 +76,9 @@
 .status-chip.annullato,.status-chip.annullata{color:#e39a90;background:rgba(139,55,47,.17);border-color:rgba(185,93,82,.55)}
 .title-with-chip{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .card-actions{display:flex;align-items:flex-end;justify-content:flex-end;gap:7px;flex-wrap:wrap}
-.owner-control{display:flex;flex-direction:column;gap:3px;min-width:132px}
-.owner-label{font:600 8px 'Cinzel',serif;letter-spacing:.55px;text-transform:uppercase;color:var(--muted)}
-.owner-select{min-width:132px}
+.owner-control,.status-control{display:flex;flex-direction:column;gap:3px;min-width:132px}
+.owner-label,.status-label{font:600 8px 'Cinzel',serif;letter-spacing:.55px;text-transform:uppercase;color:var(--muted);line-height:1}
+.owner-select,.status-control .status-select{min-width:132px;height:34px}
 .owner-select.assigned{border-color:rgba(118,145,94,.62);color:#c4d9aa}
 .line-note{margin-top:4px;color:#d6bd91;font-size:11px;font-style:italic;line-height:1.25}
 .line-note::before{content:"↳ ";color:var(--gold)}
@@ -118,6 +118,10 @@
 }
 #orders .btn.small{
   font-size:10px;
+}
+#orders .card-actions > .btn.danger.small{
+  align-self:flex-end;
+  height:34px;
 }
 #orders .line{
   font-size:13px;
@@ -429,7 +433,10 @@ function renderOrders(){
       <div class="money"><div>${vMoney(o.total)}</div><div class="meta">${Number(o.discount||0)*100}% sconto</div></div>
       <div class="card-actions">
         ${ownerSelectHtml(o)}
-        <select class="status-select" onchange="changeOrderStatus('${vEsc(o.id)}',this.value)">${['Nuovo','In lavorazione','Pronto','Consegnato','Annullato'].map(st=>`<option ${o.status===st?'selected':''}>${st}</option>`).join('')}</select>
+        <label class="status-control">
+          <span class="status-label">Stato ordine</span>
+          <select class="status-select" onchange="changeOrderStatus('${vEsc(o.id)}',this.value)">${['Nuovo','In lavorazione','Pronto','Consegnato','Annullato'].map(st=>`<option ${o.status===st?'selected':''}>${st}</option>`).join('')}</select>
+        </label>
         <button class="btn danger small" onclick="deleteOrder('${vEsc(o.id)}')">Elimina</button>
       </div>
     </div>
