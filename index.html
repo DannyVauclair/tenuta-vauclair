@@ -273,7 +273,11 @@
     text-transform:uppercase
   }
   .summary-section-title.ranch{color:var(--gold)}
-  .summary-row{display:flex;justify-content:space-between;gap:8px;align-items:baseline;padding:5px 0;border-bottom:1px dashed var(--rule-soft)}
+  .summary-row{display:block;padding:6px 0;border-bottom:1px dashed var(--rule-soft)}
+  .summary-row-top{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+  .summary-item-note{width:100%;margin-top:5px;border:1px solid rgba(185,133,63,.20);background:rgba(0,0,0,.16);color:var(--ink);padding:5px 7px;font-size:10px;outline:none}
+  .summary-item-note::placeholder{color:rgba(185,167,140,.62);font-style:italic}
+  .summary-item-note:focus{border-color:rgba(185,133,63,.58);background:rgba(0,0,0,.24)}
   .summary-row-main{display:flex;flex-direction:column;min-width:0}
   .summary-name{font-family:'Libre Baskerville',Georgia,serif;font-size:11.5px;font-weight:700;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}
   .summary-cat{font-size:9.5px;color:var(--ink-soft);margin-top:2px}
@@ -1161,7 +1165,7 @@ function calculate(){
         const value = qty * item.p;
         catSubtotal += value;
         subtotalAll += value;
-        if (qty > 0) active.push({ view, cat: cat.name, name: item.n, qty, unit: item.p, value });
+        if (qty > 0){ const noteKey=itemNoteKey(view,cat.name,item.n); active.push({ view, cat: cat.name, name: item.n, qty, unit: item.p, value, noteKey, notes:itemNotes[noteKey]||'' }); }
         const rowTotal = document.getElementById(`row-${key}`);
         if (rowTotal) rowTotal.textContent = money(value);
       });
@@ -1187,14 +1191,21 @@ function renderSummary(active, subtotal, discountValue, total){
       html += `<div class="summary-section-title ${view === 'ranch' ? 'ranch' : ''}">${catalog[view].label}</div>`;
       html += groups[view].map(a => `
         <div class="summary-row">
-          <div class="summary-row-main">
-            <span class="summary-name">${a.name}</span>
-            <span class="summary-cat">${a.cat}</span>
+          <div class="summary-row-top">
+            <div class="summary-row-main">
+              <span class="summary-name">${escapeHtml(a.name)}</span>
+              <span class="summary-cat">${escapeHtml(a.cat)}</span>
+            </div>
+            <div class="summary-nums">
+              <span class="summary-qty">×${a.qty}</span>
+              <span class="summary-val">${money(a.value)}</span>
+            </div>
           </div>
-          <div class="summary-nums">
-            <span class="summary-qty">×${a.qty}</span>
-            <span class="summary-val">${money(a.value)}</span>
-          </div>
+          <input class="summary-item-note" type="text" maxlength="140"
+            data-note-key="${escapeHtml(a.noteKey||itemNoteKey(a.view,a.cat,a.name))}"
+            value="${escapeHtml(a.notes||'')}"
+            placeholder="Nota interna · es. in deposito ne abbiamo già 4"
+            oninput="setOrderItemNote(this.dataset.noteKey,this.value)">
         </div>`).join('');
     });
     list.innerHTML = html;
@@ -1284,6 +1295,7 @@ function applySearch(){
 
 function resetAll(){
   Object.keys(quantities).forEach(k => delete quantities[k]);
+  itemNotes = {};
   discountPercent = 0;
   document.getElementById('customDiscount').value = '';
   document.querySelectorAll('.discount-btn').forEach(b => b.classList.toggle('active', Number(b.dataset.discount) === 0));
@@ -1298,7 +1310,7 @@ function getActiveItems(){
       cat.items.forEach((item, ii) => {
         if (item.available === false) return;
         const qty = quantities[keyFor(view, ci, ii)] || 0;
-        if (qty > 0) active.push({view, cat:cat.name, name:item.n, qty, unit:item.p, value:qty*item.p});
+        if (qty > 0){ const noteKey=itemNoteKey(view,cat.name,item.n); active.push({view, cat:cat.name, name:item.n, qty, unit:item.p, value:qty*item.p, noteKey, notes:itemNotes[noteKey]||''}); }
       });
     });
   });
@@ -1319,7 +1331,7 @@ async function copyOrder(){
     const group = active.filter(a => a.view === view);
     if (!group.length) return;
     lines.push(catalog[view].label.toUpperCase());
-    group.forEach(a => lines.push(`${a.name} ×${a.qty} — ${money(a.value)}`));
+    group.forEach(a => lines.push(`${a.name} ×${a.qty} — ${money(a.value)}${a.notes?` · ${a.notes}`:''}`));
     lines.push('');
   });
 
@@ -1351,6 +1363,7 @@ const STORE = {
 };
 let currentOrderNumber = 1;
 let favorites = new Set();
+let itemNotes = {};
 let productionItems = [];
 let productionIndex = 0;
 
@@ -1364,12 +1377,19 @@ function nowLabel(ts=Date.now()){
 }
 function getCustomer(){ return (document.getElementById('customerName')?.value || '').trim(); }
 function getNote(){ return (document.getElementById('orderNote')?.value || '').trim(); }
+function itemNoteKey(view,cat,name){ return [view,cat,name].join('||'); }
+function setOrderItemNote(key,value){
+  const clean=String(value||'').slice(0,140);
+  if(clean.trim()) itemNotes[key]=clean; else delete itemNotes[key];
+  saveDraft();
+}
 
 function loadV2State(){
   const next = Number(safeGet(STORE.next,1)) || 1;
   const draft = safeGet(STORE.draft,null);
   currentOrderNumber = Number(draft?.orderNumber || next) || next;
   if (draft?.quantities){ Object.entries(draft.quantities).forEach(([k,v]) => quantities[k]=Math.max(0,Math.floor(Number(v)||0))); }
+  if (draft?.itemNotes && typeof draft.itemNotes==='object'){ itemNotes={...draft.itemNotes}; }
   if (draft && Number.isFinite(Number(draft.discount))) discountPercent = Math.max(0,Math.min(100,Number(draft.discount)));
   favorites = new Set((safeGet(STORE.favorites,[]) || []).filter(k => { try{return !!itemFromKey(k)?.item}catch(e){return false} }));
   document.getElementById('customerName').value = draft?.customer || '';
@@ -1389,7 +1409,7 @@ function loadV2State(){
 function saveDraft(){
   const clean = {};
   Object.entries(quantities).forEach(([k,v])=>{ if(Number(v)>0) clean[k]=Number(v); });
-  safeSet(STORE.draft,{orderNumber:currentOrderNumber,quantities:clean,discount:discountPercent,customer:getCustomer(),note:getNote()});
+  safeSet(STORE.draft,{orderNumber:currentOrderNumber,quantities:clean,itemNotes:{...itemNotes},discount:discountPercent,customer:getCustomer(),note:getNote()});
 }
 
 function toggleCompact(){
@@ -1544,7 +1564,7 @@ function orderText(active=getActiveItems()){
   if(getCustomer()) lines.push(`Cliente: ${getCustomer()}`);
   if(getNote()) lines.push(`Nota: ${getNote()}`);
   lines.push('');
-  ['armory','ranch'].forEach(view=>{ const group=active.filter(a=>a.view===view); if(!group.length)return; lines.push(catalog[view].label.toUpperCase()); group.forEach(a=>lines.push(`${a.name} ×${a.qty} — ${money(a.value)}`)); lines.push(''); });
+  ['armory','ranch'].forEach(view=>{ const group=active.filter(a=>a.view===view); if(!group.length)return; lines.push(catalog[view].label.toUpperCase()); group.forEach(a=>lines.push(`${a.name} ×${a.qty} — ${money(a.value)}${a.notes?` · ${a.notes}`:''}`)); lines.push(''); });
   lines.push(`Subtotale: ${money(subtotal)}`); if(discountPercent>0) lines.push(`Sconto ${formatPercent(discountPercent)}: -${money(discountValue)}`); lines.push(`TOTALE: ${money(total)}`);
   return lines.join('\n');
 }
@@ -1615,7 +1635,7 @@ function renderProduction(){
 function receiptHtml(){
   const active=getActiveItems(); if(!active.length)return '<div class="production-empty">L’ordine è vuoto.</div>';
   const subtotal=active.reduce((s,a)=>s+a.value,0),dv=subtotal*discountPercent/100,total=subtotal-dv;
-  const grouped=['armory','ranch'].map(view=>{const g=active.filter(a=>a.view===view);if(!g.length)return'';return `<div class="receipt-items"><strong>${catalog[view].label.toUpperCase()}</strong>${g.map(a=>`<div class="receipt-line"><span>${escapeHtml(a.name)} ×${a.qty}<small>${escapeHtml(a.cat)}</small></span><b>${money(a.value)}</b></div>`).join('')}</div>`}).join('');
+  const grouped=['armory','ranch'].map(view=>{const g=active.filter(a=>a.view===view);if(!g.length)return'';return `<div class="receipt-items"><strong>${catalog[view].label.toUpperCase()}</strong>${g.map(a=>`<div class="receipt-line"><span>${escapeHtml(a.name)} ×${a.qty}<small>${escapeHtml(a.cat)}${a.notes?' · '+escapeHtml(a.notes):''}</small></span><b>${money(a.value)}</b></div>`).join('')}</div>`}).join('');
   return `<div class="receipt-sheet"><h3 class="receipt-brand">Tenuta Vauclair</h3><div class="receipt-sub">Armeria &amp; Ranch</div><hr class="receipt-rule"><div class="receipt-meta"><div><strong>Ordine</strong> ${orderCode()}</div><div><strong>Data</strong> ${nowLabel()}</div><div><strong>Cliente</strong> ${escapeHtml(getCustomer()||'—')}</div><div><strong>Nota</strong> ${escapeHtml(getNote()||'—')}</div></div>${grouped}<hr class="receipt-rule"><div class="receipt-total-line"><span>Subtotale</span><b>${money(subtotal)}</b></div>${discountPercent?`<div class="receipt-total-line"><span>Sconto ${formatPercent(discountPercent)}</span><b>-${money(dv)}</b></div>`:''}<div class="receipt-total-line grand"><span>Totale dovuto</span><span>${money(total)}</span></div><div class="receipt-signature">Daniel Vauclair</div></div>`;
 }
 function openReceipt(){ document.getElementById('receiptContent').innerHTML=receiptHtml(); document.getElementById('receiptModal').classList.add('open'); document.body.classList.add('modal-open'); }
@@ -1628,7 +1648,7 @@ function getHistory(){ return safeGet(STORE.history,[])||[]; }
 function archiveOrder(){
   const active=getActiveItems(); if(!active.length){document.getElementById('copyStatus').textContent='L’ordine è vuoto.';return;}
   const subtotal=active.reduce((s,a)=>s+a.value,0),dv=subtotal*discountPercent/100,total=subtotal-dv;
-  const entry={code:orderCode(),orderNumber:currentOrderNumber,timestamp:Date.now(),customer:getCustomer(),note:getNote(),discount:discountPercent,subtotal,total,items:active.map(a=>({key:a.key,view:a.view,cat:a.cat,name:a.name,qty:a.qty,unit:a.unit,value:a.value}))};
+  const entry={code:orderCode(),orderNumber:currentOrderNumber,timestamp:Date.now(),customer:getCustomer(),note:getNote(),discount:discountPercent,subtotal,total,items:active.map(a=>({notes:a.notes||'',key:a.key,view:a.view,cat:a.cat,name:a.name,qty:a.qty,unit:a.unit,value:a.value}))};
   const history=getHistory(); history.unshift(entry); safeSet(STORE.history,history.slice(0,60));
   const next=currentOrderNumber+1; safeSet(STORE.next,next); currentOrderNumber=next;
   Object.keys(quantities).forEach(k=>delete quantities[k]); discountPercent=0;
@@ -1720,7 +1740,7 @@ async function saveSharedOrder(){
       item:a.name,
       qty:a.qty,
       unitPrice:a.unit,
-      notes:''
+      notes:a.notes||''
     }))
   };
 
