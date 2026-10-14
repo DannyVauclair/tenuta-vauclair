@@ -72,7 +72,12 @@ button,input,select{font:inherit}.shell{max-width:1280px;margin:auto;padding:18p
 .section-title{margin:22px 0 9px;font:600 24px 'Cormorant Garamond',serif;color:var(--gold2)}.cards{display:grid;gap:10px}.card{background:linear-gradient(180deg,rgba(42,35,31,.98),rgba(30,25,24,.98));border:1px solid var(--soft);border-top:2px solid var(--gold)}
 .card-head{display:grid;grid-template-columns:120px minmax(0,1fr) auto auto;gap:12px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--soft)}.code{font:700 12px 'Cinzel',serif;color:var(--gold2)}.meta{font-size:10.5px;color:var(--muted);margin-top:3px}.money{font-weight:700;color:var(--gold2);text-align:right}.title-with-chip{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .status-chip{display:inline-flex;padding:3px 8px;border:1px solid var(--rule);font:700 9px 'Cinzel',serif;text-transform:uppercase}.status-chip.consegnato,.status-chip.completata{color:#b8d8a4;background:rgba(71,110,70,.17);border-color:rgba(107,154,100,.55)}.status-chip.annullato,.status-chip.annullata{color:#e39a90;background:rgba(139,55,47,.17);border-color:rgba(185,93,82,.55)}
-.lines{padding:6px 14px 12px}.line{display:grid;grid-template-columns:1fr 70px 90px 100px;gap:8px;padding:7px 0;border-bottom:1px dashed var(--soft);font-size:12px}.line-note{margin-top:4px;color:#d6bd91;font-size:10.5px;font-style:italic}.line-note::before{content:'↳ ';color:var(--gold)}.card-costbar{display:flex;justify-content:flex-end;gap:18px;flex-wrap:wrap;padding:9px 14px;border-top:1px dashed var(--soft);background:rgba(0,0,0,.10);color:var(--muted);font-size:10.5px}.card-costbar strong{color:var(--gold2);font-size:12px}.card-costbar .margin{color:#b8d8a4}.card-costbar.loss .margin{color:#e39a90}.card-costbar.unknown{justify-content:flex-start}.card-foot{display:flex;justify-content:space-between;gap:10px;padding:10px 14px;border-top:1px solid var(--soft);color:var(--muted);font-size:10.5px}
+.lines{padding:6px 14px 12px}.line{display:grid;grid-template-columns:34px 1fr 70px 90px 100px;gap:8px;align-items:start;padding:7px 0;border-bottom:1px dashed var(--soft);font-size:12px}.line-note{margin-top:4px;color:#d6bd91;font-size:10.5px;font-style:italic}.line-note::before{content:'↳ ';color:var(--gold)}
+.line-state-view{width:28px;height:28px;display:grid;place-items:center;border:1px solid rgba(185,133,63,.30);background:#151314;color:transparent;font:700 16px/1 Georgia,serif}
+.line-state-view.done{color:#c7e5aa;border-color:rgba(118,145,94,.85);background:rgba(73,104,56,.30)}
+.line-state-view.missing{color:#f0a49a;border-color:rgba(185,93,82,.85);background:rgba(139,55,47,.28)}
+.line.state-done{background:linear-gradient(90deg,rgba(82,118,62,.08),transparent 34%)}
+.line.state-missing{background:linear-gradient(90deg,rgba(139,55,47,.08),transparent 34%)}.card-costbar{display:flex;justify-content:flex-end;gap:18px;flex-wrap:wrap;padding:9px 14px;border-top:1px dashed var(--soft);background:rgba(0,0,0,.10);color:var(--muted);font-size:10.5px}.card-costbar strong{color:var(--gold2);font-size:12px}.card-costbar .margin{color:#b8d8a4}.card-costbar.loss .margin{color:#e39a90}.card-costbar.unknown{justify-content:flex-start}.card-foot{display:flex;justify-content:space-between;gap:10px;padding:10px 14px;border-top:1px solid var(--soft);color:var(--muted);font-size:10.5px}
 .collab-body{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px 14px}.block{padding:10px 12px;background:rgba(0,0,0,.13);border:1px solid var(--soft)}.label{font:600 9px 'Cinzel',serif;color:var(--muted);text-transform:uppercase;margin-bottom:5px}.actions{display:flex;gap:7px;justify-content:flex-end;flex-wrap:wrap}.empty{padding:28px;text-align:center;color:var(--muted);border:1px dashed var(--rule)}.toast{position:fixed;right:18px;bottom:18px;padding:12px 14px;background:#191617;border:1px solid var(--gold);display:none}.toast.show{display:block}
 @media(max-width:850px){.site-nav{grid-template-columns:1fr 1fr}.stats{grid-template-columns:1fr 1fr}.filters{grid-template-columns:1fr}.card-head{grid-template-columns:1fr}.money{text-align:left}.collab-body{grid-template-columns:1fr}}
 </style><link rel="stylesheet" href="vauclair-header.css?v=20261010-4">
@@ -104,12 +109,13 @@ function ownerOrderId(c){return isOrderOwnerRecord(c)?String(c.title).slice(ORDE
 function ownerRecordTime(c){const d=new Date(c?.updatedAt||c?.createdAt||0);return Number.isNaN(d.getTime())?0:d.getTime()}
 function archivedOrderMeta(id){
   const rec=collabs.filter(c=>ownerOrderId(c)===String(id)).sort((a,b)=>ownerRecordTime(b)-ownerRecordTime(a))[0]||null;
-  const out={owner:rec?.responsible||'',notes:{}};
+  const out={owner:rec?.responsible||'',notes:{},states:{}};
   const raw=String(rec?.description||'');
   if(raw.startsWith(ORDER_META_PREFIX)){
     try{
       const data=JSON.parse(raw.slice(ORDER_META_PREFIX.length));
       if(data&&typeof data.notes==='object'&&data.notes)out.notes={...data.notes};
+      if(data&&typeof data.states==='object'&&data.states)out.states={...data.states};
     }catch(e){}
   }
   return out;
@@ -119,6 +125,16 @@ function archivedLineNote(o,l,i){
   const meta=archivedOrderMeta(o.id),key=String(i);
   if(Object.prototype.hasOwnProperty.call(meta.notes,key))return String(meta.notes[key]||'');
   return String(l?.notes||'');
+}
+function archivedLineState(o,i){
+  const value=String(archivedOrderMeta(o.id).states?.[String(i)]||'');
+  return value==='done'||value==='missing'?value:'';
+}
+function archivedLineStateHtml(o,i){
+  const state=archivedLineState(o,i);
+  const symbol=state==='done'?'✓':state==='missing'?'×':'';
+  const label=state==='done'?'Fatto':state==='missing'?'Non disponibile':'Da controllare / produrre';
+  return '<span class="line-state-view '+state+'" title="'+label+'" aria-label="'+label+'">'+symbol+'</span>';
 }
 function orderCostHtml(o){
   if(typeof window.vauclairProductionOrderCost!=='function')return '';
@@ -170,7 +186,7 @@ function render(){
  const ac=collabs.filter(c=>!isOrderOwnerRecord(c)&&['Completata','Annullata'].includes(c.status)).filter(c=>!q||[c.id,c.title,c.partner,c.description,c.status].join(' ').toLowerCase().includes(q));
  document.getElementById('aAll').textContent=ao.length+ac.length;document.getElementById('aDel').textContent=ao.filter(o=>o.status==='Consegnato').length;document.getElementById('aCan').textContent=ao.filter(o=>o.status==='Annullato').length;document.getElementById('aDone').textContent=ac.filter(c=>c.status==='Completata').length;document.getElementById('aGone').textContent=ac.filter(c=>c.status==='Annullata').length;
  document.getElementById('orders').style.display=kind==='collabs'?'none':'grid';document.getElementById('collabs').style.display=kind==='orders'?'none':'grid';
- document.getElementById('orders').innerHTML=ao.length?ao.map(o=>`<article class="card"><div class="card-head"><div><div class="code">${esc(o.id)}</div><div class="meta">${date(o.createdAt)}</div></div><div><div class="title-with-chip"><strong>${esc(o.client)}</strong><span class="status-chip ${cls(o.status)}">${esc(o.status)}</span></div><div class="meta">${esc(o.department)}${archivedOrderOwner(o.id)?' · preso da '+esc(archivedOrderOwner(o.id)):''}</div></div><div class="money">${money(o.total)}</div><div class="actions"><button class="btn" onclick="restoreOrder('${esc(o.id)}')">Riattiva</button><button class="btn danger" onclick="deleteOrder('${esc(o.id)}')">Elimina</button></div></div><div class="lines">${(o.lines||[]).map((l,i)=>`<div class="line"><div><strong>${esc(l.item)}</strong><div class="meta">${esc(l.category)}</div>${archivedLineNote(o,l,i)? `<div class="line-note">${esc(archivedLineNote(o,l,i))}</div>` : ''}</div><div>×${l.qty}</div><div class="meta">${money(l.unitPrice)}</div><div class="money">${money(l.lineTotal)}</div></div>`).join('')}</div>${orderCostHtml(o)}<div class="card-foot"><span>${esc(o.notes||'Nessuna nota')}</span><span>Aggiornato ${date(o.updatedAt)}</span></div></article>`).join(''):'<div class="empty">Nessun ordine archiviato.</div>';
+ document.getElementById('orders').innerHTML=ao.length?ao.map(o=>`<article class="card"><div class="card-head"><div><div class="code">${esc(o.id)}</div><div class="meta">${date(o.createdAt)}</div></div><div><div class="title-with-chip"><strong>${esc(o.client)}</strong><span class="status-chip ${cls(o.status)}">${esc(o.status)}</span></div><div class="meta">${esc(o.department)}${archivedOrderOwner(o.id)?' · preso da '+esc(archivedOrderOwner(o.id)):''}</div></div><div class="money">${money(o.total)}</div><div class="actions"><button class="btn" onclick="restoreOrder('${esc(o.id)}')">Riattiva</button><button class="btn danger" onclick="deleteOrder('${esc(o.id)}')">Elimina</button></div></div><div class="lines">${(o.lines||[]).map((l,i)=>`<div class="line state-${archivedLineState(o,i)}">${archivedLineStateHtml(o,i)}<div><strong>${esc(l.item)}</strong><div class="meta">${esc(l.category)}</div>${archivedLineNote(o,l,i)? `<div class="line-note">${esc(archivedLineNote(o,l,i))}</div>` : ''}</div><div>×${l.qty}</div><div class="meta">${money(l.unitPrice)}</div><div class="money">${money(l.lineTotal)}</div></div>`).join('')}</div>${orderCostHtml(o)}<div class="card-foot"><span>${esc(o.notes||'Nessuna nota')}</span><span>Aggiornato ${date(o.updatedAt)}</span></div></article>`).join(''):'<div class="empty">Nessun ordine archiviato.</div>';
  document.getElementById('collabs').innerHTML=ac.length?ac.map(c=>`<article class="card"><div class="card-head"><div><div class="code">${esc(c.id)}</div><div class="meta">${esc(c.type)}</div></div><div><div class="title-with-chip"><strong>${esc(c.title)}</strong><span class="status-chip ${cls(c.status)}">${esc(c.status)}</span></div><div class="meta">${esc(c.partner)} · ${esc(c.department)}</div></div><div class="meta">${c.eventDate?date(c.eventDate):'Data non definita'}</div><div class="actions"><button class="btn" onclick="restoreCollab('${esc(c.id)}')">Riattiva</button><button class="btn danger" onclick="deleteCollab('${esc(c.id)}')">Elimina</button></div></div><div class="collab-body"><div class="block"><div class="label">Descrizione</div>${esc(c.description||'Nessuna descrizione')}</div><div class="block"><div class="label">Responsabile</div>${esc(c.responsible||'—')}<div class="meta">Aggiornato ${date(c.updatedAt)}</div></div></div></article>`).join(''):'<div class="empty">Nessuna collaborazione archiviata.</div>';
 }
 async function restoreOrder(id){await post({action:'updateStatus',id,status:'Nuovo'});toast(id+' riattivato.');setTimeout(loadAll,550)}
