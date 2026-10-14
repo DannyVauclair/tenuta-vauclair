@@ -82,6 +82,10 @@
 .owner-select.assigned{border-color:rgba(118,145,94,.62);color:#c4d9aa}
 .line-note{margin-top:4px;color:#d6bd91;font-size:11px;font-style:italic;line-height:1.25}
 .line-note::before{content:"↳ ";color:var(--gold)}
+.line-note-input{display:block;width:min(420px,100%);margin-top:5px;border:1px solid rgba(185,133,63,.22);background:rgba(0,0,0,.14);color:#d6bd91;padding:5px 7px;font-size:11px;outline:none}
+.line-note-input::placeholder{color:rgba(185,167,140,.55);font-style:italic}
+.line-note-input:focus{border-color:rgba(185,133,63,.58);background:rgba(0,0,0,.23)}
+.line-note-input:disabled{opacity:.55}
 
 .btn.small{padding:7px 9px;font-size:9px}
 .btn[disabled]{opacity:.55;cursor:wait}
@@ -265,8 +269,28 @@ function ownerRecordTime(c){
 function ownerRecordsFor(id){
   return orderOwnerRecords.filter(c=>ownerOrderId(c)===String(id)).sort((a,b)=>ownerRecordTime(b)-ownerRecordTime(a));
 }
-function orderOwner(id){
-  return ownerRecordsFor(id)[0]?.responsible||'';
+const ORDER_META_PREFIX='__VAU_ORDER_META_V1__';
+function parseOrderMetaRecord(rec){
+  const out={owner:rec?.responsible||'',notes:{}};
+  const raw=String(rec?.description||'');
+  if(raw.startsWith(ORDER_META_PREFIX)){
+    try{
+      const data=JSON.parse(raw.slice(ORDER_META_PREFIX.length));
+      if(data&&typeof data.notes==='object'&&data.notes)out.notes={...data.notes};
+    }catch(e){}
+  }
+  return out;
+}
+function currentOrderMeta(id){
+  const rec=ownerRecordsFor(id)[0]||null;
+  return {rec,...parseOrderMetaRecord(rec)};
+}
+function orderOwner(id){return currentOrderMeta(id).owner||''}
+function effectiveLineNote(o,line,index){
+  const meta=currentOrderMeta(o.id);
+  const key=String(index);
+  if(Object.prototype.hasOwnProperty.call(meta.notes,key))return String(meta.notes[key]||'');
+  return String(line?.notes||'');
 }
 function ownerSelectHtml(o){
   const current=orderOwner(o.id);
@@ -278,60 +302,81 @@ async function loadOrderOwners(){
     if(d&&d.ok!==false)orderOwnerRecords=(d.collaborations||[]).filter(isOrderOwnerRecord);
   }catch(e){}
 }
-async function setOrderOwner(id,owner,select){
+async function replaceOrderMeta(id,owner,notes){
   const oldRecords=ownerRecordsFor(id);
+  const cleanNotes={};
+  Object.entries(notes||{}).forEach(([k,v])=>{
+    const value=String(v??'').slice(0,140);
+    cleanNotes[String(k)]=value;
+  });
+
+  if(!owner && !Object.keys(cleanNotes).length){
+    for(const rec of oldRecords){
+      const r=await vPost({action:'deleteCollaboration',id:rec.id});
+      if(r&&r.ok===false)throw new Error(r.error||'Errore');
+    }
+    orderOwnerRecords=orderOwnerRecords.filter(c=>ownerOrderId(c)!==String(id));
+    return;
+  }
+
+  const payload={
+    action:'createCollaboration',
+    title:ORDER_OWNER_MARKER+id,
+    partner:'Registro ordini interno',
+    department:'Tenuta',
+    type:'Altro',
+    eventDate:'',
+    location:'',
+    responsible:owner||'',
+    description:ORDER_META_PREFIX+JSON.stringify({notes:cleanNotes})
+  };
+  const r=await vPost(payload);
+  if(r&&r.ok===false)throw new Error(r.error||'Errore');
+
+  if(r&&r.collaboration){
+    const saved={...r.collaboration};
+    if(!saved.description)saved.description=payload.description;
+    if(saved.responsible==null)saved.responsible=owner||'';
+    if(!saved.createdAt&&!saved.updatedAt)saved.updatedAt=new Date().toISOString();
+    orderOwnerRecords.push(saved);
+  }else{
+    await new Promise(res=>setTimeout(res,500));
+    await loadOrderOwners();
+  }
+
+  const fresh=ownerRecordsFor(id)[0];
+  for(const rec of oldRecords){
+    if(!fresh||rec.id!==fresh.id){
+      try{await vPost({action:'deleteCollaboration',id:rec.id})}catch(e){}
+    }
+  }
+  if(fresh)orderOwnerRecords=orderOwnerRecords.filter(c=>ownerOrderId(c)!==String(id)||c.id===fresh.id);
+}
+async function setOrderOwner(id,owner,select){
+  const meta=currentOrderMeta(id);
   if(select)select.disabled=true;
   try{
-    if(!owner){
-      for(const rec of oldRecords){
-        const r=await vPost({action:'deleteCollaboration',id:rec.id});
-        if(r&&r.ok===false)throw new Error(r.error||'Errore');
-      }
-      orderOwnerRecords=orderOwnerRecords.filter(c=>ownerOrderId(c)!==String(id));
-      renderOrders();
-      vToast(id+' non è più assegnato.');
-      return;
-    }
-
-    const payload={
-      action:'createCollaboration',
-      title:ORDER_OWNER_MARKER+id,
-      partner:'Registro ordini interno',
-      department:'Tenuta',
-      type:'Altro',
-      eventDate:'',
-      location:'',
-      responsible:owner,
-      description:'Responsabile interno dell ordine '+id
-    };
-    const r=await vPost(payload);
-    if(r&&r.ok===false)throw new Error(r.error||'Errore');
-
-    if(r&&r.collaboration){
-      const saved={...r.collaboration};
-      if(!saved.createdAt&&!saved.updatedAt)saved.updatedAt=new Date().toISOString();
-      orderOwnerRecords.push(saved);
-    }else{
-      await new Promise(res=>setTimeout(res,500));
-      await loadOrderOwners();
-    }
-
-    const fresh=ownerRecordsFor(id)[0];
-    for(const rec of oldRecords){
-      if(!fresh||rec.id!==fresh.id){
-        try{await vPost({action:'deleteCollaboration',id:rec.id})}catch(e){}
-      }
-    }
-    if(fresh)orderOwnerRecords=orderOwnerRecords.filter(c=>ownerOrderId(c)!==String(id)||c.id===fresh.id);
-
+    await replaceOrderMeta(id,owner,meta.notes);
     renderOrders();
-    vToast(id+' preso in consegna da '+owner+'.');
+    vToast(owner?id+' preso in consegna da '+owner+'.':id+' non è più assegnato.');
   }catch(e){
     vToast('Assegnazione non salvata: '+(e.message||e),false);
     await loadOrderOwners();
     renderOrders();
-  }finally{
-    if(select)select.disabled=false;
+  }
+}
+async function setOrderLineNote(id,index,value,input){
+  const meta=currentOrderMeta(id);
+  const notes={...meta.notes,[String(index)]:String(value||'').slice(0,140)};
+  if(input)input.disabled=true;
+  try{
+    await replaceOrderMeta(id,meta.owner,notes);
+    renderOrders();
+    vToast('Nota aggiornata per '+id+'.');
+  }catch(e){
+    vToast('Nota non salvata: '+(e.message||e),false);
+    await loadOrderOwners();
+    renderOrders();
   }
 }
 async function loadOrders(){
@@ -368,7 +413,7 @@ function renderOrders(){
   const f=active.filter(o=>{
     if(dept&&o.department!==dept)return false;if(status&&o.status!==status)return false;
     if(!q)return true;
-    return [o.id,o.client,o.department,o.status,o.notes,o.createdBy,orderOwner(o.id),...(o.lines||[]).flatMap(l=>[l.item,l.category,l.notes])].join(' ').toLowerCase().includes(q);
+    return [o.id,o.client,o.department,o.status,o.notes,o.createdBy,orderOwner(o.id),...(o.lines||[]).flatMap((l,i)=>[l.item,l.category,effectiveLineNote(o,l,i)])].join(' ').toLowerCase().includes(q);
   });
   document.getElementById('sAll').textContent=active.length;
   document.getElementById('sNew').textContent=active.filter(o=>o.status==='Nuovo').length;
@@ -388,7 +433,7 @@ function renderOrders(){
         <button class="btn danger small" onclick="deleteOrder('${vEsc(o.id)}')">Elimina</button>
       </div>
     </div>
-    <div class="lines">${(o.lines||[]).map(l=>`<div class="line"><div><strong>${vEsc(l.item)}</strong><div class="meta">${vEsc(l.category)}</div>${l.notes? `<div class="line-note">${vEsc(l.notes)}</div>` : ''}</div><div>×${Number(l.qty||0)}</div><div class="unit meta">${vMoney(l.unitPrice)}</div><div class="money">${vMoney(l.lineTotal)}</div></div>`).join('')}</div>
+    <div class="lines">${(o.lines||[]).map((l,i)=>`<div class="line"><div><strong>${vEsc(l.item)}</strong><div class="meta">${vEsc(l.category)}</div><input class="line-note-input" maxlength="140" value="${vEsc(effectiveLineNote(o,l,i))}" placeholder="+ Nota interna · es. in deposito ne abbiamo già 4" onchange="setOrderLineNote('${vEsc(o.id)}',${i},this.value,this)"></div><div>×${Number(l.qty||0)}</div><div class="unit meta">${vMoney(l.unitPrice)}</div><div class="money">${vMoney(l.lineTotal)}</div></div>`).join('')}</div>
     ${orderProductionCostHtml(o)}
     <div class="card-foot"><span>${vEsc(o.notes||'Nessuna nota')}</span><span>Aggiornato ${vDate(o.updatedAt)}</span></div>
   </article>`).join('');
