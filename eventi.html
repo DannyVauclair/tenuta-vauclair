@@ -800,8 +800,10 @@ async function loadCollabs(){
   }
 }
 function statusClass(s){return String(s||'').toLowerCase().replaceAll(' ','-')}
+function isInternalOrderOwner(c){return String(c?.title||'').startsWith('__VAU_ORDER_OWNER__')}
 function renderCollabs(){
-  const active=collabs.filter(c=>!['Completata','Annullata'].includes(c.status));
+  const visible=collabs.filter(c=>!isInternalOrderOwner(c));
+  const active=visible.filter(c=>!['Completata','Annullata'].includes(c.status));
   const q=document.getElementById('cSearch').value.trim().toLowerCase(),dept=document.getElementById('cDept').value,status=document.getElementById('cStatus').value;
   const f=active.filter(c=>{
     if(dept&&c.department!==dept)return false;
@@ -814,7 +816,7 @@ function renderCollabs(){
   document.getElementById('cProp').textContent=active.filter(c=>c.status==='Proposta').length;
   document.getElementById('cConf').textContent=active.filter(c=>c.status==='Confermata').length;
   document.getElementById('cRun').textContent=active.filter(c=>c.status==='In corso').length;
-  document.getElementById('cDone').textContent=collabs.filter(c=>c.status==='Completata').length;
+  document.getElementById('cDone').textContent=visible.filter(c=>c.status==='Completata').length;
 
   const box=document.getElementById('collabs');
   if(!f.length){
