@@ -346,8 +346,51 @@ function ownerSelectHtml(o){
 async function loadOrderOwners(){
   try{
     const d=await vGetRetry({action:'collaborations'},2);
-    if(d&&d.ok!==false)orderOwnerRecords=(d.collaborations||[]).filter(isOrderOwnerRecord);
+    if(d&&d.ok!==false){
+      const fetched=(d.collaborations||[]).filter(isOrderOwnerRecord);
+      const pending=orderOwnerRecords.filter(c=>c?._pending===true);
+      const keepPending=pending.filter(p=>{
+        const id=ownerOrderId(p);
+        return !fetched.some(r=>
+          ownerOrderId(r)===id &&
+          String(r?.responsible||'')===String(p?.responsible||'') &&
+          String(r?.description||'')===String(p?.description||'')
+        );
+      });
+      orderOwnerRecords=[...fetched,...keepPending];
+    }
   }catch(e){}
+}
+async function syncPendingOrderMeta(id,attempt=0){
+  const delays=[1200,2200,3800];
+  await new Promise(r=>setTimeout(r,delays[Math.min(attempt,delays.length-1)]));
+  try{
+    const d=await vGetRetry({action:'collaborations'},2);
+    if(!d||d.ok===false)return;
+    const fetched=(d.collaborations||[]).filter(isOrderOwnerRecord);
+    const pending=orderOwnerRecords.filter(c=>c?._pending===true&&ownerOrderId(c)===String(id))
+      .sort((a,b)=>ownerRecordTime(b)-ownerRecordTime(a))[0];
+    if(!pending)return;
+    const match=fetched
+      .filter(r=>ownerOrderId(r)===String(id))
+      .sort((a,b)=>ownerRecordTime(b)-ownerRecordTime(a))
+      .find(r=>String(r?.responsible||'')===String(pending?.responsible||'')&&String(r?.description||'')===String(pending?.description||''));
+    if(match){
+      orderOwnerRecords=[
+        ...fetched,
+        ...orderOwnerRecords.filter(c=>c?._pending===true&&ownerOrderId(c)!==String(id))
+      ];
+      const stale=fetched.filter(r=>ownerOrderId(r)===String(id)&&r.id!==match.id);
+      for(const rec of stale){
+        try{await vPost({action:'deleteCollaboration',id:rec.id})}catch(e){}
+      }
+      renderOrders();
+      return;
+    }
+    if(attempt<2)syncPendingOrderMeta(id,attempt+1);
+  }catch(e){
+    if(attempt<2)syncPendingOrderMeta(id,attempt+1);
+  }
 }
 async function replaceOrderMeta(id,owner,notes,states){
   const oldRecords=ownerRecordsFor(id);
@@ -385,24 +428,38 @@ async function replaceOrderMeta(id,owner,notes,states){
   const r=await vPost(payload);
   if(r&&r.ok===false)throw new Error(r.error||'Errore');
 
-  if(r&&r.collaboration){
-    const saved={...r.collaboration};
-    if(!saved.description)saved.description=payload.description;
-    if(saved.responsible==null)saved.responsible=owner||'';
-    if(!saved.createdAt&&!saved.updatedAt)saved.updatedAt=new Date().toISOString();
-    orderOwnerRecords.push(saved);
-  }else{
-    await new Promise(res=>setTimeout(res,500));
-    await loadOrderOwners();
-  }
+  const now=new Date().toISOString();
+  if(r&&r.collaboration&&r.collaboration.id){
+    const saved={...payload,...r.collaboration,_pending:false};
+    saved.title=payload.title;
+    saved.description=payload.description;
+    saved.responsible=owner||'';
+    if(!saved.createdAt&&!saved.updatedAt)saved.updatedAt=now;
 
-  const fresh=ownerRecordsFor(id)[0];
-  for(const rec of oldRecords){
-    if(!fresh||rec.id!==fresh.id){
-      try{await vPost({action:'deleteCollaboration',id:rec.id})}catch(e){}
+    orderOwnerRecords=orderOwnerRecords.filter(c=>!(c?._pending===true&&ownerOrderId(c)===String(id)));
+    orderOwnerRecords.push(saved);
+
+    for(const rec of oldRecords){
+      if(rec?._pending===true)continue;
+      if(rec.id&&rec.id!==saved.id){
+        try{await vPost({action:'deleteCollaboration',id:rec.id})}catch(e){}
+      }
     }
+    orderOwnerRecords=orderOwnerRecords.filter(c=>ownerOrderId(c)!==String(id)||c.id===saved.id);
+  }else{
+    // Il POST via iframe non restituisce subito la riga creata:
+    // manteniamo quindi il nuovo stato localmente e aspettiamo che il database lo propaghi.
+    const pending={
+      ...payload,
+      id:'local-'+Date.now()+'-'+Math.floor(Math.random()*1e6),
+      status:'Proposta',
+      updatedAt:now,
+      _pending:true
+    };
+    orderOwnerRecords=orderOwnerRecords.filter(c=>!(c?._pending===true&&ownerOrderId(c)===String(id)));
+    orderOwnerRecords.push(pending);
+    syncPendingOrderMeta(id);
   }
-  if(fresh)orderOwnerRecords=orderOwnerRecords.filter(c=>ownerOrderId(c)!==String(id)||c.id===fresh.id);
 }
 async function setOrderOwner(id,owner,select){
   const meta=currentOrderMeta(id);
@@ -438,11 +495,25 @@ async function cycleOrderLineState(id,index,button){
   const next=nextLineState(current);
   const states={...meta.states};
   if(next)states[key]=next;else delete states[key];
-  if(button)button.disabled=true;
+
+  // Aggiornamento ottimistico: la spunta resta visibile subito.
+  const optimistic={
+    title:ORDER_OWNER_MARKER+id,
+    responsible:meta.owner||'',
+    description:ORDER_META_PREFIX+JSON.stringify({notes:meta.notes||{},states}),
+    id:'local-'+Date.now()+'-'+Math.floor(Math.random()*1e6),
+    updatedAt:new Date().toISOString(),
+    _pending:true
+  };
+  orderOwnerRecords=orderOwnerRecords.filter(c=>!(c?._pending===true&&ownerOrderId(c)===String(id)));
+  orderOwnerRecords.push(optimistic);
+  renderOrders();
+
   try{
     await replaceOrderMeta(id,meta.owner,meta.notes,states);
     renderOrders();
   }catch(e){
+    orderOwnerRecords=orderOwnerRecords.filter(c=>c!==optimistic);
     vToast('Stato articolo non salvato: '+(e.message||e),false);
     await loadOrderOwners();
     renderOrders();
