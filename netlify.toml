@@ -1,0 +1,4 @@
+[build]
+  publish = "."
+
+# Sito statico: nessun comando di build necessario.
