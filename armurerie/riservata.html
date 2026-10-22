@@ -54,21 +54,21 @@
   <div class="private-lock-emblem" aria-hidden="true">✦</div>
   <span class="label">ACCESSO PROTETTO</span>
   <h2>Archivio della <em>famiglia.</em></h2>
-  <p class="private-explanation">Accedi con l’email e la password che hai già registrato. Solo il proprietario può consultare i prezzi di esportazione.</p>
+  <p class="private-explanation">Accedi con l’email e la password che hai già registrato. Solo gli account autorizzati della famiglia Vauclair possono consultare i prezzi di esportazione.</p>
   <form id="authForm" class="private-auth-form">
     <label>Indirizzo email<input type="email" id="privateEmail" name="email" autocomplete="email" required maxlength="254" placeholder="La tua email"></label>
     <label>Password<input type="password" id="privatePassword" name="password" autocomplete="current-password" required minlength="8" placeholder="Almeno 8 caratteri"></label>
     <button class="btn gold" id="privateSubmit" type="submit">Accedi al registro →</button>
   </form>
   <p class="status private-status" role="status" aria-live="polite" id="authMessage"></p>
-  <p class="private-fineprint">Il tuo account è già stato confermato e autorizzato. Non serve registrarti di nuovo.</p>
+  <p class="private-fineprint">Se hai già un account autorizzato, accedi con le tue credenziali personali.</p>
 </div>
 
 <div class="private-auth-panel" id="awaitingApproval" hidden>
   <div class="private-lock-emblem" aria-hidden="true">◇</div>
   <span class="label">ACCESSO NON AUTORIZZATO</span>
   <h2>Accesso <em>negato.</em></h2>
-  <p class="private-explanation">Questo account non è quello del proprietario. Le quotazioni restano riservate. Accedi con le credenziali già registrate dal proprietario.</p>
+  <p class="private-explanation">Questo account non è autorizzato a consultare il registro. Le quotazioni rimangono riservate agli account abilitati della famiglia Vauclair.</p>
   <p class="status" id="approvalMessage" role="status"></p>
   <div class="private-auth-actions"><button class="btn outline" id="retryApproval" type="button">Verifica di nuovo</button><button class="order-subtle" id="pendingLogout" type="button">Esci</button></div>
 </div>
