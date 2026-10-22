@@ -57,10 +57,22 @@ window.VauclairSimulator={
  mount(weapons,q,callback,preserve=false){
   const catalog=window.VAUCLAIR_WEAPONS||[];
   data=weapons.map(w=>{const p=catalog.find(p=>p.id===w.weapon_id&&p.tag==="attuale");if(!p||!retail[p.id])throw Error("Modello non disponibile nel catalogo ufficiale");return {id:p.id,name:p.name,standard:M.cents(p.buy),retail:M.cents(retail[p.id]),export:M.cents(w.blip_price)};});
-  quantities=q;onQuantity=callback;if(!preserve)prices.clear();requested=null;render();
+  quantities=q;onQuantity=callback;if(!preserve)prices.clear();requested=null;
+  const picker=$("simAddModel");picker.replaceChildren();
+  for(const w of data){const option=el("option","",w.name);option.value=w.id;picker.append(option);}
+  $("simAddButton").disabled=!data.length;
+  render();
  },
  render,
- clear(){data=[];quantities=null;prices.clear();views.clear();requested=null;goalValue=roiValue=0;$("simStrategy").textContent="Listino Vauclair";$("simLines").replaceChildren();for(const id of ["simCost","simRevenue","simProfit","simReturn","simMargin","simSaving","simMaximum","simRoom","simCount","simResidual","simGoalStatus","simWarning"])$(id).textContent="";$("simGoal").value=$("simRoi").value=$("simBudget").value=$("simBudgetNumber").value=0;},
+ clear(){data=[];quantities=null;prices.clear();views.clear();requested=null;goalValue=roiValue=0;$("simStrategy").textContent="Listino Vauclair";$("simLines").replaceChildren();$("simAddModel").replaceChildren();$("simAddButton").disabled=true;for(const id of ["simCost","simRevenue","simProfit","simReturn","simMargin","simSaving","simMaximum","simRoom","simCount","simResidual","simGoalStatus","simWarning"])$(id).textContent="";$("simGoal").value=$("simRoi").value=$("simBudget").value=$("simBudgetNumber").value=0;},
+};
+$("simAddForm").onsubmit=event=>{
+ event.preventDefault();
+ if(!quantities)return;
+ const id=$("simAddModel").value,qty=Number($("simAddQty").value);
+ if(!data.some(w=>w.id===id)||!Number.isInteger(qty)||qty<1||qty>999)return;
+ quantities.set(id,Math.min(999,(quantities.get(id)||0)+qty));
+ manual();onQuantity();
 };
 document.querySelectorAll("[data-sim-preset]").forEach(b=>b.onclick=()=>{if(!quantities)return;const mode=b.dataset.simPreset;if(mode==="custom"){manual();update();return;}for(const w of data)prices.set(w.id,mode==="standard"?w.standard:Math.round(w.retail*(mode==="full"?1:mode==="five"?.95:.9)));requested=null;$("simStrategy").textContent=b.textContent;render();});
 for(const id of ["simGoal","simRoi"]){
