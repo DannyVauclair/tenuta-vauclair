@@ -4,6 +4,8 @@
    I valori di listino sono istantanee al momento della creazione.
    Nessun dato viene trasmesso o condiviso con altri utenti. */
 const WEAPONS=Array.isArray(window.VAUCLAIR_WEAPONS)?window.VAUCLAIR_WEAPONS:[];
+// Il catalogo storico resta leggibile negli ordini salvati; le nuove forniture usano solo armi rilasciate.
+const ACTIVE_WEAPONS=WEAPONS.filter(w=>w.tag==="attuale");
 const STORE="vauclair.armurerie.orders.v1",DRAFT="vauclair.armurerie.draft.v1";
 const STATES=["Da valutare","Confermato","In corso","Ricevuto","Annullato"];
 const money=value=>new Intl.NumberFormat("it-IT",{style:"currency",currency:"USD",currencyDisplay:"narrowSymbol",minimumFractionDigits:0,maximumFractionDigits:2}).format(value);
@@ -51,7 +53,7 @@ function updateLines(){
   if(!priceEdited)$("agreedPrice").value=String(total);
 }
 function addWeapon(id,amount){
-  const weapon=WEAPONS.find(w=>w.id===id);
+  const weapon=ACTIVE_WEAPONS.find(w=>w.id===id);
   const qty=Number(amount);
   if(!weapon||!Number.isInteger(qty)||qty<1||qty>999){notice("Seleziona un modello e una quantità compresa tra 1 e 999.");return;}
   const prev=lines.find(x=>x.id===id);
@@ -129,7 +131,7 @@ function startDraft(){
     sessionStorage.removeItem(DRAFT);
     if(!Array.isArray(draft)||!draft.length)return;
     for(const l of draft){
-      if(WEAPONS.some(w=>w.id===l.id)&&Number.isInteger(l.qty)&&l.qty>0&&l.qty<=999) addWeapon(l.id,l.qty);
+      if(ACTIVE_WEAPONS.some(w=>w.id===l.id)&&Number.isInteger(l.qty)&&l.qty>0&&l.qty<=999) addWeapon(l.id,l.qty);
     }
     if(lines.length)openPanel();
   }catch(_){}
@@ -137,7 +139,7 @@ function startDraft(){
 function init(){
   const sel=$("weaponChoice");
   if(!sel)return;
-  for(const w of WEAPONS){const opt=node("option","",w.name);opt.value=w.id;sel.append(opt);}
+  for(const w of ACTIVE_WEAPONS){const opt=node("option","",w.name);opt.value=w.id;sel.append(opt);}
   $("newOrder").addEventListener("click",openPanel);
   $("cancelOrder").addEventListener("click",closePanel);
   $("addWeapon").addEventListener("click",()=>addWeapon(sel.value,$("weaponQuantity").value));
