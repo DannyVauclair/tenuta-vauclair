@@ -3,6 +3,11 @@
 .simulator h2{font-size:42px}.simulator h2 em{color:var(--gold)}
 .simulator p{font-size:13px;line-height:1.8;color:#d2bfa9}
 .sim-presets{display:flex;gap:8px;flex-wrap:wrap;margin:22px 0 12px}
+.sim-add{display:grid;grid-template-columns:minmax(0,2fr) minmax(96px,.65fr) auto;align-items:end;gap:12px;background:linear-gradient(145deg,#32251f,#221b19);border:1px solid #70513c;padding:16px 18px;margin:20px 0 14px}
+.simulator .sim-add label{margin:0;min-width:0}
+.sim-add select{display:block;width:100%;min-height:44px;background:#19161a;border:1px solid #806143;color:#f7e9d6;padding:9px 10px;font:14px var(--book);margin-top:8px}
+.sim-add .btn{min-height:44px;white-space:nowrap}
+.sim-add button:disabled{opacity:.45;cursor:not-allowed}
 .sim-layout{display:grid;grid-template-columns:minmax(0,1fr) 370px;gap:24px;align-items:start}
 .sim-line,.sim-box{background:linear-gradient(150deg,#302328,#211b20);border:1px solid #70513c;border-top:2px solid #b88c52;padding:22px;margin-bottom:18px}
 .sim-line h3{font-size:28px;margin:0}.sim-line-head button{flex-shrink:0}
@@ -25,4 +30,5 @@
 .sim-warning{display:block;margin-top:10px;font-size:12px;line-height:1.8}
 .sim-formulas{font-size:12px;color:#d2bfa9;margin:16px 0}.sim-formulas summary{cursor:pointer;min-height:32px}
 @media(max-width:950px){.sim-layout{grid-template-columns:1fr}.sim-summary{max-width:none}.sim-heading{align-items:flex-start;flex-direction:column}}
-@media(max-width:530px){.sim-line,.sim-box,.sim-summary{padding:16px}.sim-line-head{align-items:flex-start;flex-direction:column}.simulator h2{font-size:36px}.sim-presets button{flex:1 1 44%;min-height:44px}.sim-summary .private-totals strong{font-size:25px}.sim-summary .private-profit strong{font-size:36px}}
+@media(max-width:690px){.sim-add{grid-template-columns:minmax(0,1fr) 96px}.sim-add .btn{grid-column:1/-1;white-space:normal}}
+@media(max-width:530px){.sim-add{padding:14px}.sim-line,.sim-box,.sim-summary{padding:16px}.sim-line-head{align-items:flex-start;flex-direction:column}.simulator h2{font-size:36px}.sim-presets button{flex:1 1 44%;min-height:44px}.sim-summary .private-totals strong{font-size:25px}.sim-summary .private-profit strong{font-size:36px}}
