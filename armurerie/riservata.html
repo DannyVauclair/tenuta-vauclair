@@ -14,10 +14,10 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.89.0/dist/umd/supabase.js" defer></script>
 <script src="header.js?v=20261013-noarrow1" defer></script>
 <script src="notifiche.js?v=20261012-bell1" defer></script>
-<link rel="stylesheet" href="simulatore.css?v=20261022-repair1">
+<link rel="stylesheet" href="simulatore.css?v=20261022-repair2">
 <script src="catalogo.js?v=20261022-available11" defer></script>
-<script src="simulatore-core.js?v=20261022-repair1" defer></script>
-<script src="simulatore.js?v=20261022-repair1" defer></script>
+<script src="simulatore-core.js?v=20261022-repair2" defer></script>
+<script src="simulatore.js?v=20261022-repair2" defer></script>
 <script src="riservata.js?v=20261022-sim2" defer></script>
 </head>
 <body class="private-page">
@@ -130,30 +130,33 @@
 <div class="sim-box sim-repair">
 <span class="label">MANUTENZIONE · SOGLIA 90%</span>
 <h3>Grasso per armi</h3>
-<p>Per esportare serve una condizione di almeno <strong>90%</strong>. Un grasso costa <strong>$8</strong> e ripara del <strong>20%</strong>. Indica sopra, per ogni modello, la condizione iniziale delle armi: il calcolo propone quanti grassi servono per portarle almeno al 90%.</p>
+<p>Per esportare serve una condizione di almeno <strong>90%</strong>. Un grasso costa <strong>$8</strong> e ripara del <strong>20%</strong>. <strong>Ogni singola arma può essere riparata al massimo 5 volte in tutta la sua vita.</strong> Indica condizione e riparazioni già effettuate per modello, oppure apri il dettaglio per distinguere ogni esemplare. Le armi non più recuperabili sono escluse dall'incasso previsto.</p>
 <div class="sim-repair-entry">
 <label for="simGreaseCount">Grassi da acquistare per questa fornitura
 <input id="simGreaseCount" type="number" min="0" max="100000" step="1" value="0" disabled></label>
 <button class="order-subtle" id="simGreaseAuto" type="button" disabled>Usa quantità calcolata</button>
 </div>
-<p class="sim-reference">Quantità suggerita: <strong id="simGreaseSuggest">0</strong> · Calcolo: uno o più grassi per arma in base alla condizione iniziale. Puoi modificare manualmente il numero se hai armi in condizioni diverse.</p>
+<p class="sim-reference">Grassi necessari per le armi recuperabili: <strong id="simGreaseSuggest">0</strong>. Il totale rispetta le riparazioni già effettuate su ciascuna arma. Se acquisti meno grassi, il ricavo sarà calcolato solo sulle armi effettivamente esportabili; quelli acquistati in più restano nel costo.</p>
 <p class="sim-repair-status" id="simGreaseStatus" role="status"></p>
 </div></div>
 <aside class="quote sim-summary">
 <span class="label">PROIEZIONE COMMERCIALE</span><h3>La tua fornitura</h3>
 <div class="private-totals">
-<div><span>Armi integre</span><strong id="simCount">0</strong></div>
+<div><span>Armi nella fornitura</span><strong id="simCount">0</strong></div>
+<div><span>Esportabili dopo manutenzione</span><strong id="simEligible">0</strong></div>
+<div><span>Non recuperabili (limite 5)</span><strong id="simImpossible">0</strong></div>
+<div><span>In attesa di grassi</span><strong id="simUncovered">0</strong></div>
 <div><span>Acquisto armi</span><strong id="simCost">—</strong></div>
 <div><span>Grassi per armi</span><strong id="simGreaseTotal">0</strong></div>
 <div><span>Spesa riparazioni</span><strong id="simRepairCost">—</strong></div>
 <div class="sim-total-spend"><span>Spesa totale (armi + grassi)</span><strong id="simTotalCost">—</strong></div>
-<div><span>Ricavo esportazione</span><strong id="simRevenue">—</strong></div>
+<div><span>Ricavo delle sole armi esportabili</span><strong id="simRevenue">—</strong></div>
 <div class="private-profit"><span>Profitto lordo dopo riparazioni</span><strong id="simProfit">—</strong></div>
 <div><span>Rendimento sulla spesa</span><strong id="simReturn">—</strong></div>
 <div><span>Margine sul ricavo</span><strong id="simMargin">—</strong></div>
 <div><span>Risparmio sul prezzo pieno</span><strong id="simSaving">—</strong></div>
 </div>
-<details class="sim-formulas"><summary>Come si leggono i risultati</summary><p>Profitto lordo = ricavo − acquisto armi − grassi. Grassi = quantità × $8. Rendimento = profitto ÷ spesa totale (armi + grassi). Margine = profitto ÷ ricavo. Il massimo spendibile per le armi è già ridotto dei costi di riparazione. Percentuali non definite a denominatore zero. Trasporto e altri costi non sono inclusi.</p></details>
+<details class="sim-formulas"><summary>Come si leggono i risultati</summary><p>Il profitto lordo = ricavo delle armi esportabili − acquisto di TUTTE le armi − costo di TUTTI i grassi acquistati. Ogni arma ha massimo 5 riparazioni in totale (comprese le precedenti). Un grasso costa $8 e ripara del 20%. Le armi che non possono raggiungere il 90% e quelle senza grassi sufficienti non producono ricavi. Rendimento = profitto ÷ spesa totale; margine = profitto ÷ ricavo. Il massimo spendibile per le armi considera la spesa per i grassi. Trasporto e altri costi non sono inclusi.</p></details>
 <h3>Il tuo obiettivo</h3>
 <label>Profitto lordo minimo ($)<input id="simGoal" type="number" min="0" max="1000000000" step="0.01" value="0"></label>
 <label>Rendimento minimo sulla spesa (%)<input id="simRoi" type="number" min="0" max="100000" step="0.01" value="0"></label>
@@ -161,7 +164,7 @@
 <div class="private-totals"><div><span>Massimo spendibile per le armi</span><strong id="simMaximum">—</strong></div><div><span>Spazio per aumentare l’offerta alle armerie</span><strong id="simRoom">—</strong></div></div>
 <p id="simGoalStatus" role="status"></p><p id="simWarning" class="sim-warning"></p>
 <button id="simTransfer" class="btn gold" type="button" disabled>Prepara nuovo ordine →</button>
-<p class="sim-reference">Trasferisce solo quantità e prezzi concordati. I grassi sono costi interni di manutenzione: non vengono sommati al prezzo dovuto all'armeria. Nessuna tariffa di esportazione viene trasferita.</p>
+<p class="sim-reference">Trasferisce quantità e prezzi d'acquisto concordati (anche per le armi non esportabili), non il numero di riparazioni o i grassi, che restano una simulazione privata. Nessuna tariffa di esportazione viene trasferita.</p>
 </aside></div></section>
 </div>
 </div>
