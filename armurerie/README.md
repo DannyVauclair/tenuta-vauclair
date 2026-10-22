@@ -47,6 +47,12 @@ L'importo trasferito a Ordini è soltanto quanto concordato con il fornitore per
 
 Moduli: `simulatore-core.js` (formule), `simulatore.js` (interfaccia riservata), `simulatore.css` (stile). Nessuna tariffa export è hardcoded nei sorgenti GitHub.
 
+## Attivazione account e recupero password
+
+La pagina `accesso.html` gestisce in modo indipendente il primo accesso degli account familiari già invitati e il recupero delle password. `accesso.js` usa esclusivamente la chiave pubblicabile Supabase: invia una email tramite `resetPasswordForEmail` specificando `redirectTo: https://dannyvauclair.github.io/tenuta-vauclair/armurerie/accesso.html`, e consente `updateUser({password})` esclusivamente dopo il collegamento autenticato e la conferma di appartenenza alla tabella privata con RLS. La procedura **non crea utenti né autorizza nuovi account**, e non espone tariffe o credenziali riservate.
+
+**Configurazione necessaria su Supabase Dashboard → Authentication → URL Configuration:** aggiungere fra i Redirect URLs autorizzati l’indirizzo ESATTO `https://dannyvauclair.github.io/tenuta-vauclair/armurerie/accesso.html` (senza wildcard). Non è necessario cambiare il Site URL principale del progetto Supabase condiviso con altri servizi. I vecchi link di invito con redirect errato possono essere sostituiti da un nuovo link inviato direttamente dalla pagina `accesso.html`, dopo la configurazione.
+
 ## Ordini
 
 La pagina Ordini utilizza ancora il **localStorage del browser**; non è sincronizzata tra giocatori e non condivide il sistema di accesso della pagina esportazioni. Il carrello dal listino agli ordini si trasferisce tramite sessionStorage.
