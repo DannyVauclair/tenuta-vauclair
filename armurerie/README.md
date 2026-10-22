@@ -39,6 +39,12 @@ L'email di conferma ricevuta inizialmente non ha riportato alla pagina per via d
 
 Per revocare l'accesso si elimina il membro autorizzato dal database. Non abilitare policy di INSERT/UPDATE/DELETE per i ruoli `anon` o `authenticated`.
 
+## Simulatore di forniture (area privata)
+
+La pagina `riservata.html` contiene ora un simulatore integrato, che si attiva solo dopo accesso Supabase autorizzato e lettura RLS delle tariffe staff. Consente aggiunta rapida dei modelli, quantità 0–999, offerte per arma (slider e importo esatto), preset Vauclair/prezzo pieno/sconti 5% e 10%, distribuzione proporzionale di un budget globale con residuo di arrotondamento esplicito, profitto lordo, rendimento sulla spesa e margine sul ricavo, obiettivo di profitto e ROI minimo. Il trasferimento verso Ordini passa esclusivamente ID, quantità e prezzi negoziati in `sessionStorage` temporaneo (non trasmette i ricavi al blip), lasciando intatti i prezzi e gli ordini già salvati. Il calcolo usa centesimi interi e non include costi aggiuntivi.
+
+Moduli: `simulatore-core.js` (formule), `simulatore.js` (interfaccia riservata), `simulatore.css` (stile). Nessuna tariffa export è hardcoded nei sorgenti GitHub.
+
 ## Ordini
 
 La pagina Ordini utilizza ancora il **localStorage del browser**; non è sincronizzata tra giocatori e non condivide il sistema di accesso della pagina esportazioni. Il carrello dal listino agli ordini si trasferisce tramite sessionStorage.
