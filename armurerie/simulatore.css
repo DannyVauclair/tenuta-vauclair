@@ -19,6 +19,19 @@
 .simulator .sim-quantity{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .sim-quantity input[type=number]{width:90px;margin:0}
 .sim-quantity button{min-width:42px;min-height:42px}
+.sim-condition{display:grid;gap:4px;padding:12px 14px;background:rgba(20,13,12,.32);border:1px solid rgba(201,159,99,.2);margin:17px 0}
+.sim-condition input[type=number]{max-width:165px}
+.sim-condition .sim-reference{display:block;font-size:11px;color:var(--secondary);margin-top:2px}
+.sim-repair{border-color:rgba(208,169,115,.5);background:linear-gradient(135deg,#33241e,#211916)}
+.sim-repair h3{font:600 31px/1.1 var(--serif);margin:12px 0}
+.sim-repair strong{color:#e9c18a}
+.sim-repair-entry{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:12px}
+.simulator .sim-repair-entry label{margin:8px 0}
+.sim-repair-entry .order-subtle{min-height:44px;margin-bottom:8px;white-space:normal}
+.sim-repair-status{border-left:2px solid #b88c52;padding-left:12px;margin:12px 0 0}
+.sim-repair-status.sim-repair-short{border-color:#e8a38b;color:#ffc7b3}
+.sim-summary .sim-total-spend{border-top:1px solid rgba(219,173,111,.38);margin-top:8px;padding-top:14px}
+.sim-summary .sim-total-spend strong{color:#ffdf9c}
 .sim-line-bottom{display:flex;flex-wrap:wrap;justify-content:space-between;gap:14px;border-top:1px solid #654a37;padding-top:14px;font-size:12px}
 .sim-line-bottom strong{display:block;font:600 28px var(--serif);color:#efc787}
 .sim-summary{position:static;padding:24px;min-width:0}
@@ -31,4 +44,4 @@
 .sim-formulas{font-size:12px;color:#d2bfa9;margin:16px 0}.sim-formulas summary{cursor:pointer;min-height:32px}
 @media(max-width:950px){.sim-layout{grid-template-columns:1fr}.sim-summary{max-width:none}.sim-heading{align-items:flex-start;flex-direction:column}}
 @media(max-width:690px){.sim-add{grid-template-columns:minmax(0,1fr) 96px}.sim-add .btn{grid-column:1/-1;white-space:normal}}
-@media(max-width:530px){.sim-add{padding:14px}.sim-line,.sim-box,.sim-summary{padding:16px}.sim-line-head{align-items:flex-start;flex-direction:column}.simulator h2{font-size:36px}.sim-presets button{flex:1 1 44%;min-height:44px}.sim-summary .private-totals strong{font-size:25px}.sim-summary .private-profit strong{font-size:36px}}
+@media(max-width:530px){.sim-repair-entry{grid-template-columns:1fr}.sim-repair-entry .order-subtle{margin-bottom:0}.sim-add{padding:14px}.sim-line,.sim-box,.sim-summary{padding:16px}.sim-line-head{align-items:flex-start;flex-direction:column}.simulator h2{font-size:36px}.sim-presets button{flex:1 1 44%;min-height:44px}.sim-summary .private-totals strong{font-size:25px}.sim-summary .private-profit strong{font-size:36px}}
