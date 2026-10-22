@@ -6,26 +6,62 @@ const retail={a1:80,a2:90,a3:95,a4:120,a5:140,a9:125,a10:145,a15:100,a16:140,a17
 const money=c=>new Intl.NumberFormat("it-IT",{style:"currency",currency:"USD",currencyDisplay:"narrowSymbol"}).format(c/100);
 const pct=x=>x===null?"—":new Intl.NumberFormat("it-IT",{maximumFractionDigits:2}).format(x)+"%";
 const el=(tag,cls,text)=>{const n=document.createElement(tag);n.className=cls||"";if(text!==undefined)n.textContent=text;return n;};
-let data=[],quantities=null,prices=new Map(),onQuantity=()=>{},views=new Map(),requested=null,goalValue=0,roiValue=0;
-function rows(){return data.filter(w=>quantities?.get(w.id)>0).map(w=>({...w,qty:quantities.get(w.id),price:prices.get(w.id)??w.standard}));}
+let data=[],quantities=null,prices=new Map(),conditions=new Map(),greaseManual=null,onQuantity=()=>{},views=new Map(),requested=null,goalValue=0,roiValue=0;
+function rows(){return data.filter(w=>quantities?.get(w.id)>0).map(w=>({...w,qty:quantities.get(w.id),price:prices.get(w.id)??w.standard,condition:conditions.get(w.id)??100}));}
 function button(text,fn){const b=el("button","order-subtle",text);b.type="button";b.onclick=fn;return b;}
 function input(type,value,min,max,step,label){const i=el("input");Object.assign(i,{type,value,min,max,step});i.setAttribute("aria-label",label);return i;}
 function manual(){requested=null;$("simStrategy").textContent="Prezzi personalizzati";}
 function update(){
- const rr=rows(),t=M.totals(rr),profit=t.revenue-t.cost;
- const goal=goalValue,roi=roiValue;
- const maximum=M.target(t.revenue,goal,roi);
- for(const [id,value] of Object.entries({simCount:t.count,simCost:money(t.cost),simRevenue:money(t.revenue),simProfit:money(profit),simReturn:pct(t.cost?profit/t.cost*100:null),simMargin:pct(t.revenue?profit/t.revenue*100:null),simSaving:money(t.retail-t.cost),simMaximum:t.count?money(maximum):"—",simRoom:t.count?money(maximum-t.cost):"—"}))$(id).textContent=value;
- $("simProfit").classList.toggle("sim-loss",profit<0);
- $("simBudget").max=(t.retail/100).toFixed(2);$("simBudgetNumber").max=(t.retail/100).toFixed(2);
+ const rr=rows(),t=M.totals(rr);
+ const suggested=M.greaseSuggested(rr),greaseCount=t.count?(greaseManual??suggested):0;
+ const fin=M.financials(rr,greaseCount,goalValue,roiValue);
+ const maximum=fin.maxPurchase;
+ const metrics={
+  simCount:t.count,simCost:money(t.cost),simGreaseTotal:greaseCount,
+  simRepairCost:money(fin.repair),simTotalCost:money(fin.totalCost),
+  simRevenue:money(t.revenue),simProfit:money(fin.profit),
+  simReturn:pct(fin.roi),simMargin:pct(fin.margin),
+  simSaving:money(t.retail-t.cost),
+  simMaximum:t.count?money(maximum):"—",
+  simRoom:t.count?money(maximum-t.cost):"—"
+ };
+ for(const [id,value] of Object.entries(metrics))$(id).textContent=value;
+ $("simProfit").classList.toggle("sim-loss",fin.profit<0);
+ $("simBudget").max=(t.retail/100).toFixed(2);
+ $("simBudgetNumber").max=(t.retail/100).toFixed(2);
  if(document.activeElement!==$("simBudget"))$("simBudget").value=((requested??t.cost)/100).toFixed(2);
  if(document.activeElement!==$("simBudgetNumber"))$("simBudgetNumber").value=((requested??t.cost)/100).toFixed(2);
  $("simResidual").textContent=requested===null?"Offerta effettiva: "+money(t.cost):"Budget richiesto: "+money(requested)+" · Offerta effettiva: "+money(t.cost)+" · Residuo non distribuito: "+money(requested-t.cost);
- $("simGoalStatus").textContent=!t.count?"Aggiungi almeno un’arma per valutare l’obiettivo.":maximum<0?"Obiettivo impossibile: il profitto richiesto supera l’intero ricavo, anche con acquisti a costo zero.":maximum===0?"Obiettivo raggiungibile solo a costo zero: fornitura gratuita, non una trattativa realistica. Il rendimento a spesa zero non è definito.":t.cost===0&&roi>0?"Profitto valutabile, ma il rendimento percentuale non è definito con una spesa pari a zero.":t.cost<=maximum?"Obiettivi rispettati. Puoi aumentare l’offerta complessiva fino al limite indicato.":"Obiettivi non raggiunti con l’offerta attuale: riduci la spesa di almeno "+money(t.cost-maximum)+".";
- $("simWarning").textContent=t.count&&(maximum<t.standard||rr.some(r=>r.price<r.standard))?"Attenzione: un’offerta sotto il listino Vauclair potrebbe essere poco interessante per il fornitore. Non conosciamo il suo minimo accettabile; il costo di produzione non è una soglia di accettazione.":"La disponibilità del fornitore ad accettare il prezzo va comunque negoziata.";
- $("simTransfer").disabled=!t.count;
  $("simBudget").disabled=$("simBudgetNumber").disabled=!t.count;
- for(const r of rr){const v=views.get(r.id);if(!v)continue;v.profit.textContent=money(r.qty*(r.export-r.price));v.total.textContent=money(r.qty*r.price);v.range.max=Math.max(r.retail,r.price)/100;if(document.activeElement!==v.range)v.range.value=r.price/100;if(document.activeElement!==v.exact)v.exact.value=(r.price/100).toFixed(2);v.range.max=Math.max(r.retail,r.price)/100;v.warning.textContent=r.price<r.standard?"Offerta inferiore al listino Vauclair":r.price>r.retail?"Offerta superiore al prezzo pieno":"";}
+ $("simGreaseCount").disabled=$("simGreaseAuto").disabled=!t.count;
+ if(document.activeElement!==$("simGreaseCount"))$("simGreaseCount").value=greaseCount;
+ $("simGreaseSuggest").textContent=String(suggested);
+ const isShort=greaseManual!==null&&greaseCount<suggested;
+ $("simGreaseStatus").classList.toggle("sim-repair-short",isShort);
+ $("simGreaseStatus").textContent=!t.count?"Aggiungi un'arma per stimare la manutenzione.":isShort?
+  "Attenzione: la quantità inserita è inferiore alla stima di "+(suggested-greaseCount)+" grassi. Alcune armi potrebbero restare sotto il 90% e non essere esportabili.":
+  greaseManual===null?"Quantità automatica calcolata dalle condizioni indicate (ogni modello ha una condizione media uniforme).":
+  greaseCount>suggested?"Quantità personalizzata: "+(greaseCount-suggested)+" grassi in più rispetto alla stima.":"Quantità personalizzata: coincide con la stima.";
+ $("simGoalStatus").textContent=!t.count?"Aggiungi almeno un’arma per valutare l’obiettivo.":
+  maximum<0?"Obiettivo impossibile: la manutenzione costa già "+money(fin.repair)+" e il budget d'acquisto necessario sarebbe negativo.":
+  maximum===0?"Obiettivo raggiungibile soltanto con armi gratuite: verifica se l'accordo è realistico.":
+  fin.totalCost===0&&roiValue>0?"Profitto valutabile, ma il rendimento percentuale è indefinito con una spesa totale pari a zero.":
+  t.cost<=maximum?"Obiettivi rispettati, costi di manutenzione inclusi. Puoi aumentare l'offerta alle armerie fino al limite indicato.":
+  "Obiettivi non raggiunti: riduci l'offerta per le armi di almeno "+money(t.cost-maximum)+". Il costo dei grassi è già considerato.";
+ $("simWarning").textContent=t.count&&(maximum<t.standard||rr.some(r=>r.price<r.standard))?
+ "Attenzione: un'offerta sotto il listino Vauclair potrebbe essere poco interessante per il fornitore. I costi di manutenzione sono tuoi e non riducono automaticamente il prezzo richiesto dall'armeria.":
+ "La disponibilità del fornitore ad accettare il prezzo va comunque negoziata.";
+ $("simTransfer").disabled=!t.count;
+ for(const r of rr){
+  const v=views.get(r.id);if(!v)continue;
+  v.profit.textContent=money(r.qty*(r.export-r.price));
+  v.total.textContent=money(r.qty*r.price);
+  v.range.max=Math.max(r.retail,r.price)/100;
+  if(document.activeElement!==v.range)v.range.value=r.price/100;
+  if(document.activeElement!==v.exact)v.exact.value=(r.price/100).toFixed(2);
+  v.warning.textContent=r.price<r.standard?"Offerta inferiore al listino Vauclair":r.price>r.retail?"Offerta superiore al prezzo pieno":"";
+  v.conditionHint.textContent="Stima: "+M.greasePerWeapon(r.condition)+" grassi per arma, "+r.qty*M.greasePerWeapon(r.condition)+" per questo modello.";
+ }
 }
 function render(){
  if(!quantities)return;
@@ -46,25 +82,31 @@ function render(){
   const set=i=>{if(i.value===""||!i.checkValidity())return;prices.set(r.id,M.cents(i.value));manual();update();};
   range.oninput=()=>set(range);exact.oninput=()=>set(exact);
   exact.onchange=()=>{if(!exact.checkValidity()||exact.value===""){exact.value=((prices.get(r.id)??r.standard)/100).toFixed(2);}update();};
+  const condition=input("number",r.condition,0,100,1,"Condizione iniziale (%) "+r.name);
+  const conditionBox=el("label","sim-condition","Condizione iniziale delle armi (%)");
+  const conditionHint=el("small","sim-reference");
+  conditionBox.append(condition,conditionHint);
+  condition.oninput=()=>{if(condition.value!==""&&condition.checkValidity()&&Number.isInteger(Number(condition.value))){conditions.set(r.id,Number(condition.value));update();}};
+  condition.onchange=()=>{if(condition.value===""||!condition.checkValidity()||!Number.isInteger(Number(condition.value)))condition.value=conditions.get(r.id)??100;update();};
   const summary=el("div","sim-line-bottom"),total=el("strong"),gain=el("strong"),warning=el("small","sim-warning");
-  const c=el("span","","Acquisto modello ");c.append(total);const g=el("span","","Profitto lordo ");g.append(gain);summary.append(c,g);
-  card.append(head,refs,qbox,offer,summary,warning);root.append(card);views.set(r.id,{range,exact,total,profit:gain,warning});
+  const c=el("span","","Acquisto modello ");c.append(total);const g=el("span","","Profitto prima dei grassi ");g.append(gain);summary.append(c,g);
+  card.append(head,refs,qbox,offer,conditionBox,summary,warning);root.append(card);views.set(r.id,{range,exact,total,profit:gain,warning,conditionHint});
  }
- if(!rows().length)root.append(el("p","empty","Seleziona le armi dal catalogo qui sopra. Le simulazioni restano temporanee."));
+ if(!rows().length)root.append(el("p","empty","Aggiungi armi alla fornitura: puoi scegliere i modelli qui sopra oppure dal catalogo."));
  update();
 }
 window.VauclairSimulator={
  mount(weapons,q,callback,preserve=false){
   const catalog=window.VAUCLAIR_WEAPONS||[];
   data=weapons.map(w=>{const p=catalog.find(p=>p.id===w.weapon_id&&p.tag==="attuale");if(!p||!retail[p.id])throw Error("Modello non disponibile nel catalogo ufficiale");return {id:p.id,name:p.name,standard:M.cents(p.buy),retail:M.cents(retail[p.id]),export:M.cents(w.blip_price)};});
-  quantities=q;onQuantity=callback;if(!preserve)prices.clear();requested=null;
+  quantities=q;onQuantity=callback;if(!preserve){prices.clear();conditions.clear();greaseManual=null;}requested=null;
   const picker=$("simAddModel");picker.replaceChildren();
   for(const w of data){const option=el("option","",w.name);option.value=w.id;picker.append(option);}
   $("simAddButton").disabled=!data.length;
   render();
  },
  render,
- clear(){data=[];quantities=null;prices.clear();views.clear();requested=null;goalValue=roiValue=0;$("simStrategy").textContent="Listino Vauclair";$("simLines").replaceChildren();$("simAddModel").replaceChildren();$("simAddButton").disabled=true;for(const id of ["simCost","simRevenue","simProfit","simReturn","simMargin","simSaving","simMaximum","simRoom","simCount","simResidual","simGoalStatus","simWarning"])$(id).textContent="";$("simGoal").value=$("simRoi").value=$("simBudget").value=$("simBudgetNumber").value=0;},
+ clear(){data=[];quantities=null;prices.clear();conditions.clear();greaseManual=null;views.clear();requested=null;goalValue=roiValue=0;$("simStrategy").textContent="Listino Vauclair";$("simLines").replaceChildren();$("simAddModel").replaceChildren();$("simAddButton").disabled=true;for(const id of ["simCost","simGreaseTotal","simRepairCost","simTotalCost","simGreaseSuggest","simGreaseStatus","simRevenue","simProfit","simReturn","simMargin","simSaving","simMaximum","simRoom","simCount","simResidual","simGoalStatus","simWarning"])$(id).textContent="";$("simGoal").value=$("simRoi").value=$("simBudget").value=$("simBudgetNumber").value=$("simGreaseCount").value=0;$("simGreaseAuto").disabled=$("simGreaseCount").disabled=true;},
 };
 $("simAddForm").onsubmit=event=>{
  event.preventDefault();
@@ -74,6 +116,18 @@ $("simAddForm").onsubmit=event=>{
  quantities.set(id,Math.min(999,(quantities.get(id)||0)+qty));
  manual();onQuantity();
 };
+$("simGreaseCount").oninput=()=>{
+ if(!quantities||$("simGreaseCount").value===""||!$("simGreaseCount").checkValidity())return;
+ const count=Number($("simGreaseCount").value);
+ if(!Number.isInteger(count))return;
+ greaseManual=count;update();
+};
+$("simGreaseCount").onchange=()=>{
+ if($("simGreaseCount").value===""||!$("simGreaseCount").checkValidity()||!Number.isInteger(Number($("simGreaseCount").value))){
+  $("simGreaseCount").value=greaseManual??M.greaseSuggested(rows());update();
+ }
+};
+$("simGreaseAuto").onclick=()=>{greaseManual=null;update();};
 document.querySelectorAll("[data-sim-preset]").forEach(b=>b.onclick=()=>{if(!quantities)return;const mode=b.dataset.simPreset;if(mode==="custom"){manual();update();return;}for(const w of data)prices.set(w.id,mode==="standard"?w.standard:Math.round(w.retail*(mode==="full"?1:mode==="five"?.95:.9)));requested=null;$("simStrategy").textContent=b.textContent;render();});
 for(const id of ["simGoal","simRoi"]){
  $(id).oninput=()=>{if($(id).value!==""&&$(id).checkValidity()){if(id==="simGoal")goalValue=M.cents($(id).value);else roiValue=Math.round(Number($(id).value)*100);update();}};
@@ -83,7 +137,7 @@ function budget(i){if(!quantities||i.value===""||!i.checkValidity())return;const
 $("simBudget").oninput=()=>budget($("simBudget"));
 $("simBudgetNumber").oninput=()=>budget($("simBudgetNumber"));
 $("simBudgetNumber").onchange=()=>{if(!$("simBudgetNumber").checkValidity())$("simBudgetNumber").value=(M.totals(rows()).cost/100).toFixed(2);update();};
-$("simReset").onclick=()=>{if(!quantities)return;quantities.clear();prices.clear();requested=null;goalValue=roiValue=0;$("simGoal").value=$("simRoi").value=0;$("simStrategy").textContent="Listino Vauclair";onQuantity();};
+$("simReset").onclick=()=>{if(!quantities)return;quantities.clear();prices.clear();conditions.clear();greaseManual=null;requested=null;goalValue=roiValue=0;$("simGoal").value=$("simRoi").value=0;$("simStrategy").textContent="Listino Vauclair";onQuantity();};
 $("simTransfer").onclick=()=>{
  const payload=rows().map(r=>({id:r.id,qty:r.qty,unit:r.price/100}));
  if(!payload.length)return;
