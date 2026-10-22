@@ -133,6 +133,8 @@ function startSimulationDraft(){
     lines=draft.map(l=>({id:l.id,qty:l.qty,unit:Math.round(l.unit*100)/100}));
     priceEdited=false;updateLines();openPanel();
     sessionStorage.removeItem(key);
+    // Una bozza precedente del listino pubblico non deve sovrascrivere questa fornitura.
+    sessionStorage.removeItem(DRAFT);
     notice("Fornitura dal simulatore: quantità e prezzi unitari concordati. Indica il fornitore e salva per creare un nuovo ordine.");
     return true;
   }catch(_){return false;}
