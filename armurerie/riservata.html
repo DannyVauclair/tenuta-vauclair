@@ -14,10 +14,10 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.89.0/dist/umd/supabase.js" defer></script>
 <script src="header.js?v=20261013-noarrow1" defer></script>
 <script src="notifiche.js?v=20261012-bell1" defer></script>
-<link rel="stylesheet" href="simulatore.css?v=20261022-sim2">
+<link rel="stylesheet" href="simulatore.css?v=20261022-sim3">
 <script src="catalogo.js?v=20261022-available11" defer></script>
 <script src="simulatore-core.js?v=20261022-sim2" defer></script>
-<script src="simulatore.js?v=20261022-sim2" defer></script>
+<script src="simulatore.js?v=20261022-sim3" defer></script>
 <script src="riservata.js?v=20261022-sim2" defer></script>
 </head>
 <body class="private-page">
@@ -101,7 +101,16 @@
   </div>
 <section id="simulatore" class="simulator" aria-labelledby="simTitle">
 <div class="sim-heading"><div><span class="label">TRATTATIVE · SOLO ARMI INTEGRE</span><h2 id="simTitle">Simulatore <em>forniture.</em></h2></div><button id="simReset" class="order-subtle" type="button">Azzera simulazione</button></div>
-<p>Modifica quantità e offerte senza cambiare listini, tariffe o ordini registrati. Da 0 a 999 armi per modello.</p>
+<p>Componi una fornitura e prova le offerte senza cambiare listini, tariffe o ordini registrati. Da 0 a 999 armi per modello.</p>
+<form class="sim-add" id="simAddForm" aria-label="Aggiungi armi alla simulazione">
+  <label for="simAddModel">Modello
+    <select id="simAddModel" required><option value="">Accedi al registro per scegliere un modello</option></select>
+  </label>
+  <label for="simAddQty">Quantità
+    <input id="simAddQty" type="number" min="1" max="999" step="1" value="1" required>
+  </label>
+  <button type="submit" class="btn gold" id="simAddButton" disabled>+ Aggiungi alla fornitura</button>
+</form>
 <div class="sim-presets" aria-label="Strategie di acquisto">
 <button type="button" class="order-subtle" data-sim-preset="standard">Listino Vauclair</button>
 <button type="button" class="order-subtle" data-sim-preset="full">Prezzo pieno</button>
