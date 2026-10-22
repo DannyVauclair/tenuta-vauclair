@@ -18,6 +18,28 @@
     rows.forEach((r,i)=>{if(prices[i]<r.retail&&r.qty<=remainder){prices[i]++;remainder-=r.qty;}});
     return {prices,remainder,budget};
   }
-  const api={cents,totals,target,allocate};
+  // One tin of gun oil/grease restores 20 durability points; exports require at least 90%.
+  // Conditions are estimates by model, not an assertion about individual weapons.
+  const GREASE_UNIT_CENTS=800,MIN_EXPORT_CONDITION=90,RESTORE_POINTS=20;
+  function greasePerWeapon(condition){
+    const n=Number(condition);
+    if(!Number.isFinite(n)||n<0||n>100)throw new RangeError("Condizione arma non valida");
+    return Math.max(0,Math.ceil((MIN_EXPORT_CONDITION-n)/RESTORE_POINTS));
+  }
+  function greaseSuggested(rows){
+    return rows.reduce((sum,r)=>sum+r.qty*greasePerWeapon(r.condition??100),0);
+  }
+  function financials(rows,greaseCount,profitGoal=0,roiHundredths=0){
+    if(!Number.isInteger(greaseCount)||greaseCount<0||greaseCount>100000)throw new RangeError("Quantità grassi non valida");
+    const quote=totals(rows),repair=greaseCount*GREASE_UNIT_CENTS,totalCost=quote.cost+repair,profit=quote.revenue-totalCost;
+    return {
+      ...quote,greaseCount,repair,totalCost,profit,
+      roi:totalCost>0?profit/totalCost*100:null,
+      margin:quote.revenue>0?profit/quote.revenue*100:null,
+      // The supplier budget is what remains after buying maintenance materials.
+      maxPurchase:target(quote.revenue,profitGoal,roiHundredths)-repair
+    };
+  }
+  const api={cents,totals,target,allocate,greasePerWeapon,greaseSuggested,financials,GREASE_UNIT_CENTS,MIN_EXPORT_CONDITION,RESTORE_POINTS};
   if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.VauclairMath=api;
 })(globalThis);
