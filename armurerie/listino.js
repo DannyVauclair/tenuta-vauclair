@@ -1,6 +1,6 @@
 (()=>{
 "use strict";
-const weapons=Array.isArray(window.VAUCLAIR_WEAPONS)?window.VAUCLAIR_WEAPONS:[];
+const weapons=Array.isArray(window.VAUCLAIR_WEAPONS)?window.VAUCLAIR_WEAPONS.filter(w=>w.tag==="attuale"):[];
 const money=n=>new Intl.NumberFormat("it-IT",{style:"currency",currency:"USD",currencyDisplay:"narrowSymbol",minimumFractionDigits:0,maximumFractionDigits:2}).format(n);
 const pick=new Map();
 let category="Tutte",filter="";
@@ -104,6 +104,6 @@ $("startOrder").addEventListener("click",()=>{
   catch(_){alert("Impossibile trasferire la selezione in questo browser. Apri Ordini e inserisci le armi manualmente.");return}
   window.location.href="ordini.html#nuovo";
 });
-if(weapons.length!==22)throw Error("Il catalogo non contiene 22 armi.");
+if(weapons.length!==11)throw Error("Il listino delle armi disponibili deve contenere 11 modelli.");
 update();
 })();
