@@ -28,12 +28,12 @@ Backend: Supabase (progetto esistente Wildlands, tabelle nuove e isolate dal sis
 
 - `public.vauclair_export_prices`: 22 righe (11 quotazioni approvate, 11 modelli futuri disabilitati con blip_price=0). SELECT soltanto agli utenti autenticati che compaiono nella tabella di accesso.
 - `public.vauclair_private_members`: elenco degli UUID Supabase abilitati. Nessun utente pubblico o autenticato può autoaggiungersi o modificare le tariffe; per gli utenti non approvati le policy RLS restituiscono zero righe.
-- Un solo account è stato verificato tramite conferma email e autorizzato nel database. L'accesso ai prezzi è negato a tutti gli altri account, anche se registrati.
+- L'accesso al registro è gestito da una lista esplicita di account autorizzati tramite UUID Supabase; si può abilitare separatamente un secondo account per Vivian senza condividere le credenziali. Fino all'inserimento nel database, l'account aggiuntivo non può accedere ai prezzi, anche se è già registrato. Gli altri account rimangono esclusi.
 - La chiave `sb_publishable_` utilizzata nel frontend è pubblica per definizione; **non usare mai service_role né altre chiavi segrete nei file GitHub**.
 
 ### Accesso proprietario già attivato
 
-L'unico account registrato è risultato **email confermata** ed è già presente tra i membri autorizzati. Aprire **Registro** dalla navigazione del sito Armurerie ed effettuare il login con l'email e la password già utilizzate: non occorre una seconda registrazione né un nuovo link di conferma.
+L'account proprietario iniziale è risultato **email confermata** ed è già presente tra i membri autorizzati. Aprire **Registro** dalla navigazione Armurerie ed effettuare l'accesso con le credenziali personali dell'account autorizzato. L'eventuale secondo utente va prima creato in Supabase Auth e poi autorizzato in `vauclair_private_members`.
 
 L'email di conferma ricevuta inizialmente non ha riportato alla pagina per via della configurazione di redirect del progetto, ma l'account è già confermato lato Supabase. Se un giorno si vorrà riattivare la registrazione da questa interfaccia, prima configurare i redirect dell'applicazione in Supabase > Authentication > URL Configuration.
 
