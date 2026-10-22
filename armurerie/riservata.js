@@ -80,7 +80,7 @@ async function sync(){
     if(member.error)throw member.error;
     if(!member.data){
       failSafe();
-      msg("approvalMessage","Questo account non è autorizzato. Accedi con l’account del proprietario.");
+      msg("approvalMessage","Questo account non è autorizzato. Accedi con un account abilitato al registro.");
       show("awaitingApproval");return;
     }
     const {data,error:readError}=await client.from("vauclair_export_prices")
