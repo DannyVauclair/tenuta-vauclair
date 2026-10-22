@@ -14,7 +14,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.89.0/dist/umd/supabase.js" defer></script>
 <script src="header.js?v=20261013-noarrow1" defer></script>
 <script src="notifiche.js?v=20261012-bell1" defer></script>
-<script src="riservata.js?v=20261012-owner2" defer></script>
+<script src="riservata.js?v=20261022-staff11" defer></script>
 </head>
 <body class="private-page">
 <a class="skip" href="#contenuto">Vai al contenuto</a>
@@ -71,13 +71,13 @@
 
 <div id="privateWorkspace" hidden>
   <div class="private-workspace-head">
-    <div><span class="label">UFFICIO ESPORTAZIONI</span><h2>Listino <em>del blip.</em></h2><p>Valori proposti, da confermare con lo staff. I margini mostrati sono lordi e presuppongono acquisti ai tetti del listino.</p></div>
+    <div><span class="label">UFFICIO ESPORTAZIONI</span><h2>Listino <em>del blip.</em></h2><p>Tariffe di esportazione confermate dallo staff. I margini mostrati sono lordi e presuppongono acquisti ai tetti del listino. Solo armi integre.</p></div>
     <button type="button" class="order-subtle" id="privateLogout">Esci dall'area privata</button>
   </div>
   <div class="private-summary-cards" aria-label="Riepilogo catalogo">
-    <div class="order-stat"><small>Modelli in archivio</small><strong id="privateCount">—</strong></div>
-    <div class="order-stat"><small>Ricarico proposto</small><strong>+150%</strong></div>
-    <div class="order-stat"><small>Tariffe</small><strong>22</strong></div>
+    <div class="order-stat"><small>Modelli disponibili</small><strong id="privateCount">—</strong></div>
+    <div class="order-stat"><small>Tariffe confermate</small><strong id="privateApprovedCount">—</strong></div>
+    <div class="order-stat"><small>Condizione richiesta</small><strong>Integre</strong></div>
   </div>
   <div class="toolbar private-toolbar">
     <input class="search" id="privateSearch" type="search" placeholder="Cerca un'arma..." aria-label="Cerca un'arma" autocomplete="off">
@@ -102,13 +102,13 @@
         <div><span>Incasso blip</span><strong id="privateRevenue">$0</strong></div>
         <div class="private-profit"><span>Margine Vauclair</span><strong id="privateProfit">$0</strong></div>
       </div>
-      <p class="hint">Prezzi del blip ancora da approvare. Una trattativa d'acquisto sotto il tetto indicato migliora il margine.</p>
+      <p class="hint">Prezzi del blip confermati dallo staff. Una trattativa d’acquisto sotto il tetto indicato migliora il margine.</p>
     </aside>
   </div>
 </div>
 </div>
 </section>
 </main>
-<footer class="footer compact-footer"><div class="wrap footer-inner"><strong>Vauclair Armurerie</strong><p>Archivio interno · Anno 1900 · Prezzi di esportazione riservati e non ancora approvati.</p></div></footer>
+<footer class="footer compact-footer"><div class="wrap footer-inner"><strong>Vauclair Armurerie</strong><p>Archivio interno · Anno 1900 · Tariffe di esportazione approvate e riservate.</p></div></footer>
 </body>
 </html>
