@@ -1,0 +1,28 @@
+.simulator{margin-top:42px;scroll-margin-top:24px}
+.sim-heading,.sim-line-head{display:flex;justify-content:space-between;align-items:center;gap:16px}
+.simulator h2{font-size:42px}.simulator h2 em{color:var(--gold)}
+.simulator p{font-size:13px;line-height:1.8;color:#d2bfa9}
+.sim-presets{display:flex;gap:8px;flex-wrap:wrap;margin:22px 0 12px}
+.sim-layout{display:grid;grid-template-columns:minmax(0,1fr) 370px;gap:24px;align-items:start}
+.sim-line,.sim-box{background:linear-gradient(150deg,#302328,#211b20);border:1px solid #70513c;border-top:2px solid #b88c52;padding:22px;margin-bottom:18px}
+.sim-line h3{font-size:28px;margin:0}.sim-line-head button{flex-shrink:0}
+.simulator .sim-reference{font-size:12px;line-height:1.8}
+.simulator label{display:block;font-size:13px;color:#ead7bb;margin:14px 0}
+.simulator input[type=number]{display:block;width:100%;min-height:44px;background:#19161a;border:1px solid #806143;color:#f7e9d6;padding:10px;font:16px var(--book);margin-top:8px;box-sizing:border-box}
+.simulator input:focus-visible,.simulator button:focus-visible{outline:2px solid #ebc68a;outline-offset:3px}
+.simulator input[type=range]{width:100%;min-height:40px;accent-color:#d4a569;cursor:pointer;margin:8px 0}
+.simulator .sim-quantity{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.sim-quantity input[type=number]{width:90px;margin:0}
+.sim-quantity button{min-width:42px;min-height:42px}
+.sim-line-bottom{display:flex;flex-wrap:wrap;justify-content:space-between;gap:14px;border-top:1px solid #654a37;padding-top:14px;font-size:12px}
+.sim-line-bottom strong{display:block;font:600 28px var(--serif);color:#efc787}
+.sim-summary{position:static;padding:24px;min-width:0}
+.sim-summary .private-totals span{font-size:12px;line-height:1.6}
+.sim-summary .private-profit strong{font-size:38px}
+.sim-summary .btn{width:100%;margin-top:16px}
+.sim-summary h3{margin-top:20px}
+.simulator .sim-warning,.simulator .sim-loss{color:#f2b49c}
+.sim-warning{display:block;margin-top:10px;font-size:12px;line-height:1.8}
+.sim-formulas{font-size:12px;color:#d2bfa9;margin:16px 0}.sim-formulas summary{cursor:pointer;min-height:32px}
+@media(max-width:950px){.sim-layout{grid-template-columns:1fr}.sim-summary{max-width:none}.sim-heading{align-items:flex-start;flex-direction:column}}
+@media(max-width:530px){.sim-line,.sim-box,.sim-summary{padding:16px}.sim-line-head{align-items:flex-start;flex-direction:column}.simulator h2{font-size:36px}.sim-presets button{flex:1 1 44%;min-height:44px}.sim-summary .private-totals strong{font-size:25px}.sim-summary .private-profit strong{font-size:36px}}

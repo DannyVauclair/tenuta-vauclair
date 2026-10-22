@@ -14,7 +14,11 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.89.0/dist/umd/supabase.js" defer></script>
 <script src="header.js?v=20261013-noarrow1" defer></script>
 <script src="notifiche.js?v=20261012-bell1" defer></script>
-<script src="riservata.js?v=20261022-staff11" defer></script>
+<link rel="stylesheet" href="simulatore.css?v=20261022-sim1">
+<script src="catalogo.js?v=20261022-available11" defer></script>
+<script src="simulatore-core.js?v=20261022-sim1" defer></script>
+<script src="simulatore.js?v=20261022-sim1" defer></script>
+<script src="riservata.js?v=20261022-sim1" defer></script>
 </head>
 <body class="private-page">
 <a class="skip" href="#contenuto">Vai al contenuto</a>
@@ -71,7 +75,7 @@
 
 <div id="privateWorkspace" hidden>
   <div class="private-workspace-head">
-    <div><span class="label">UFFICIO ESPORTAZIONI</span><h2>Listino <em>del blip.</em></h2><p>Tariffe di esportazione confermate dallo staff. I margini mostrati sono lordi e presuppongono acquisti ai tetti del listino. Solo armi integre.</p></div>
+    <div><span class="label">UFFICIO ESPORTAZIONI</span><h2>Listino <em>del blip.</em></h2><p>Tariffe di esportazione confermate dallo staff. I profitti mostrati nel catalogo presuppongono acquisti al listino Vauclair. Solo armi integre.</p></div>
     <button type="button" class="order-subtle" id="privateLogout">Esci dall'area privata</button>
   </div>
   <div class="private-summary-cards" aria-label="Riepilogo catalogo">
@@ -79,6 +83,7 @@
     <div class="order-stat"><small>Tariffe confermate</small><strong id="privateApprovedCount">—</strong></div>
     <div class="order-stat"><small>Condizione richiesta</small><strong>Integre</strong></div>
   </div>
+  <p><a class="btn outline" href="#simulatore">Vai alla trattativa ↓</a></p>
   <div class="toolbar private-toolbar">
     <input class="search" id="privateSearch" type="search" placeholder="Cerca un'arma..." aria-label="Cerca un'arma" autocomplete="off">
     <div class="filters" role="group" aria-label="Categorie armi">
@@ -90,21 +95,49 @@
       <button type="button" class="collapse-all-btn" id="privateCollapseAll">Chiudi tutte</button>
     </div>
   </div>
-  <div class="catalog-layout">
+  <div class="sim-catalog">
     <div id="privateCatalog" class="price-list private-catalog" aria-live="polite"><p class="empty">Caricamento sicuro…</p></div>
-    <aside class="quote private-quote">
-      <span class="label">PROIEZIONE INTERNA</span>
-      <h3>Simula esportazione</h3>
-      <p>Seleziona i modelli e le quantità per confrontare investimento, incasso al blip e margine lordo.</p>
-      <div class="selected" id="privateSelected"><div class="empty">Nessuna arma selezionata.</div></div>
-      <div class="private-totals">
-        <div><span>Acquisti</span><strong id="privateCost">$0</strong></div>
-        <div><span>Incasso blip</span><strong id="privateRevenue">$0</strong></div>
-        <div class="private-profit"><span>Margine Vauclair</span><strong id="privateProfit">$0</strong></div>
-      </div>
-      <p class="hint">Prezzi del blip confermati dallo staff. Una trattativa d’acquisto sotto il tetto indicato migliora il margine.</p>
-    </aside>
+
   </div>
+<section id="simulatore" class="simulator" aria-labelledby="simTitle">
+<div class="sim-heading"><div><span class="label">TRATTATIVE · SOLO ARMI INTEGRE</span><h2 id="simTitle">Simulatore <em>forniture.</em></h2></div><button id="simReset" class="order-subtle" type="button">Azzera simulazione</button></div>
+<p>Modifica quantità e offerte senza cambiare listini, tariffe o ordini registrati. Da 0 a 999 armi per modello.</p>
+<div class="sim-presets" aria-label="Strategie di acquisto">
+<button type="button" class="order-subtle" data-sim-preset="standard">Listino Vauclair</button>
+<button type="button" class="order-subtle" data-sim-preset="full">Prezzo pieno</button>
+<button type="button" class="order-subtle" data-sim-preset="five">Sconto 5%</button>
+<button type="button" class="order-subtle" data-sim-preset="ten">Sconto 10%</button>
+<button type="button" class="order-subtle" data-sim-preset="custom">Prezzi personalizzati</button>
+</div><p class="sim-reference">Strategia: <strong id="simStrategy">Listino Vauclair</strong> · Gli sconti si applicano al prezzo pieno dell’armeria.</p>
+<div class="sim-layout"><div><div id="simLines"></div>
+<div class="sim-box">
+<h3>Budget della fornitura</h3>
+<label for="simBudget">Distribuisci l’offerta complessiva</label><input id="simBudget" type="range" min="0" max="0" step="0.01" value="0">
+<label>Budget richiesto ($)<input id="simBudgetNumber" type="number" min="0" max="0" step="0.01" value="0"></label>
+<p class="sim-reference">Distribuzione proporzionale ai prezzi Vauclair, fino al prezzo pieno di ciascun modello. Questo controllo sostituisce le offerte personalizzate. Centesimi non distribuibili restano nel residuo; il budget non viene superato. Per offerte oltre il prezzo pieno usa l’importo unitario manuale.</p>
+<p id="simResidual"></p>
+</div></div>
+<aside class="quote sim-summary">
+<span class="label">PROIEZIONE COMMERCIALE</span><h3>La tua fornitura</h3>
+<div class="private-totals">
+<div><span>Armi integre</span><strong id="simCount">0</strong></div>
+<div><span>Offerta complessiva</span><strong id="simCost">—</strong></div>
+<div><span>Ricavo esportazione</span><strong id="simRevenue">—</strong></div>
+<div class="private-profit"><span>Profitto lordo</span><strong id="simProfit">—</strong></div>
+<div><span>Rendimento sulla spesa</span><strong id="simReturn">—</strong></div>
+<div><span>Margine sul ricavo</span><strong id="simMargin">—</strong></div>
+<div><span>Risparmio sul prezzo pieno</span><strong id="simSaving">—</strong></div>
+</div>
+<details class="sim-formulas"><summary>Come si leggono i risultati</summary><p>Profitto lordo = ricavo − spesa. Rendimento (ricarico) = profitto ÷ spesa. Margine = profitto ÷ ricavo. Percentuali non definite a denominatore zero. Nessun altro costo è incluso.</p></details>
+<h3>Il tuo obiettivo</h3>
+<label>Profitto lordo minimo ($)<input id="simGoal" type="number" min="0" max="1000000000" step="0.01" value="0"></label>
+<label>Rendimento minimo sulla spesa (%)<input id="simRoi" type="number" min="0" max="100000" step="0.01" value="0"></label>
+<p class="sim-reference">Entrambi i vincoli si applicano insieme. Lascia 0 per non richiedere un profitto o un rendimento aggiuntivo.</p>
+<div class="private-totals"><div><span>Massimo spendibile</span><strong id="simMaximum">—</strong></div><div><span>Spazio per aumentare l’offerta</span><strong id="simRoom">—</strong></div></div>
+<p id="simGoalStatus" role="status"></p><p id="simWarning" class="sim-warning"></p>
+<button id="simTransfer" class="btn gold" type="button" disabled>Prepara nuovo ordine →</button>
+<p class="sim-reference">Trasferisce solo quantità e prezzi concordati. Il salvataggio avviene negli Ordini dopo aver indicato il fornitore. Nessuna tariffa di esportazione viene trasferita.</p>
+</aside></div></section>
 </div>
 </div>
 </section>

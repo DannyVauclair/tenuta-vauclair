@@ -125,6 +125,18 @@ function downloadBackup(){
   a.href=url;a.download="vauclair-armurerie-ordini-"+new Date().toISOString().slice(0,10)+".json";
   document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),5000);
 }
+function startSimulationDraft(){
+  const key="vauclair.armurerie.simulation-order.v1";
+  try {
+    const draft=JSON.parse(sessionStorage.getItem(key)||"null");
+    if(!Array.isArray(draft)||!draft.length||draft.length>11||!draft.every(l=>validLine(l)&&l.qty<=999&&ACTIVE_WEAPONS.some(w=>w.id===l.id))||new Set(draft.map(l=>l.id)).size!==draft.length)return false;
+    lines=draft.map(l=>({id:l.id,qty:l.qty,unit:Math.round(l.unit*100)/100}));
+    priceEdited=false;updateLines();openPanel();
+    sessionStorage.removeItem(key);
+    notice("Fornitura dal simulatore: quantità e prezzi unitari concordati. Indica il fornitore e salva per creare un nuovo ordine.");
+    return true;
+  }catch(_){return false;}
+}
 function startDraft(){
   try{
     const draft=JSON.parse(sessionStorage.getItem(DRAFT)||"null");
@@ -162,8 +174,9 @@ function init(){
     }
     closePanel();render();$("orderList").scrollIntoView({behavior:"smooth",block:"start"});
   });
-  load();render();updateLines();startDraft();
+  load();render();updateLines();if(!startSimulationDraft())startDraft();
   if(window.location.hash==="#nuovo"&&!lines.length)openPanel();
 }
 init();
 })();
+

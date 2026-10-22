@@ -11,13 +11,13 @@ const normalize=s=>String(s).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toL
 const groups=["Revolver","Pistole","Fucili","Repeater"];
 const expanded=new Set(["Revolver"]);
 const quantities=new Map();
-let weapons=[],client=null,filter="",category="Tutte",version=0;
+let weapons=[],client=null,filter="",category="Tutte",version=0,owner=null;
 const show=panel=>{
   for(const id of ["authPanel","awaitingApproval","privateWorkspace"])$(id).hidden=id!==panel;
 };
 const msg=(id,value)=>{$(id).textContent=value||"";};
 const notify=message=>msg("authMessage",message);
-const failSafe=()=>{weapons=[];quantities.clear();$("privateCatalog").replaceChildren();};
+const failSafe=()=>{owner=null;weapons=[];quantities.clear();$("privateCatalog").replaceChildren();window.VauclairSimulator.clear();};
 function rerender(){
   const root=$("privateCatalog");root.replaceChildren();
   const active=weapons.filter(w=>(category==="Tutte"||w.category===category)&&normalize(w.weapon_name).includes(normalize(filter)));
@@ -62,20 +62,7 @@ function rerender(){
     }
     section.append(body);root.append(section);
   }
-  const selected=$("privateSelected");selected.replaceChildren();
-  let paid=0,revenue=0,count=0;
-  for(const w of weapons){
-    const quantity=quantities.get(w.weapon_id)||0;
-    if(!quantity)continue;
-    count+=quantity;paid+=quantity*Number(w.purchase_ceiling);revenue+=quantity*Number(w.blip_price);
-    const line=node("div","selected-line");
-    line.append(node("span","",quantity+" × "+w.weapon_name),node("strong","",fmt(Number(w.blip_price)*quantity)));
-    selected.append(line);
-  }
-  if(!count)selected.append(node("div","empty","Nessuna arma selezionata."));
-  $("privateCost").textContent=fmt(paid);
-  $("privateRevenue").textContent=fmt(revenue);
-  $("privateProfit").textContent=fmt(revenue-paid);
+  window.VauclairSimulator.render();
 }
 function adjust(id,delta){
   const qty=Math.min(999,Math.max(0,(quantities.get(id)||0)+delta));
@@ -103,8 +90,11 @@ async function sync(){
     if(readError)throw readError;
     if(!Array.isArray(data)||data.length!==11)throw new Error("Archivio delle tariffe approvate non disponibile o incompleto.");
     weapons=data.sort((a,b)=>Number(a.weapon_id.slice(1))-Number(b.weapon_id.slice(1)));
-    quantities.clear();$("privateCount").textContent=String(weapons.length);
+    const preserve=owner===user.id;
+    if(!preserve)quantities.clear();owner=user.id;
+    $("privateCount").textContent=String(weapons.length);
     $("privateApprovedCount").textContent=String(weapons.length);
+    window.VauclairSimulator.mount(weapons,quantities,rerender,preserve);
     show("privateWorkspace");rerender();
   }catch(error){
     if(request!==version)return;
