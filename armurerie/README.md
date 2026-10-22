@@ -2,7 +2,7 @@
 
 Sito commerciale distinto dal gestionale originale **Tenuta Vauclair**. Tutti i file di questa attività risiedono in `armurerie/`: il sito Armeria/Ranch nella radice del repository non va modificato per questa attività.
 
-- **Listino acquisti:** `index.html`, prezzi di acquisto pubblici per 22 armi, categorie richiudibili, ricerca, filtri, quantità e carrello.
+- **Listino acquisti:** `index.html`, prezzi di acquisto pubblici per 11 armi attualmente disponibili (gli altri 11 modelli restano archiviati e nascosti fino al rilascio), categorie richiudibili, ricerca, filtri, quantità e carrello.
 - **Ordini:** `ordini.html`, registro locale con fornitori, forniture, stati e backup JSON.
 - **Registro esportazioni:** `riservata.html`, terza voce della navigazione Armurerie. L'indirizzo è pubblico e mostra una schermata di accesso, ma **le tariffe del blip sono leggibili unicamente dall'account proprietario** grazie alla Row Level Security Supabase.
 
@@ -16,17 +16,17 @@ Google Sheet: https://docs.google.com/spreadsheets/d/1pEC4RjsqgQCZQZ_U5X3WPfLgKR
 
 Scheda principale: **01 - Proposta commerciale**.
 
-I 22 prezzi massimi d'acquisto pubblici sono in `catalogo.js`. Solo in Supabase sono disponibili le 22 tariffe proposte per il blip e i relativi margini (non pubblicare tariffe o margini direttamente in HTML, JavaScript, repository, README o localStorage).
+I 22 modelli originali rimangono in `catalogo.js` per preservare i riferimenti degli ordini già registrati, ma solo 11 con `tag: "attuale"` sono disponibili nei nuovi acquisti. Il registro privato mostra solo le 11 tariffe confermate dallo staff; le altre 11 sono disabilitate nel database (blip_price = 0) fino al rilascio. Non pubblicare tariffe o margini direttamente in HTML, JavaScript, repository, README o localStorage.
 
-Qualità delle basi di costo: **11 reali, 4 ricostruite con ricette storiche, 4 stime per confronto e 3 analogie**. Il vecchio calcolo universale sull'Evans è stato eliminato. Per le 11 armi non ancora rilasciate i valori restano provvisori.
+Qualità delle basi di costo: **11 reali, 4 ricostruite con ricette storiche, 4 stime per confronto e 3 analogie**. Il vecchio calcolo universale sull'Evans è stato eliminato. Le 11 armi non ancora rilasciate non sono acquistabili o esportabili nel sito e non mostrano tariffe proiettate.
 
-**Il +150% sul prezzo d'acquisto di riferimento è la nuova proposta di esportazione allo staff, NON una tariffa già approvata nel gioco.** Il precedente +120% è mantenuto solo come confronto storico nel foglio di calcolo.
+**Le 11 tariffe attive sono state approvate dallo staff il 22 ottobre 2026** e sono consultabili solo tramite l’area privata. Il foglio Google conserva per ora le simulazioni storiche al +150% e +120%; non è il listino operativo. L’esportazione riguarda solo armi integre.
 
 ## Sicurezza registro esportazioni
 
 Backend: Supabase (progetto esistente Wildlands, tabelle nuove e isolate dal sistema della mappa tesori).
 
-- `public.vauclair_export_prices`: 22 valori privati. SELECT soltanto agli utenti autenticati che compaiono nella tabella di accesso.
+- `public.vauclair_export_prices`: 22 righe (11 quotazioni approvate, 11 modelli futuri disabilitati con blip_price=0). SELECT soltanto agli utenti autenticati che compaiono nella tabella di accesso.
 - `public.vauclair_private_members`: elenco degli UUID Supabase abilitati. Nessun utente pubblico o autenticato può autoaggiungersi o modificare le tariffe; per gli utenti non approvati le policy RLS restituiscono zero righe.
 - Un solo account è stato verificato tramite conferma email e autorizzato nel database. L'accesso ai prezzi è negato a tutti gli altri account, anche se registrati.
 - La chiave `sb_publishable_` utilizzata nel frontend è pubblica per definizione; **non usare mai service_role né altre chiavi segrete nei file GitHub**.
@@ -51,7 +51,7 @@ Fogli condivisi `styles.css`: bordeaux scuro, ottone brunito, dettagli e tipogra
 
 - `index.html`, `ordini.html`, `riservata.html`: le tre pagine.
 - `styles.css` e `ornamenti.css`: stile condiviso, fregi oro e icone. La voce di navigazione corrente non ha più una sottolineatura.
-- `catalogo.js`: **solo** i 22 prezzi pubblici di acquisto.
+- `catalogo.js`: prezzi d’acquisto e storico di 22 modelli; ne vengono mostrati 11 attualmente disponibili.
 - `listino.js`: catalogo, quantità, categorie, carrello.
 - `ordini.js`: gestione locale ordini.
 - `riservata.js`: autenticazione, controllo permessi e visualizzazione sicura delle tariffe via Supabase.
