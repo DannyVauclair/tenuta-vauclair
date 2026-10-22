@@ -42,6 +42,24 @@
 .simulator .sim-warning,.simulator .sim-loss{color:#f2b49c}
 .sim-warning{display:block;margin-top:10px;font-size:12px;line-height:1.8}
 .sim-formulas{font-size:12px;color:#d2bfa9;margin:16px 0}.sim-formulas summary{cursor:pointer;min-height:32px}
+.sim-history{display:grid;gap:4px;padding:12px 14px;background:rgba(20,13,12,.32);border:1px solid rgba(201,159,99,.2);margin:12px 0}
+.sim-history input[type=number]{max-width:165px}
+.sim-history .sim-reference{font-size:11px;margin-top:4px}
+.sim-unit-status{padding-left:11px;border-left:2px solid #94764b}
+.sim-unit-status.sim-repair-short{color:#ffbca6;border-color:#f0ad93}
+.sim-units{margin:15px 0 22px;border:1px solid #71533b;background:rgba(15,11,10,.35);padding:12px}
+.sim-units>summary{cursor:pointer;color:#eccd97;font:600 12px/1.8 var(--display);padding:6px;list-style-position:inside}
+.sim-units-inner{padding:10px 0 0}
+.sim-unit{display:grid;grid-template-columns:minmax(90px,1fr) minmax(95px,1.1fr) minmax(95px,1.1fr);gap:10px;align-items:end;border-bottom:1px solid rgba(201,159,99,.2);padding:12px 2px}
+.sim-unit-name{font:600 13px var(--serif);color:#f3dbba;align-self:center}
+.simulator .sim-unit label{margin:0;font-size:11px;min-width:0}
+.simulator .sim-unit input[type=number]{padding:7px;min-height:39px;margin-top:5px}
+.sim-unit-state{grid-column:1/-1;line-height:1.6;color:#d2bfa9}
+.sim-unit-state.sim-repair-short{color:#f2b49c;font-weight:700}
+.sim-unit-nav{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin:17px 0}
+.sim-unit-nav .order-subtle{min-height:40px}
+.sim-unit-nav button:disabled{opacity:.4;cursor:not-allowed}
+@media(max-width:600px){.sim-unit{grid-template-columns:1fr 1fr}.sim-unit-name{grid-column:1/-1}.sim-unit-nav{justify-content:center}}
 @media(max-width:950px){.sim-layout{grid-template-columns:1fr}.sim-summary{max-width:none}.sim-heading{align-items:flex-start;flex-direction:column}}
 @media(max-width:690px){.sim-add{grid-template-columns:minmax(0,1fr) 96px}.sim-add .btn{grid-column:1/-1;white-space:normal}}
 @media(max-width:530px){.sim-repair-entry{grid-template-columns:1fr}.sim-repair-entry .order-subtle{margin-bottom:0}.sim-add{padding:14px}.sim-line,.sim-box,.sim-summary{padding:16px}.sim-line-head{align-items:flex-start;flex-direction:column}.simulator h2{font-size:36px}.sim-presets button{flex:1 1 44%;min-height:44px}.sim-summary .private-totals strong{font-size:25px}.sim-summary .private-profit strong{font-size:36px}}
