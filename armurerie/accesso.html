@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#141114">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="referrer" content="no-referrer">
+<meta name="description" content="Vauclair Armurerie — attivazione e recupero credenziali personali.">
+<title>Credenziali riservate · Vauclair Armurerie</title>
+<link rel="icon" href="../assets/vauclair-logo.webp" type="image/webp">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600;1,700&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=20261012-restyle1">
+<link rel="stylesheet" href="ornamenti.css?v=20261012-banner1">
+<style>
+.credential-section{padding:55px 0 100px;min-height:65vh}
+.credential-panel{margin:0 auto;max-width:580px;padding:34px 32px;background:linear-gradient(145deg,#30241e,#201915);border:1px solid rgba(202,155,87,.5);border-top:2px solid #b88c52}
+.credential-panel h2{font-size:46px;margin:10px 0 15px}
+.credential-panel p{color:#d5be9f;line-height:1.9}
+.credential-panel label{display:block;color:#f5eadd;margin:19px 0 12px;font-size:12px}
+.credential-panel input{width:100%;display:block;min-height:46px;padding:12px;margin-top:7px;border:1px solid #836541;background:#191412;color:#f8ebda;font:15px var(--book)}
+.credential-panel input:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.credential-panel button{margin:17px 0 0;width:100%}
+.credential-panel .credential-message{min-height:26px;color:#e5ca97;font-size:13px;overflow-wrap:anywhere}
+.credential-panel .credential-error{color:#efaa95}
+.credential-panel .credential-hint{color:#bdab99;font-size:11px}
+.credential-panel .credential-success{color:#efd39e}
+.credential-actions{margin-top:20px;display:flex;gap:14px;flex-wrap:wrap}
+.credential-actions a{font:600 10px var(--display);letter-spacing:.3px;border-bottom:1px solid #b88c52;padding:7px 0}
+@media(max-width:550px){.credential-section{padding:25px 0 55px}.credential-panel{padding:25px 18px}.credential-panel h2{font-size:37px}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.89.0/dist/umd/supabase.js" defer></script>
+<script src="accesso.js?v=20261022-access1" defer></script>
+</head>
+<body class="private-page">
+<header class="header"><div class="wrap header-inner">
+<a class="brand" href="./" aria-label="Vauclair Armurerie — Listino"><img src="../assets/vauclair-logo.webp" width="96" height="96" alt="Stemma Vauclair"><span><strong>Vauclair <em>Armurerie</em></strong></span></a>
+<nav class="nav" aria-label="Navigazione"><a class="last" href="riservata.html">Registro</a></nav>
+</div></header>
+<main id="contenuto">
+<section class="compact-hero private-hero"><div class="wrap"><span class="label">ARCHIVIO COMMERCIALE · FAMIGLIA VAUCLAIR</span><h1>Accesso <em>personale.</em></h1><p>Attivazione e recupero delle credenziali riservate.</p></div></section>
+<section class="credential-section"><div class="wrap">
+<div class="credential-panel">
+<span class="label">CREDENZIALI PROTETTE</span>
+<h2 id="credentialTitle">Imposta la <em>password.</em></h2>
+<p id="credentialIntro">Per attivare un account autorizzato o recuperare una password, richiedi un collegamento personale tramite email.</p>
+<div id="credentialRequestPanel">
+<form id="credentialRequestForm">
+<label for="credentialEmail">Email dell'account autorizzato<input type="email" id="credentialEmail" name="email" autocomplete="email" placeholder="La tua email" maxlength="254" required></label>
+<button type="submit" class="btn gold" id="credentialSend">Ricevi il link per impostare la password →</button>
+</form>
+<p class="credential-hint">Questa funzione non crea nuovi account né concede autorizzazioni al registro. Usa l'email già invitata su Supabase.</p>
+</div>
+<div id="credentialSetPanel" hidden>
+<form id="credentialSetForm">
+<label for="credentialPassword">Nuova password<input type="password" id="credentialPassword" name="password" minlength="12" maxlength="128" autocomplete="new-password" required></label>
+<label for="credentialPasswordConfirm">Ripeti la password<input type="password" id="credentialPasswordConfirm" name="confirm-password" minlength="12" maxlength="128" autocomplete="new-password" required></label>
+<button type="submit" class="btn gold" id="credentialSave">Salva la password →</button>
+</form>
+<p class="credential-hint">Scegli una password personale di almeno 12 caratteri. Non condividerla con nessuno.</p>
+</div>
+<div id="credentialSuccess" hidden>
+<p class="credential-success">Password configurata correttamente. Puoi accedere al Registro con la tua email e la nuova password.</p>
+<a class="btn gold" href="riservata.html">Accedi al Registro →</a>
+</div>
+<p id="credentialMessage" class="credential-message" role="status" aria-live="polite"></p>
+<div class="credential-actions"><a href="riservata.html">Torna al Registro</a><a href="./">Listino acquisti</a></div>
+</div></div></section>
+</main>
+<footer class="footer compact-footer"><div class="wrap footer-inner"><strong>Vauclair Armurerie</strong><p>Accesso personale · Archivio interno · Anno 1900</p></div></footer>
+</body></html>
