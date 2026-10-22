@@ -41,7 +41,7 @@ function rerender(){
     for(const w of groupItems){
       const row=node("article","private-weapon");
       const name=node("div","private-weapon-name");
-      name.append(node("strong","",w.weapon_name),node("small","",w.quality==="REALE"?"Arma disponibile":"Valutazione provvisoria"));
+      name.append(node("strong","",w.weapon_name),node("small","","Solo armi integre"));
       const amounts=[
         ["Acquisto",fmt(Number(w.purchase_ceiling)),"private-value"],
         ["Al blip",fmt(Number(w.blip_price)),"private-value blip"],
@@ -97,12 +97,14 @@ async function sync(){
       show("awaitingApproval");return;
     }
     const {data,error:readError}=await client.from("vauclair_export_prices")
-      .select("weapon_id,weapon_name,category,purchase_ceiling,blip_price,quality");
+      .select("weapon_id,weapon_name,category,purchase_ceiling,blip_price,quality")
+      .eq("quality","REALE").gt("blip_price",0);
     if(request!==version)return;
     if(readError)throw readError;
-    if(!Array.isArray(data)||data.length!==22)throw new Error("Archivio non disponibile o dati incompleti.");
+    if(!Array.isArray(data)||data.length!==11)throw new Error("Archivio delle tariffe approvate non disponibile o incompleto.");
     weapons=data.sort((a,b)=>Number(a.weapon_id.slice(1))-Number(b.weapon_id.slice(1)));
     quantities.clear();$("privateCount").textContent=String(weapons.length);
+    $("privateApprovedCount").textContent=String(weapons.length);
     show("privateWorkspace");rerender();
   }catch(error){
     if(request!==version)return;
