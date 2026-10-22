@@ -110,13 +110,13 @@ function render(){
   const conditionBox=el("label","sim-condition","Condizione iniziale comune delle armi (%)");
   const conditionHint=el("small","sim-reference");
   conditionBox.append(condition,conditionHint);
-  condition.oninput=()=>{if(condition.value!==""&&condition.checkValidity()&&Number.isInteger(Number(condition.value))){conditions.set(r.id,Number(condition.value));update();}};
+  condition.oninput=()=>{if(condition.value!==""&&condition.checkValidity()&&Number.isInteger(Number(condition.value))){conditions.set(r.id,Number(condition.value));update();if(unitDetails.open)renderUnitPage();}};
   condition.onchange=()=>{if(condition.value===""||!condition.checkValidity()||!Number.isInteger(Number(condition.value)))condition.value=conditions.get(r.id)??100;update();};
   const history=input("number",r.repaired,0,5,1,"Riparazioni già effettuate per arma "+r.name);
   const historyBox=el("label","sim-history","Riparazioni già effettuate (comune, da 0 a 5)");
   const historyHint=el("small","sim-reference");
   historyBox.append(history,historyHint);
-  history.oninput=()=>{if(history.value!==""&&history.checkValidity()&&Number.isInteger(Number(history.value))){priorRepairs.set(r.id,Number(history.value));update();}};
+  history.oninput=()=>{if(history.value!==""&&history.checkValidity()&&Number.isInteger(Number(history.value))){priorRepairs.set(r.id,Number(history.value));update();if(unitDetails.open)renderUnitPage();}};
   history.onchange=()=>{if(history.value===""||!history.checkValidity()||!Number.isInteger(Number(history.value)))history.value=priorRepairs.get(r.id)??0;update();};
   const lineStatus=el("p","sim-unit-status");
   const unitDetails=el("details","sim-units");
