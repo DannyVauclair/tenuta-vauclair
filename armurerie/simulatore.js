@@ -13,6 +13,7 @@ function input(type,value,min,max,step,label){const i=el("input");Object.assign(
 function manual(){requested=null;$("simStrategy").textContent="Prezzi personalizzati";}
 function update(){
  const rr=rows(),t=M.totals(rr);
+ if(!t.count)greaseManual=null;
  const suggested=M.greaseSuggested(rr),greaseCount=t.count?(greaseManual??suggested):0;
  const fin=M.financials(rr,greaseCount,goalValue,roiValue);
  const maximum=fin.maxPurchase;
@@ -43,6 +44,7 @@ function update(){
   greaseManual===null?"Quantità automatica calcolata dalle condizioni indicate (ogni modello ha una condizione media uniforme).":
   greaseCount>suggested?"Quantità personalizzata: "+(greaseCount-suggested)+" grassi in più rispetto alla stima.":"Quantità personalizzata: coincide con la stima.";
  $("simGoalStatus").textContent=!t.count?"Aggiungi almeno un’arma per valutare l’obiettivo.":
+  isShort?"Il ricavo e il profitto sono solo teorici: con questi grassi alcune armi potrebbero non raggiungere il 90%. Correggi la manutenzione prima di considerare l'obiettivo raggiunto.":
   maximum<0?"Obiettivo impossibile: la manutenzione costa già "+money(fin.repair)+" e il budget d'acquisto necessario sarebbe negativo.":
   maximum===0?"Obiettivo raggiungibile soltanto con armi gratuite: verifica se l'accordo è realistico.":
   fin.totalCost===0&&roiValue>0?"Profitto valutabile, ma il rendimento percentuale è indefinito con una spesa totale pari a zero.":
