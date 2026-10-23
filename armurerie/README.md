@@ -1,3 +1,13 @@
+## Ordini condivisi Daniel / Vivian — dal 23 ottobre 2026
+
+`ordini.html` è ora un archivio **privato e condiviso**, non più uno storico soltanto locale. Il client usa l'autenticazione Supabase esistente e prima di mostrare qualunque ordine verifica `vauclair_private_members`; la tabella `public.vauclair_shared_orders` applica RLS a lettura, inserimento, modifica ed eliminazione per i soli membri approvati. La tabella ha privilegi `SELECT, INSERT, UPDATE, DELETE` per `authenticated` (nessun accesso `anon`, `PUBLIC`, `TRUNCATE` o `TRIGGER`). La pubblicazione `supabase_realtime` include esclusivamente questa nuova tabella per l'aggiornamento fra i due account. Sono previsti anche aggiornamento manuale, all'attivazione della scheda e polling ogni 20 secondi.
+
+La prima apertura **autenticata dal browser che contiene lo storico vecchio** importa automaticamente i record da `localStorage` alla nuova tabella. L'importazione salta ID già presenti (idempotente), salva un marker locale soltanto dopo risposta positiva e mantiene il vecchio archivio come backup. Ogni nuova operazione viene confermata da Supabase; in caso di errore la pagina non sostiene che sia stata salvata. `Esporta backup` esporta il registro condiviso. Le notifiche della campanella continuano invece a essere personali al browser e non costituiscono il registro condiviso.
+
+Il riepilogo mostra **prezzo d'acquisto**, **eventuali altre spese**, **ricavo di esportazione previsto** e **profitto netto stimato = ricavo blip − acquisto − altre spese**, con i prezzi di esportazione letti esclusivamente dopo login/RLS da `vauclair_export_prices`. Nessuna tariffa è inserita nel JavaScript pubblico o negli ordini condivisi. Gli ordini già registrati hanno `expenses=0` per compatibilità; il nuovo modulo consente di indicare grassi, trasporto e commissioni e il pulsante `Modifica costi` permette di correggere anche il prezzo negoziato delle forniture esistenti. Il ricavo presuppone tutte le armi a condizione esportabile ≥90% e attualmente usa le tariffe correnti: non è un incasso realizzato. Se un'arma non ha una tariffa approvata, non si presenta un profitto fuorviante.
+
+La pagina Ordini non contiene un modulo di login aggiuntivo: chi non è autenticato usa `riservata.html` e torna su Ordini, conservando la sessione Supabase dello stesso sito.
+
 # Vauclair Armurerie
 
 Sito commerciale distinto dal gestionale originale **Tenuta Vauclair**. Tutti i file di questa attività risiedono in `armurerie/`: il sito Armeria/Ranch nella radice del repository non va modificato per questa attività.
