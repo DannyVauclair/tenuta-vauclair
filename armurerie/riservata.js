@@ -96,6 +96,12 @@ async function sync(){
     $("privateApprovedCount").textContent=String(weapons.length);
     window.VauclairSimulator.mount(weapons,quantities,rerender,preserve);
     show("privateWorkspace");rerender();
+    // Return ONLY to the site's fixed orders page after the usual auth and RLS verification.
+    // No arbitrary URL or password is accepted from the address bar.
+    if(new URLSearchParams(window.location.search).get("dest")==="ordini"){
+      window.location.replace("ordini.html");
+      return;
+    }
   }catch(error){
     if(request!==version)return;
     failSafe();show("awaitingApproval");
