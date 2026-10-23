@@ -1,12 +1,16 @@
 (()=>{
 "use strict";
-/* Ordini Vauclair Armurerie: salva su browser locale, nessun server.
-   I valori di listino sono istantanee al momento della creazione.
-   Nessun dato viene trasmesso o condiviso con altri utenti. */
+/* Ordini familiari su Supabase con RLS. Le tariffe del blip vengono lette
+   soltanto dopo autenticazione e approvazione; non sono presenti nel codice pubblico.
+   Il vecchio localStorage viene importato una sola volta, conservando un backup. */
 const WEAPONS=Array.isArray(window.VAUCLAIR_WEAPONS)?window.VAUCLAIR_WEAPONS:[];
 // Il catalogo storico resta leggibile negli ordini salvati; le nuove forniture usano solo armi rilasciate.
 const ACTIVE_WEAPONS=WEAPONS.filter(w=>w.tag==="attuale");
 const STORE="vauclair.armurerie.orders.v1",DRAFT="vauclair.armurerie.draft.v1";
+const MIGRATED="vauclair.armurerie.orders.cloud-migrated.v1";
+const TABLE="vauclair_shared_orders";
+const SUPABASE_URL="https://bvihgkzztxksmzdjtniy.supabase.co";
+const SUPABASE_PUBLIC_KEY="sb_publishable_kXVblfFaJZzSIPHbQYs6ig_0do9tewr";
 const STATES=["Da valutare","Confermato","In corso","Ricevuto","Annullato"];
 const money=value=>new Intl.NumberFormat("it-IT",{style:"currency",currency:"USD",currencyDisplay:"narrowSymbol",minimumFractionDigits:0,maximumFractionDigits:2}).format(value);
 const $=id=>document.getElementById(id);
@@ -14,15 +18,135 @@ const node=(tag,cls,text)=>{const x=document.createElement(tag);if(cls)x.classNa
 const norm=str=>String(str||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
 const formatDate=stamp=>{const date=new Date(stamp);return Number.isNaN(date.getTime())?stamp:date.toLocaleString("it-IT",{dateStyle:"short",timeStyle:"short"})};
 const validLine=l=>l&&WEAPONS.some(w=>w.id===l.id)&&Number.isInteger(l.qty)&&l.qty>0&&l.qty<=9999&&Number.isFinite(l.unit)&&l.unit>=0&&l.unit<=100000;
-const validOrder=r=>r&&typeof r==="object"&&typeof r.id==="string"&&r.id.length<100&&typeof r.created==="string"&&r.created.length<80&&typeof r.supplier==="string"&&r.supplier.length<=90&&typeof r.type==="string"&&r.type.length<=50&&typeof r.notes==="string"&&r.notes.length<=700&&STATES.includes(r.status)&&Number.isFinite(r.price)&&r.price>=0&&r.price<=10000000&&Array.isArray(r.lines)&&r.lines.length>0&&r.lines.length<=22&&r.lines.every(validLine);
-let orders=[],lines=[],priceEdited=false;
+const validOrder=r=>r&&typeof r==="object"&&typeof r.id==="string"&&r.id.length<100&&typeof r.created==="string"&&r.created.length<80&&typeof r.supplier==="string"&&r.supplier.length<=90&&typeof r.type==="string"&&r.type.length<=50&&typeof r.notes==="string"&&r.notes.length<=700&&STATES.includes(r.status)&&Number.isFinite(r.price)&&r.price>=0&&r.price<=10000000&&(r.expenses===undefined||(Number.isFinite(r.expenses)&&r.expenses>=0&&r.expenses<=10000000))&&Array.isArray(r.lines)&&r.lines.length>0&&r.lines.length<=22&&r.lines.every(validLine);
+let orders=[],lines=[],priceEdited=false,approved=false,client=null,authSerial=0,refreshing=false,userId=null;
+let tariff=new Map(),subscription=null;
+const cents=v=>Math.round(Number(v||0)*100);
+const toMoney=c=>money(c/100);
 function notice(msg){$("saveStatus").textContent=msg}
-function load(){
-  try{const x=JSON.parse(localStorage.getItem(STORE)||"[]");orders=Array.isArray(x)?x.filter(validOrder).slice(0,3000):[];}catch(_){orders=[];}
+function syncInfo(text,error=false){
+ const box=$("orderSyncStatus");box.textContent=text;box.classList.toggle("error",error);
 }
-function persist(){
-  try{localStorage.setItem(STORE,JSON.stringify(orders));return true}
-  catch(_){notice("Non è stato possibile salvare sul browser. Libera spazio o verifica le impostazioni.");return false}
+function accessMessage(text){$("orderAccessMessage").textContent=text}
+function lock(text){
+ approved=false;userId=null;orders=[];tariff.clear();
+ $("orderWorkspace").hidden=true;$("orderAccessGate").hidden=false;
+ accessMessage(text);if(subscription&&client){client.removeChannel(subscription);subscription=null;}
+}
+function readLegacy(){
+ try{const old=JSON.parse(localStorage.getItem(STORE)||"[]");return Array.isArray(old)?old.filter(validOrder).slice(0,3000):[]}
+ catch(_){return []}
+}
+function cleanPayload(r){
+ const {updated_at,...record}=r;
+ return {...record,expenses:Math.round((record.expenses??0)*100)/100};
+}
+function finance(r){
+ let revenue=0;
+ for(const l of r.lines){
+  if(!tariff.has(l.id))return null;
+  revenue+=l.qty*cents(tariff.get(l.id));
+ }
+ const purchase=cents(r.price),extra=cents(r.expenses||0),spent=purchase+extra;
+ return {revenue,purchase,extra,spent,profit:revenue-spent,roi:spent>0?(revenue-spent)/spent*100:null};
+}
+function showPreview(){
+ if(!$("newOrderProjection"))return;
+ const purchase=cents($("agreedPrice").value),extra=cents($("orderExpenses").value);
+ const linesReady=lines.length>0&&lines.every(l=>tariff.has(l.id));
+ if(!linesReady){
+  $("newOrderProjection").textContent="Seleziona solo armi con tariffe di esportazione approvate per ottenere una stima del profitto.";
+  return;
+ }
+ const revenue=lines.reduce((s,l)=>s+l.qty*cents(tariff.get(l.id)),0);
+ $("newOrderProjection").textContent="Ricavo blip stimato: "+toMoney(revenue)+" · Costi totali: "+toMoney(purchase+extra)+" · Profitto previsto: "+toMoney(revenue-purchase-extra)+" (armi tutte esportabili).";
+}
+async function fetchShared(){
+ const received=[];
+ for(let from=0;from<3000;from+=1000){
+  const {data,error}=await client.from(TABLE).select("id,payload,updated_at").order("updated_at",{ascending:false}).range(from,from+999);
+  if(error)throw error;
+  received.push(...(data||[]));
+  if(!data||data.length<1000)break;
+ }
+ return received.filter(row=>row&&row.payload&&validOrder({...row.payload,id:row.id}))
+  .map(row=>({...row.payload,id:row.id,expenses:row.payload.expenses??0,updated_at:row.updated_at}));
+}
+async function importLegacy(remote){
+ if(localStorage.getItem(MIGRATED)==="1")return;
+ const known=new Set(remote.map(x=>x.id));
+ const pending=readLegacy().filter(x=>!known.has(x.id));
+ for(let i=0;i<pending.length;i+=50){
+  const batch=pending.slice(i,i+50).map(r=>({id:r.id,payload:cleanPayload(r)}));
+  const {error}=await client.from(TABLE).upsert(batch,{onConflict:"id",ignoreDuplicates:true});
+  if(error)throw error;
+ }
+ // Non cancellare lo storico locale: rimane come backup.
+ localStorage.setItem(MIGRATED,"1");
+ if(pending.length&&window.VAUCLAIR_NOTIFY)window.VAUCLAIR_NOTIFY("Ordini importati",pending.length+" ordini trasferiti al registro condiviso");
+}
+async function refreshShared(){
+ if(!approved||refreshing)return;
+ refreshing=true;
+ try{orders=await fetchShared();render();syncInfo("Archivio condiviso attivo · "+orders.length+" ordini · Daniel e Vivian · ultimo aggiornamento "+new Date().toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"}));}
+ catch(e){syncInfo("Sincronizzazione non riuscita: "+(e.message||"controlla la connessione")+" · Riprova prima di modificare.",true);}
+ finally{refreshing=false;}
+}
+async function checkAccess(){
+ const n=++authSerial;
+ if(!client){lock("Servizio di autenticazione non disponibile: ricarica la pagina.");return;}
+ try{
+  const {data:{user},error}=await client.auth.getUser();
+  if(n!==authSerial)return;
+  if(error||!user){lock("Accedi prima al Registro riservato con l'account di Daniel o Vivian; poi torna qui.");return;}
+  const auth=await client.from("vauclair_private_members").select("user_id").eq("user_id",user.id).maybeSingle();
+  if(n!==authSerial)return;
+  if(auth.error)throw auth.error;
+  if(!auth.data){lock("Questo account non è abilitato agli ordini della famiglia Vauclair.");return;}
+  const prices=await client.from("vauclair_export_prices").select("weapon_id,blip_price").eq("quality","REALE").gt("blip_price",0);
+  if(n!==authSerial)return;
+  if(prices.error)throw prices.error;
+  if(!Array.isArray(prices.data)||prices.data.length!==11)throw Error("Tariffe riservate non disponibili o incomplete.");
+  tariff=new Map(prices.data.map(x=>[x.weapon_id,Number(x.blip_price)]));
+  approved=true;userId=user.id;
+  let remote=await fetchShared();
+  if(n!==authSerial)return;
+  try{await importLegacy(remote);remote=await fetchShared();}
+  catch(e){syncInfo("Importazione storico locale non completata: "+e.message,true);throw e;}
+  if(n!==authSerial)return;
+  orders=remote;$("orderAccessGate").hidden=true;$("orderWorkspace").hidden=false;
+  render();showPreview();
+  syncInfo("Archivio condiviso attivo · "+orders.length+" ordini · Daniel e Vivian");
+  if(!subscription&&typeof client.channel==="function"){
+   subscription=client.channel("vauclair-family-orders")
+    .on("postgres_changes",{event:"*",schema:"public",table:TABLE},()=>{void refreshShared();})
+    .subscribe();
+  }
+ }catch(e){if(n!==authSerial)return;lock("Impossibile verificare l'accesso o sincronizzare gli ordini: "+(e.message||"errore di connessione")+". Riprova.");}
+}
+async function writeOrder(record){
+ if(!approved)throw Error("Accesso non autorizzato");
+ const {error}=await client.from(TABLE).insert({id:record.id,payload:cleanPayload(record)});
+ if(error)throw error;
+ await refreshShared();
+}
+async function changeOrder(record){
+ if(!approved)throw Error("Accesso non autorizzato");
+ const timestamp=new Date().toISOString();
+ const {data,error}=await client.from(TABLE)
+  .update({payload:cleanPayload(record),updated_at:timestamp})
+  .eq("id",record.id).eq("updated_at",record.updated_at).select("id");
+ if(error)throw error;
+ if(!data?.length)throw Error("Questo ordine è stato modificato altrove. Aggiorna e riprova.");
+ await refreshShared();
+}
+async function eraseOrder(record){
+ if(!approved)throw Error("Accesso non autorizzato");
+ const {data,error}=await client.from(TABLE)
+  .delete().eq("id",record.id).eq("updated_at",record.updated_at).select("id");
+ if(error)throw error;
+ if(!data?.length)throw Error("L'ordine è stato modificato altrove. Aggiorna prima di eliminarlo.");
+ await refreshShared();
 }
 function openPanel(){
   $("orderPanel").hidden=false;
