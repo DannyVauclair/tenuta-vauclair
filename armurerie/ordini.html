@@ -10,8 +10,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600;1,700&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css?v=20261012-restyle1">
 <link rel="stylesheet" href="ornamenti.css?v=20261012-banner1">
+<link rel="stylesheet" href="ordini-condivisi.css?v=20261023-shared1">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.89.0/dist/umd/supabase.js" defer></script>
 <script src="catalogo.js?v=20261022-available11" defer></script><script src="header.js?v=20261013-noarrow1" defer></script>
-<script src="notifiche.js" defer></script><script src="ordini.js?v=20261022-sim3" defer></script>
+<script src="notifiche.js" defer></script><script src="ordini.js?v=20261023-shared1" defer></script>
 </head>
 <body>
 <a class="skip" href="#ordini">Vai agli ordini</a>
@@ -38,12 +40,20 @@
 <main>
 <section class="compact-hero"><div class="wrap"><span class="label">REGISTRO COMMERCIALE · ANNO 1900</span>
 <h1>Registro <em>ordini.</em></h1>
-<p>Organizza le forniture di armi integre. I modelli non ancora rilasciati saranno aggiunti in seguito.</p>
+<p>Archivio condiviso di Daniel e Vivian · acquisti, spese e proiezioni di profitto.</p>
 </div></section>
 <section class="order-area" id="ordini"><div class="wrap">
+<div class="order-access" id="orderAccessGate" role="status">
+  <span class="label">ACCESSO FAMILIARE RISERVATO</span>
+  <h2>Ordini condivisi.</h2>
+  <p id="orderAccessMessage">Verifica dell'account autorizzato in corso…</p>
+  <a href="riservata.html" class="btn gold">Accedi al Registro riservato</a>
+  <button class="order-subtle" type="button" id="orderRetry">Riprova la verifica</button>
+</div>
+<div id="orderWorkspace" hidden>
 <div class="order-head">
 <div><span class="label">FORNITURE E ACQUISTI</span><h2>Ordini</h2></div>
-<div class="order-top-actions"><button class="order-subtle" type="button" id="exportData">Esporta backup</button><button class="btn gold" type="button" id="newOrder">+ Nuovo ordine</button></div>
+<div class="order-top-actions"><button class="order-subtle" type="button" id="refreshOrders">↻ Aggiorna</button><button class="order-subtle" type="button" id="exportData">Esporta backup</button><button class="btn gold" type="button" id="newOrder">+ Nuovo ordine</button></div>
 </div>
 <div class="order-stats">
 <div class="order-stat"><small>Da valutare</small><strong id="statNew">0</strong></div>
@@ -67,7 +77,10 @@
 <label>Prezzo concordato totale ($) <input id="agreedPrice" name="agreedPrice" type="number" required min="0" max="10000000" step=".01" placeholder="Importo complessivo"></label>
 <label>Stato dell'ordine <select id="initialStatus" name="initialStatus"><option>Da valutare</option><option>Confermato</option><option>In corso</option><option>Ricevuto</option></select></label>
 </div>
+<label>Spese aggiuntive previste ($) <input id="orderExpenses" name="expenses" type="number" min="0" max="10000000" step=".01" value="0" required></label>
+<p class="order-help">Eventuali grassi, riparazioni, trasporto o commissioni non inclusi nel prezzo delle armi. Sono sottratti dal profitto.</p>
 <label>Note (facoltative) <textarea id="orderNotes" name="notes" maxlength="700" rows="2" placeholder="Luogo di consegna, accordi, condizioni dell'arma..."></textarea></label>
+<p id="newOrderProjection" class="order-help">Profitto calcolato dopo l'accesso al registro privato.</p>
 <div class="order-form-total"><span>Totale da listino</span><strong id="estimatedPrice">$0</strong></div>
 <div class="order-form-actions"><button class="btn outline" type="button" id="cancelOrder">Annulla</button><button class="btn gold" type="submit">Salva ordine</button></div>
 <p class="status" id="saveStatus" role="status"></p>
@@ -79,8 +92,8 @@
 <option>Da valutare</option><option>Confermato</option><option>In corso</option><option>Ricevuto</option><option>Annullato</option>
 </select></div>
 <div class="order-list" id="orderList" aria-live="polite"><div class="order-empty">Ancora nessun ordine.</div></div>
-<p class="order-caption">Versione iniziale: il registro salva gli ordini soltanto su questo browser. Non sono ancora sincronizzati fra giocatori o dipendenti. Usa “Esporta backup” per conservarne una copia.</p>
-</div></section>
+<p class="order-caption">Ordini archiviati su Supabase e condivisi fra i soli account autorizzati di Daniel e Vivian. I profitti sono stime basate sulle tariffe di esportazione correnti e presuppongono armi esportabili (condizione almeno 90%). Le spese aggiuntive vanno registrate manualmente. Un backup locale precedente viene importato automaticamente una sola volta, senza essere cancellato.</p>
+</div></div></section>
 </main>
 <footer class="footer compact-footer"><div class="wrap footer-inner"><strong>Vauclair Armurerie</strong><p>Vauclair Armurerie · Registro acquisti e forniture · 1900</p></div></footer>
 </body></html>
