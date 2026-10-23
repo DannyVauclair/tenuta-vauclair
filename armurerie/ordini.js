@@ -156,7 +156,7 @@ function closePanel(){
   lines=[];priceEdited=false;$("orderForm").reset();$("orderPanel").hidden=true;
   $("estimatedPrice").textContent=money(0);
   $("chosenWeapons").textContent="Nessuna arma inserita.";
-  notice("");
+  $("orderExpenses").value="0";showPreview();notice("");
 }
 function updateLines(){
   const root=$("chosenWeapons");root.replaceChildren();
@@ -168,78 +168,30 @@ function updateLines(){
     total+=line.qty*line.unit;
     const row=node("div","order-chosen-line");
     row.append(node("span","",line.qty+" × "+w.name),node("b","",money(line.qty*line.unit)));
-    const remove=node("button","","×");remove.type="button";remove.setAttribute("aria-label","Rimuovi "+w.name);
-    remove.addEventListener("click",()=>{lines=lines.filter(x=>x.id!==line.id);updateLines();});
-    row.append(remove);root.append(row);
-  }
-  total=Math.round(total*100)/100;
-  $("estimatedPrice").textContent=money(total);
-  if(!priceEdited)$("agreedPrice").value=String(total);
-}
-function addWeapon(id,amount){
-  const weapon=ACTIVE_WEAPONS.find(w=>w.id===id);
-  const qty=Number(amount);
-  if(!weapon||!Number.isInteger(qty)||qty<1||qty>999){notice("Seleziona un modello e una quantità compresa tra 1 e 999.");return;}
-  const prev=lines.find(x=>x.id===id);
-  if(prev)prev.qty=Math.min(9999,prev.qty+qty);
-  else lines.push({id,qty,unit:weapon.buy});
-  notice("");updateLines();
-}
-function makeId(){
-  const t=new Date().toISOString().slice(0,10).replace(/-/g,"");
-  const rnd=typeof crypto!=="undefined"&&crypto.randomUUID?crypto.randomUUID().slice(0,6).toUpperCase():Math.random().toString(36).slice(2,8).toUpperCase();
-  return "VA-"+t+"-"+rnd;
-}
-function render(){
-  const root=$("orderList");root.replaceChildren();
-  $("statNew").textContent=orders.filter(r=>r.status==="Da valutare").length;
-  $("statProgress").textContent=orders.filter(r=>r.status==="Confermato"||r.status==="In corso").length;
-  $("statDone").textContent=orders.filter(r=>r.status==="Ricevuto").length;
-  const q=norm($("filterOrders").value.trim()),s=$("filterStatus").value;
-  const matches=orders.filter(r=>(!s||r.status===s)&&(!q||norm([r.id,r.supplier,r.type,r.notes,r.lines.map(l=>WEAPONS.find(w=>w.id===l.id)?.name||"").join(" ")].join(" ")).includes(q)));
-  matches.sort((a,b)=>b.created.localeCompare(a.created));
-  if(!matches.length){root.append(node("div","order-empty",orders.length?"Nessun ordine corrisponde ai filtri.":"Nessun ordine ancora registrato."));return}
-  for(const r of matches){
-    const card=node("article","order-card"),head=node("div","order-card-head"),title=node("div","");
-    title.append(node("small","",r.id+" · "+formatDate(r.created)));
-    title.append(node("h3","",r.supplier));
-    const meta=node("div","order-card-meta");
-    meta.append(node("span","",r.type));
-    meta.append(node("span","",r.lines.reduce((tot,l)=>tot+l.qty,0)+" armi"));
-    title.append(meta);
-    const state=node("span","order-status",r.status);head.append(title,state);card.append(head);
-    const items=node("div","order-card-items");
-    for(const l of r.lines){const w=WEAPONS.find(x=>x.id===l.id);if(w)items.append(node("span","",l.qty+" × "+w.name));}
-    card.append(items);
-    if(r.notes)card.append(node("p","order-card-notes",r.notes));
-    const bottom=node("div","order-card-bottom");
-    bottom.append(node("strong","",money(r.price)));
-    const actions=node("div","");
-    const select=node("select","","");select.setAttribute("aria-label","Stato ordine "+r.id);
-    for(const opt of STATES){const el=node("option","",opt);el.value=opt;el.selected=opt===r.status;select.append(el);}
-    select.addEventListener("change",()=>{
-      const before=r.status;r.status=select.value;
-      if(before===r.status)return;
-      if(!persist()){r.status=before;select.value=before;return;}
-      if(window.VAUCLAIR_NOTIFY){
-        window.VAUCLAIR_NOTIFY("Stato dell’ordine aggiornato",r.supplier+" · "+before+" → "+r.status,r.id);
-      }
-      render();
-    });
-    const copy=node("button","","Copia");copy.type="button";copy.addEventListener("click",async()=>{
-      const msg=["VAUCLAIR ARMURERIE — ORDINE "+r.id,"Fornitore: "+r.supplier,"Tipo: "+r.type,
-        ...r.lines.map(l=>{const w=WEAPONS.find(x=>x.id===l.id);return "• "+l.qty+" × "+(w?.name||"Arma")+" ("+money(l.unit)+" cad. indicativi)";}),
-        "Importo concordato: "+money(r.price),"Stato: "+r.status,r.notes?"Note: "+r.notes:null].filter(Boolean).join("\n");
-      try{await navigator.clipboard.writeText(msg);copy.textContent="Copiato ✓";}
-      catch(_){window.prompt("Copia il riepilogo dell'ordine:",msg);}
+    const costs=node("button","","Modifica costi");costs.type="button";
+    costs.addEventListener("click",async()=>{
+      const purchaseText=window.prompt("Prezzo totale concordato per le armi ($):",String(r.price));
+      if(purchaseText===null)return;
+      const newPrice=Number(purchaseText.replace(",","."));
+      if(purchaseText.trim()===""||!Number.isFinite(newPrice)||newPrice<0||newPrice>10000000){syncInfo("Importo d'acquisto non valido.",true);return;}
+      const expenseText=window.prompt("Altre spese ($): grassi, trasporto, commissioni…",String(r.expenses||0));
+      if(expenseText===null)return;
+      const newExpenses=Number(expenseText.replace(",","."));
+      if(expenseText.trim()===""||!Number.isFinite(newExpenses)||newExpenses<0||newExpenses>10000000){syncInfo("Spese aggiuntive non valide.",true);return;}
+      costs.disabled=true;
+      try{await changeOrder({...r,price:Math.round(newPrice*100)/100,expenses:Math.round(newExpenses*100)/100});}
+      catch(e){syncInfo("Modifica costi non riuscita: "+e.message,true);await refreshShared();}
+      finally{costs.disabled=false;}
     });
     const remove=node("button","","Elimina");remove.type="button";
-    remove.addEventListener("click",()=>{
-      if(!confirm("Eliminare l'ordine "+r.id+"? Non sarà recuperabile senza un backup."))return;
-      const previous=orders;orders=orders.filter(o=>o!==r);
-      if(!persist()){orders=previous;return;}render();
+    remove.addEventListener("click",async()=>{
+      if(!confirm("Eliminare l'ordine "+r.id+"? Sarà rimosso anche per Vivian e non recuperabile senza backup."))return;
+      remove.disabled=true;
+      try{await eraseOrder(r);}
+      catch(e){syncInfo("Eliminazione non riuscita: "+e.message,true);await refreshShared();}
+      finally{remove.disabled=false;}
     });
-    actions.append(select,copy,remove);bottom.append(actions);card.append(bottom);root.append(card);
+    actions.append(select,costs,copy,remove);bottom.append(actions);card.append(bottom);root.append(card);
   }
 }
 function downloadBackup(){
@@ -281,27 +233,42 @@ function init(){
   $("newOrder").addEventListener("click",openPanel);
   $("cancelOrder").addEventListener("click",closePanel);
   $("addWeapon").addEventListener("click",()=>addWeapon(sel.value,$("weaponQuantity").value));
-  $("agreedPrice").addEventListener("input",()=>{priceEdited=true;});
+  $("agreedPrice").addEventListener("input",()=>{priceEdited=true;showPreview();});
+  $("orderExpenses").addEventListener("input",showPreview);
   $("filterOrders").addEventListener("input",render);
   $("filterStatus").addEventListener("change",render);
   $("exportData").addEventListener("click",downloadBackup);
-  $("orderForm").addEventListener("submit",ev=>{
-    ev.preventDefault();if(!ev.currentTarget.reportValidity())return;
-    const supplier=$("supplier").value.trim(),price=Number($("agreedPrice").value),type=$("supplierType").value;
-    if(!supplier||!lines.length||!Number.isFinite(price)||price<0||price>10000000){notice("Inserisci un fornitore, almeno un'arma e un importo valido.");return}
-    const record={id:makeId(),supplier,type,status:$("initialStatus").value,price:Math.round(price*100)/100,
+  $("refreshOrders").addEventListener("click",()=>void refreshShared());
+  $("orderRetry").addEventListener("click",()=>void checkAccess());
+  $("orderForm").addEventListener("submit",async ev=>{
+    ev.preventDefault();if(!ev.currentTarget.reportValidity()||!approved)return;
+    const supplier=$("supplier").value.trim(),price=Number($("agreedPrice").value),extra=Number($("orderExpenses").value),type=$("supplierType").value;
+    if(!supplier||!lines.length||!Number.isFinite(price)||price<0||price>10000000||!Number.isFinite(extra)||extra<0||extra>10000000){notice("Inserisci fornitore, almeno un'arma e importi validi.");return;}
+    const record={id:makeId(),supplier,type,status:$("initialStatus").value,price:Math.round(price*100)/100,expenses:Math.round(extra*100)/100,
       lines:lines.map(l=>({...l})),notes:$("orderNotes").value.trim(),created:new Date().toISOString()};
     if(!validOrder(record)){notice("Controlla i dati dell'ordine.");return;}
-    const before=orders;orders=[record,...orders];
-    if(!persist()){orders=before;return;}
-    if(window.VAUCLAIR_NOTIFY){
-      const pieces=record.lines.reduce((sum,item)=>sum+item.qty,0);
-      window.VAUCLAIR_NOTIFY("Nuovo ordine registrato",record.supplier+" · "+pieces+" armi · "+money(record.price),record.id);
-    }
-    closePanel();render();$("orderList").scrollIntoView({behavior:"smooth",block:"start"});
+    const btn=$("orderForm").querySelector('button[type="submit"]');btn.disabled=true;
+    notice("Salvataggio nel registro condiviso…");
+    try{
+      await writeOrder(record);
+      if(window.VAUCLAIR_NOTIFY){const count=record.lines.reduce((sum,l)=>sum+l.qty,0);window.VAUCLAIR_NOTIFY("Nuovo ordine condiviso",record.supplier+" · "+count+" armi · "+money(record.price),record.id);}
+      closePanel();render();$("orderList").scrollIntoView({behavior:"smooth",block:"start"});
+    }catch(e){notice("Non è stato possibile salvare l'ordine condiviso: "+e.message+". Nessun salvataggio locale è stato effettuato.");}
+    finally{btn.disabled=false;}
   });
-  load();render();updateLines();if(!startSimulationDraft())startDraft();
+  updateLines();if(!startSimulationDraft())startDraft();
   if(window.location.hash==="#nuovo"&&!lines.length)openPanel();
+  if(!window.supabase||typeof window.supabase.createClient!=="function"){
+    lock("Non riesco a caricare Supabase. Controlla la connessione e riprova.");return;
+  }
+  client=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLIC_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+  client.auth.onAuthStateChange(event=>{
+    if(["SIGNED_IN","SIGNED_OUT","INITIAL_SESSION","USER_UPDATED"].includes(event))queueMicrotask(()=>void checkAccess());
+  });
+  window.addEventListener("focus",()=>{if(approved)void refreshShared();else void checkAccess();});
+  document.addEventListener("visibilitychange",()=>{if(!document.hidden&&approved)void refreshShared();});
+  setInterval(()=>{if(approved&&!document.hidden)void refreshShared();},20000);
+  void checkAccess();
 }
 init();
 })();
