@@ -168,6 +168,81 @@ function updateLines(){
     total+=line.qty*line.unit;
     const row=node("div","order-chosen-line");
     row.append(node("span","",line.qty+" × "+w.name),node("b","",money(line.qty*line.unit)));
+    const remove=node("button","","×");remove.type="button";remove.setAttribute("aria-label","Rimuovi "+w.name);
+    remove.addEventListener("click",()=>{lines=lines.filter(x=>x.id!==line.id);updateLines();});
+    row.append(remove);root.append(row);
+  }
+  total=Math.round(total*100)/100;
+  $("estimatedPrice").textContent=money(total);
+  if(!priceEdited)$("agreedPrice").value=String(total);
+  showPreview();
+}
+function addWeapon(id,amount){
+  const weapon=ACTIVE_WEAPONS.find(w=>w.id===id);
+  const qty=Number(amount);
+  if(!weapon||!Number.isInteger(qty)||qty<1||qty>999){notice("Seleziona un modello e una quantità compresa tra 1 e 999.");return;}
+  const prev=lines.find(x=>x.id===id);
+  if(prev)prev.qty=Math.min(9999,prev.qty+qty);
+  else lines.push({id,qty,unit:weapon.buy});
+  notice("");updateLines();
+}
+function makeId(){
+  const t=new Date().toISOString().slice(0,10).replace(/-/g,"");
+  const rnd=typeof crypto!=="undefined"&&crypto.randomUUID?crypto.randomUUID().slice(0,6).toUpperCase():Math.random().toString(36).slice(2,8).toUpperCase();
+  return "VA-"+t+"-"+rnd;
+}
+function render(){
+  const root=$("orderList");root.replaceChildren();
+  $("statNew").textContent=orders.filter(r=>r.status==="Da valutare").length;
+  $("statProgress").textContent=orders.filter(r=>r.status==="Confermato"||r.status==="In corso").length;
+  $("statDone").textContent=orders.filter(r=>r.status==="Ricevuto").length;
+  const q=norm($("filterOrders").value.trim()),s=$("filterStatus").value;
+  const matches=orders.filter(r=>(!s||r.status===s)&&(!q||norm([r.id,r.supplier,r.type,r.notes,r.lines.map(l=>WEAPONS.find(w=>w.id===l.id)?.name||"").join(" ")].join(" ")).includes(q)));
+  matches.sort((a,b)=>b.created.localeCompare(a.created));
+  if(!matches.length){root.append(node("div","order-empty",orders.length?"Nessun ordine corrisponde ai filtri.":"Nessun ordine ancora registrato."));return}
+  for(const r of matches){
+    const card=node("article","order-card"),head=node("div","order-card-head"),title=node("div","");
+    title.append(node("small","",r.id+" · "+formatDate(r.created)));
+    title.append(node("h3","",r.supplier));
+    const meta=node("div","order-card-meta");
+    meta.append(node("span","",r.type));
+    meta.append(node("span","",r.lines.reduce((tot,l)=>tot+l.qty,0)+" armi"));
+    title.append(meta);
+    const state=node("span","order-status",r.status);head.append(title,state);card.append(head);
+    const items=node("div","order-card-items");
+    for(const l of r.lines){const w=WEAPONS.find(x=>x.id===l.id);if(w)items.append(node("span","",l.qty+" × "+w.name));}
+    card.append(items);
+    if(r.notes)card.append(node("p","order-card-notes",r.notes));
+    const fin=finance(r),breakdown=node("div","order-card-finance");
+    const metric=(label,value,cls="")=>{const v=node("div",cls);v.append(node("small","",label),node("strong","",value));return v;};
+    breakdown.append(metric("Acquisto armi",money(r.price)),metric("Spese aggiuntive",money(r.expenses||0)));
+    breakdown.append(metric("Ricavo previsto al blip",fin?toMoney(fin.revenue):"Non disponibile"),
+      metric("PROFITTO NETTO PREVISTO",fin?toMoney(fin.profit):"Non disponibile","order-profit"+(fin?.profit<0?" negative":"")));
+    breakdown.append(node("small","order-card-finance-note",fin?
+      "Profitto = ricavo delle armi esportabili − acquisto − spese extra. Stima alle tariffe blip correnti: presuppone tutte le armi almeno al 90% e riparazioni possibili.":
+      "Profitto non calcolabile: uno o più modelli non hanno una tariffa di esportazione approvata."));
+    card.append(breakdown);
+    const bottom=node("div","order-card-bottom");
+    const cost=node("div","order-card-cost");cost.append(node("span","","Spesa di acquisto concordata"),node("strong","",money(r.price)));bottom.append(cost);
+    const actions=node("div","");
+    const select=node("select","","");select.setAttribute("aria-label","Stato ordine "+r.id);
+    for(const opt of STATES){const el=node("option","",opt);el.value=opt;el.selected=opt===r.status;select.append(el);}
+    select.addEventListener("change",async()=>{
+      const before=r.status,next=select.value;if(before===next)return;
+      select.disabled=true;
+      try{
+        await changeOrder({...r,status:next});
+        if(window.VAUCLAIR_NOTIFY)window.VAUCLAIR_NOTIFY("Stato ordine aggiornato",r.supplier+" · "+before+" → "+next,r.id);
+      }catch(e){syncInfo("Impossibile modificare lo stato: "+e.message,true);select.value=before;await refreshShared();}
+      finally{select.disabled=false;}
+    });
+    const copy=node("button","","Copia");copy.type="button";copy.addEventListener("click",async()=>{
+      const msg=["VAUCLAIR ARMURERIE — ORDINE "+r.id,"Fornitore: "+r.supplier,"Tipo: "+r.type,
+        ...r.lines.map(l=>{const w=WEAPONS.find(x=>x.id===l.id);return "• "+l.qty+" × "+(w?.name||"Arma")+" ("+money(l.unit)+" cad. indicativi)";}),
+        "Costo armi concordato: "+money(r.price),"Spese aggiuntive: "+money(r.expenses||0),...(finance(r)?["Ricavo esportazione previsto: "+toMoney(finance(r).revenue),"Profitto netto previsto: "+toMoney(finance(r).profit)]:[]),"Stato: "+r.status,r.notes?"Note: "+r.notes:null].filter(Boolean).join("\n");
+      try{await navigator.clipboard.writeText(msg);copy.textContent="Copiato ✓";}
+      catch(_){window.prompt("Copia il riepilogo dell'ordine:",msg);}
+    });
     const costs=node("button","","Modifica costi");costs.type="button";
     costs.addEventListener("click",async()=>{
       const purchaseText=window.prompt("Prezzo totale concordato per le armi ($):",String(r.price));
