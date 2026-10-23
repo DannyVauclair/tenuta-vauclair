@@ -221,7 +221,12 @@ $("simTransfer").onclick=()=>{
  const payload=rows().map(r=>({id:r.id,qty:r.qty,unit:r.price/100}));
  if(!payload.length)return;
  if(M.totals(rows()).cost>1000000000){$("simGoalStatus").textContent="L’ordine supera il limite del registro ($10.000.000). Dividi la fornitura prima del trasferimento.";return;}
- try{sessionStorage.setItem("vauclair.armurerie.simulation-order.v1",JSON.stringify(payload));location.href="ordini.html?v=20261022-sim3#nuovo";}
+ try{
+  const selected=greaseManual??M.greaseSuggested(rows());
+  const extra=M.financials(rows(),selected).repair/100;
+  sessionStorage.setItem("vauclair.armurerie.simulation-order.v1",JSON.stringify({lines:payload,expenses:extra,greaseCount:selected}));
+  location.href="ordini.html?v=20261023-shared1#nuovo";
+ }
  catch(e){$("simGoalStatus").textContent="Il browser non consente il trasferimento della bozza. Nessun ordine è stato modificato.";}
 };
 })();
