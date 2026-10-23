@@ -12,7 +12,7 @@ const TABLE="vauclair_shared_orders";
 const SUPABASE_URL="https://bvihgkzztxksmzdjtniy.supabase.co";
 const SUPABASE_PUBLIC_KEY="sb_publishable_kXVblfFaJZzSIPHbQYs6ig_0do9tewr";
 const STATES=["Da valutare","Confermato","In corso","Ricevuto","Annullato"];
-const money=value=>new Intl.NumberFormat("it-IT",{style:"currency",currency:"USD",currencyDisplay:"narrowSymbol",minimumFractionDigits:0,maximumFractionDigits:2}).format(value);
+const money=value=>new Intl.NumberFormat("it-IT",{style:"currency",currency:"USD",currencyDisplay:"narrowSymbol",useGrouping:"always",minimumFractionDigits:0,maximumFractionDigits:2}).format(value);
 const $=id=>document.getElementById(id);
 const node=(tag,cls,text)=>{const x=document.createElement(tag);if(cls)x.className=cls;if(text!==undefined)x.textContent=String(text);return x};
 const norm=str=>String(str||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
@@ -278,15 +278,20 @@ function downloadBackup(){
 }
 function startSimulationDraft(){
   const key="vauclair.armurerie.simulation-order.v1";
-  try {
-    const draft=JSON.parse(sessionStorage.getItem(key)||"null");
-    if(!Array.isArray(draft)||!draft.length||draft.length>11||!draft.every(l=>validLine(l)&&l.qty<=999&&ACTIVE_WEAPONS.some(w=>w.id===l.id))||new Set(draft.map(l=>l.id)).size!==draft.length)return false;
+  try{
+    const decoded=JSON.parse(sessionStorage.getItem(key)||"null");
+    // Compatible with the old array-only draft and the new amount for internal grease costs.
+    const draft=Array.isArray(decoded)?decoded:decoded?.lines;
+    const extra=Array.isArray(decoded)?0:Number(decoded?.expenses??0);
+    if(!Array.isArray(draft)||!draft.length||draft.length>11||!draft.every(l=>validLine(l)&&l.qty<=999&&ACTIVE_WEAPONS.some(w=>w.id===l.id))||new Set(draft.map(l=>l.id)).size!==draft.length||
+       !Number.isFinite(extra)||extra<0||extra>10000000)return false;
     lines=draft.map(l=>({id:l.id,qty:l.qty,unit:Math.round(l.unit*100)/100}));
-    priceEdited=false;updateLines();openPanel();
+    priceEdited=false;updateLines();
+    $("orderExpenses").value=String(Math.round(extra*100)/100);
+    showPreview();openPanel();
     sessionStorage.removeItem(key);
-    // Una bozza precedente del listino pubblico non deve sovrascrivere questa fornitura.
     sessionStorage.removeItem(DRAFT);
-    notice("Fornitura dal simulatore: quantità e prezzi unitari concordati. Indica il fornitore e salva per creare un nuovo ordine.");
+    notice("Fornitura dal simulatore: prezzi delle armi separati dalla spesa per i grassi. Verifica costi e fornitore prima di salvare l'ordine condiviso.");
     return true;
   }catch(_){return false;}
 }
