@@ -1,0 +1,21 @@
+/* Vauclair Armurerie — ordini riservati, sincronia familiare e margini. */
+#orderWorkspace[hidden],#orderAccessGate[hidden]{display:none!important}
+.order-access{max-width:640px;margin:10px auto 44px;padding:27px;border:1px solid #795e44;background:linear-gradient(140deg,#302328,#1d181a);text-align:center}
+.order-access h2{font:600 34px/1.15 var(--serif);color:#f5e4cf;margin:13px 0}
+.order-access p{font:13px/1.8 var(--book);color:#dcc6aa}
+.order-access .btn,.order-access button{display:inline-block;margin:9px 6px}
+.order-sync-info{font:12px/1.7 var(--book);color:#dcc6aa;border-left:2px solid #a68154;padding:8px 13px;margin:0 0 18px;background:rgba(30,23,22,.6)}
+.order-sync-info.error{color:#ffbaaa;border-color:#cb7c6d}
+.order-help{font:12px/1.7 var(--book);color:#cbb39a;margin:8px 0 17px}
+.order-card-finance{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;border-top:1px solid rgba(213,174,119,.2);margin-top:14px;padding-top:16px}
+.order-card-finance>div{background:rgba(13,10,12,.23);padding:9px;min-width:0}
+.order-card-finance small{display:block;font:10px/1.6 var(--book);color:#bca58b}
+.order-card-finance strong{display:block;font:600 24px/1.2 var(--serif);color:#f1d0a0;overflow-wrap:anywhere}
+.order-card-finance .order-profit strong{color:#bade9d}
+.order-card-finance .order-profit.negative strong{color:#f4ae9d}
+.order-card-finance-note{grid-column:1/-1;font:11px/1.65 var(--book);color:#bca58b}
+.order-card-cost{font:12px/1.6 var(--book);color:#ceb899}
+.order-card-bottom .order-card-cost strong{font:600 27px var(--serif);color:#d9b881}
+.order-card-bottom .order-card-cost span{font-size:11px;display:block}
+@media(max-width:760px){.order-card-finance{grid-template-columns:repeat(2,minmax(0,1fr))}.order-access{padding:18px}}
+@media(max-width:450px){.order-card-finance{gap:7px}.order-card-finance strong{font-size:21px}}
