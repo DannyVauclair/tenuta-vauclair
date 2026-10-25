@@ -23,7 +23,20 @@
 /* Archivio automatico: stesso layout delle schede ordine e statistiche dedicate. */
 .order-archive-stat-link{color:var(--gold);text-decoration:underline;text-decoration-color:rgba(218,177,110,.46);text-underline-offset:3px}
 .order-archive-stat-link:hover{color:#ffe1a7}
-body[data-order-view="archive"] #newOrder,body[data-order-view="archive"] #orderPanel{display:none!important}
+body[data-order-view="archive"] #newOrder{display:none!important}
 body[data-order-view="archive"] .order-stat:last-child strong{font-size:clamp(19px,2.15vw,31px);overflow-wrap:anywhere}
 body[data-order-view="archive"] .order-top-actions .btn{font-size:11px;min-height:38px;display:inline-flex;align-items:center;justify-content:center;text-align:center}
 body[data-order-view="archive"] .order-filter input{width:100%}
+
+/* Modifica completa: righe armi con quantità e prezzi editabili, anche nell'Archivio. */
+.order-chosen-line.order-edit-line{grid-template-columns:minmax(150px,1fr) minmax(90px,120px) minmax(110px,140px) 35px;gap:10px;align-items:end;padding:11px 0}
+.order-edit-line>span{font:600 13px/1.5 var(--book);color:#f0dfc7;padding-bottom:9px}
+.order-edit-line label{font:10px/1.5 var(--book);color:#cbb39a;display:flex;flex-direction:column;gap:5px}
+.order-edit-line label input{width:100%;padding:9px 10px;background:#1b1718;border:1px solid rgba(207,160,99,.4);border-radius:0;color:#f4e3ca;font:600 13px var(--book);min-height:38px}
+.order-edit-line label input:focus{outline:1px solid #d5b17d}
+.order-edit-line button{margin-bottom:3px;cursor:pointer}
+#editingOrderHint{border-left:2px solid #c4a06d;background:rgba(46,31,26,.6);padding:12px 14px;margin:0 0 20px}
+.order-form-total{flex-wrap:wrap;gap:12px}
+#useEstimatedPrice{font-size:10px;min-height:36px}
+@media(max-width:640px){.order-chosen-line.order-edit-line{grid-template-columns:minmax(0,1fr) minmax(80px,1fr) minmax(110px,1fr);gap:8px}.order-edit-line>span{grid-column:1/-1;padding:0}.order-edit-line button{align-self:end;justify-self:end}}
+@media(max-width:390px){.order-chosen-line.order-edit-line{grid-template-columns:minmax(76px,1fr) minmax(100px,1.4fr) 35px}.order-edit-line>span{grid-column:1/-1}.order-edit-line button{grid-column:3}}
