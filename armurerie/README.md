@@ -1,3 +1,9 @@
+## Archivio delle forniture ricevute — 25 ottobre 2026
+
+La pagina **`archivio.html`** usa la stessa grafica, autenticazione Supabase e archivio `public.vauclair_shared_orders` della pagina `ordini.html`. **Non è un secondo archivio:** `ordini.html` mostra gli ordini con stato diverso da `Ricevuto`, `archivio.html` mostra solo quelli con stato `Ricevuto`. Cambiare lo stato sposta l'ordine fra le due viste, senza duplicarlo né cancellarlo. L'Archivio mostra le schede complete con costi, ricavi previsti, profitti, note e pulsanti di modifica; in alto riassume ordini ricevuti, numero di armi e profitto complessivo stimato. Il profitto non va interpretato come incasso già realizzato.
+
+Daniel e Vivian entrano nell'Archivio tramite il nuovo pulsante di navigazione; l'accesso resta sotto RLS e verifica esplicita di `vauclair_private_members`. Se manca la sessione, il collegamento `riservata.html?dest=archivio` effettua login e ritorno soltanto dopo l'autorizzazione. Le notifiche locali di stato “Ricevuto” rimandano alla nuova pagina. Il backup completo contiene anche gli ordini non ricevuti.
+
 ## Ordini condivisi Daniel / Vivian — dal 23 ottobre 2026
 
 `ordini.html` è ora un archivio **privato e condiviso**, non più uno storico soltanto locale. Il client usa l'autenticazione Supabase esistente e prima di mostrare qualunque ordine verifica `vauclair_private_members`; la tabella `public.vauclair_shared_orders` applica RLS a lettura, inserimento, modifica ed eliminazione per i soli membri approvati. La tabella ha privilegi `SELECT, INSERT, UPDATE, DELETE` per `authenticated` (nessun accesso `anon`, `PUBLIC`, `TRUNCATE` o `TRIGGER`). La pubblicazione `supabase_realtime` include esclusivamente questa nuova tabella per l'aggiornamento fra i due account. Sono previsti anche aggiornamento manuale, all'attivazione della scheda e polling ogni 20 secondi.
@@ -13,7 +19,7 @@ La pagina Ordini non contiene un modulo di login aggiuntivo: chi non è autentic
 Sito commerciale distinto dal gestionale originale **Tenuta Vauclair**. Tutti i file di questa attività risiedono in `armurerie/`: il sito Armeria/Ranch nella radice del repository non va modificato per questa attività.
 
 - **Listino acquisti:** `index.html`, prezzi di acquisto pubblici per 11 armi attualmente disponibili (gli altri 11 modelli restano archiviati e nascosti fino al rilascio), categorie richiudibili, ricerca, filtri, quantità e carrello.
-- **Ordini:** `ordini.html`, registro locale con fornitori, forniture, stati e backup JSON.
+- **Ordini:** `ordini.html`, forniture attive condivise e riservate. **Archivio:** `archivio.html`, ordini ricevuti, con riepiloghi e profitto stimato.
 - **Registro esportazioni:** `riservata.html`, terza voce della navigazione Armurerie. L'indirizzo è pubblico e mostra una schermata di accesso, ma **le tariffe del blip sono leggibili unicamente dall'account proprietario** grazie alla Row Level Security Supabase.
 
 Sito pubblico: https://dannyvauclair.github.io/tenuta-vauclair/armurerie/
@@ -65,7 +71,7 @@ La pagina `accesso.html` gestisce in modo indipendente il primo accesso degli ac
 
 ## Ordini
 
-La pagina Ordini utilizza ancora il **localStorage del browser**; non è sincronizzata tra giocatori e non condivide il sistema di accesso della pagina esportazioni. Il carrello dal listino agli ordini si trasferisce tramite sessionStorage.
+Ordini e Archivio usano Supabase con RLS e accesso condiviso fra Daniel e Vivian. Il vecchio localStorage è importato una sola volta, senza cancellare il backup. Il carrello dal listino agli ordini passa tramite sessionStorage.
 
 ## Grafica
 
@@ -73,10 +79,10 @@ Fogli condivisi `styles.css`: bordeaux scuro, ottone brunito, dettagli e tipogra
 
 ## File
 
-- `index.html`, `ordini.html`, `riservata.html`: le tre pagine.
+- `index.html`, `ordini.html`, `archivio.html`, `riservata.html`, `accesso.html`: le pagine del sito, archivio e credenziali.
 - `styles.css` e `ornamenti.css`: stile condiviso, fregi oro e icone. La voce di navigazione corrente non ha più una sottolineatura.
 - `catalogo.js`: prezzi d’acquisto e storico di 22 modelli; ne vengono mostrati 11 attualmente disponibili.
 - `listino.js`: catalogo, quantità, categorie, carrello.
-- `ordini.js`: gestione locale ordini.
+- `ordini.js`: gestione degli ordini condivisi su Supabase, con filtro di stato automatico fra Ordini e Archivio.
 - `riservata.js`: autenticazione, controllo permessi e visualizzazione sicura delle tariffe via Supabase.
-- `notifiche.js`: campanella notifiche del registro ordini locale.
+- `notifiche.js`: notifiche del browser; quelle relative agli ordini Ricevuti rimandano all’Archivio (le notifiche non sono ancora sincronizzate fra browser).
