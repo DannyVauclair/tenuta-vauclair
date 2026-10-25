@@ -10,16 +10,16 @@
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600;1,700&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css?v=20261012-restyle1">
 <link rel="stylesheet" href="ornamenti.css?v=20261012-banner1">
-<link rel="stylesheet" href="ordini-condivisi.css?v=20261023-shared1">
+<link rel="stylesheet" href="ordini-condivisi.css?v=20261025-archive1">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.89.0/dist/umd/supabase.js" defer></script>
-<script src="catalogo.js?v=20261022-available11" defer></script><script src="header.js?v=20261013-noarrow1" defer></script>
-<script src="notifiche.js" defer></script><script src="ordini.js?v=20261023-shared2" defer></script>
+<script src="catalogo.js?v=20261022-available11" defer></script><script src="header.js?v=20261025-archive1" defer></script>
+<script src="notifiche.js" defer></script><script src="ordini.js?v=20261025-archive1" defer></script>
 </head>
 <body>
 <a class="skip" href="#ordini">Vai agli ordini</a>
 <header class="header"><div class="wrap header-inner">
 <a class="brand" href="./" aria-label="Vauclair Armurerie — Listino e ordini"><img src="../assets/vauclair-logo.webp" alt="Stemma Vauclair" width="96" height="96"><span><strong>Vauclair <em>Armurerie</em></strong></span></a>
-<div class="header-tools"><nav class="nav" aria-label="Navigazione"><a class="last" href="riservata.html?v=20261012-unified1">Registro</a><a class="last" href="./">Listino acquisti</a><a class="last current" aria-current="page" href="ordini.html">Ordini</a></nav><div class="notification-shell">
+<div class="header-tools"><nav class="nav" aria-label="Navigazione"><a class="last" href="riservata.html?v=20261012-unified1">Registro</a><a class="last" href="./">Listino acquisti</a><a class="last current" aria-current="page" href="ordini.html">Ordini</a><a class="last" href="archivio.html">Archivio</a></nav><div class="notification-shell">
   <button class="notification-toggle" id="notificationBell" type="button" aria-label="Apri notifiche ordini" aria-haspopup="true" aria-expanded="false" aria-controls="notificationPanel">
     <svg viewBox="0 0 32 32" fill="none" aria-hidden="true" focusable="false">
       <path d="M16 5.5c-4.3 0-7 3.1-7 7.3v3.3c0 3.6-1.2 5.3-3.3 7.1h20.6c-2.1-1.8-3.3-3.5-3.3-7.1v-3.3c0-4.2-2.7-7.3-7-7.3Z" stroke="currentColor" stroke-width="1.55" stroke-linejoin="round"/>
@@ -40,7 +40,7 @@
 <main>
 <section class="compact-hero"><div class="wrap"><span class="label">REGISTRO COMMERCIALE · ANNO 1900</span>
 <h1>Registro <em>ordini.</em></h1>
-<p>Archivio condiviso di Daniel e Vivian · acquisti, spese e proiezioni di profitto.</p>
+<p>Forniture da valutare e in corso, condivise tra Daniel e Vivian. Gli ordini ricevuti vengono conservati nell’Archivio.</p>
 </div></section>
 <section class="order-area" id="ordini"><div class="wrap">
 <div class="order-access" id="orderAccessGate" role="status">
@@ -59,7 +59,7 @@
 <div class="order-stats">
 <div class="order-stat"><small>Da valutare</small><strong id="statNew">0</strong></div>
 <div class="order-stat"><small>In corso</small><strong id="statProgress">0</strong></div>
-<div class="order-stat"><small>Ricevuti</small><strong id="statDone">0</strong></div>
+<div class="order-stat"><small><a href="archivio.html" class="order-archive-stat-link">Ricevuti · Apri archivio</a></small><strong id="statDone">0</strong></div>
 </div>
 <section id="orderPanel" class="order-form" hidden aria-labelledby="formTitle">
 <h3 id="formTitle">Nuovo ordine</h3>
@@ -90,7 +90,7 @@
 <input id="filterOrders" type="search" placeholder="Cerca fornitore o arma..." aria-label="Cerca ordine">
 <select id="filterStatus" aria-label="Filtra per stato">
 <option value="">Tutti gli stati</option>
-<option>Da valutare</option><option>Confermato</option><option>In corso</option><option>Ricevuto</option><option>Annullato</option>
+<option>Da valutare</option><option>Confermato</option><option>In corso</option><option>Annullato</option>
 </select></div>
 <div class="order-list" id="orderList" aria-live="polite"><div class="order-empty">Ancora nessun ordine.</div></div>
 <p class="order-caption">Ordini archiviati su Supabase e condivisi fra i soli account autorizzati di Daniel e Vivian. I profitti sono stime basate sulle tariffe di esportazione correnti e presuppongono armi esportabili (condizione almeno 90%). Le spese aggiuntive vanno registrate manualmente. Un backup locale precedente viene importato automaticamente una sola volta, senza essere cancellato.</p>
