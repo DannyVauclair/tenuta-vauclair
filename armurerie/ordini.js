@@ -12,6 +12,9 @@ const TABLE="vauclair_shared_orders";
 const SUPABASE_URL="https://bvihgkzztxksmzdjtniy.supabase.co";
 const SUPABASE_PUBLIC_KEY="sb_publishable_kXVblfFaJZzSIPHbQYs6ig_0do9tewr";
 const STATES=["Da valutare","Confermato","In corso","Ricevuto","Annullato"];
+// The archive is a view of the SAME authenticated cloud records, not a second storage.
+const ARCHIVE_VIEW=document.body?.dataset?.orderView==="archive";
+const visibleOrder=r=>ARCHIVE_VIEW?r.status==="Ricevuto":r.status!=="Ricevuto";
 const money=value=>new Intl.NumberFormat("it-IT",{style:"currency",currency:"USD",currencyDisplay:"narrowSymbol",useGrouping:"always",minimumFractionDigits:0,maximumFractionDigits:2}).format(value);
 const $=id=>document.getElementById(id);
 const node=(tag,cls,text)=>{const x=document.createElement(tag);if(cls)x.className=cls;if(text!==undefined)x.textContent=String(text);return x};
@@ -88,7 +91,7 @@ async function importLegacy(remote){
 async function refreshShared(){
  if(!approved||refreshing)return;
  refreshing=true;
- try{orders=await fetchShared();render();syncInfo("Archivio condiviso attivo · "+orders.length+" ordini · Daniel e Vivian · ultimo aggiornamento "+new Date().toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"}));}
+ try{orders=await fetchShared();render();syncInfo((ARCHIVE_VIEW?"Archivio ricevuti":"Ordini attivi")+" sincronizzato · "+orders.filter(visibleOrder).length+" ordini · Daniel e Vivian · aggiornato alle "+new Date().toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"}));}
  catch(e){syncInfo("Sincronizzazione non riuscita: "+(e.message||"controlla la connessione")+" · Riprova prima di modificare.",true);}
  finally{refreshing=false;}
 }
@@ -116,7 +119,7 @@ async function checkAccess(){
   if(n!==authSerial)return;
   orders=remote;$("orderAccessGate").hidden=true;$("orderWorkspace").hidden=false;
   render();showPreview();
-  syncInfo("Archivio condiviso attivo · "+orders.length+" ordini · Daniel e Vivian");
+  syncInfo((ARCHIVE_VIEW?"Archivio ricevuti":"Ordini attivi")+" condiviso · "+orders.filter(visibleOrder).length+" ordini · Daniel e Vivian");
   if(!subscription&&typeof client.channel==="function"){
    subscription=client.channel("vauclair-family-orders")
     .on("postgres_changes",{event:"*",schema:"public",table:TABLE},()=>{void refreshShared();})
@@ -193,13 +196,21 @@ function makeId(){
 }
 function render(){
   const root=$("orderList");root.replaceChildren();
-  $("statNew").textContent=orders.filter(r=>r.status==="Da valutare").length;
-  $("statProgress").textContent=orders.filter(r=>r.status==="Confermato"||r.status==="In corso").length;
-  $("statDone").textContent=orders.filter(r=>r.status==="Ricevuto").length;
+  const received=orders.filter(r=>r.status==="Ricevuto");
+  if(ARCHIVE_VIEW){
+    $("statNew").textContent=received.length;
+    $("statProgress").textContent=received.reduce((total,r)=>total+r.lines.reduce((sum,l)=>sum+l.qty,0),0);
+    const estimates=received.map(finance);
+    $("statDone").textContent=estimates.some(f=>f===null)?"—":money(estimates.reduce((total,f)=>total+f.profit,0)/100);
+  }else{
+    $("statNew").textContent=orders.filter(r=>r.status==="Da valutare").length;
+    $("statProgress").textContent=orders.filter(r=>r.status==="Confermato"||r.status==="In corso").length;
+    $("statDone").textContent=received.length;
+  }
   const q=norm($("filterOrders").value.trim()),s=$("filterStatus").value;
-  const matches=orders.filter(r=>(!s||r.status===s)&&(!q||norm([r.id,r.supplier,r.type,r.notes,r.lines.map(l=>WEAPONS.find(w=>w.id===l.id)?.name||"").join(" ")].join(" ")).includes(q)));
+  const matches=orders.filter(r=>visibleOrder(r)&&(!s||r.status===s)&&(!q||norm([r.id,r.supplier,r.type,r.notes,r.lines.map(l=>WEAPONS.find(w=>w.id===l.id)?.name||"").join(" ")].join(" ")).includes(q)));
   matches.sort((a,b)=>b.created.localeCompare(a.created));
-  if(!matches.length){root.append(node("div","order-empty",orders.length?"Nessun ordine corrisponde ai filtri.":"Nessun ordine ancora registrato."));return}
+  if(!matches.length){root.append(node("div","order-empty",orders.some(visibleOrder)?"Nessun ordine corrisponde alla ricerca.":ARCHIVE_VIEW?"L'archivio è vuoto: gli ordini impostati su Ricevuto compariranno qui automaticamente.":"Non ci sono ordini attivi. Quelli ricevuti si trovano nell'Archivio."));return}
   for(const r of matches){
     const card=node("article","order-card"),head=node("div","order-card-head"),title=node("div","");
     title.append(node("small","",r.id+" · "+formatDate(r.created)));
@@ -336,8 +347,11 @@ function init(){
     }catch(e){notice("Non è stato possibile salvare l'ordine condiviso: "+e.message+". Nessun salvataggio locale è stato effettuato.");}
     finally{btn.disabled=false;}
   });
-  updateLines();if(!startSimulationDraft())startDraft();
-  if(window.location.hash==="#nuovo"&&!lines.length)openPanel();
+  // Opening Archivio never consumes a draft that belongs to the active Orders form.
+  if(!ARCHIVE_VIEW){
+    updateLines();if(!startSimulationDraft())startDraft();
+    if(window.location.hash==="#nuovo"&&!lines.length)openPanel();
+  }
   if(!window.supabase||typeof window.supabase.createClient!=="function"){
     lock("Non riesco a caricare Supabase. Controlla la connessione e riprova.");return;
   }
