@@ -49,7 +49,8 @@
     }
     for(const item of items){
       const link=elt("a","notification-item"+(item.read?"":" unread"));
-      link.href="ordini.html";
+      // Un aggiornamento allo stato Ricevuto porta alla scheda ora visibile nell’Archivio.
+      link.href=/→\s*Ricevuto\s*$/.test(item.text)?"archivio.html":"ordini.html";
       link.setAttribute("aria-label",safeText(item.title)+": "+safeText(item.text));
       const mark=elt("span","notification-item-mark","✦");
       const body=elt("span","notification-item-body");
