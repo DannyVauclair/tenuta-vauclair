@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#191311">
+<meta name="description" content="Vauclair Armurerie — archivio riservato delle forniture ricevute.">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<title>Archivio · Vauclair Armurerie</title>
+<link rel="icon" type="image/webp" href="../assets/vauclair-logo.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600;1,700&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=20261012-restyle1">
+<link rel="stylesheet" href="ornamenti.css?v=20261012-banner1">
+<link rel="stylesheet" href="ordini-condivisi.css?v=20261025-archive1">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.89.0/dist/umd/supabase.js" defer></script>
+<script src="catalogo.js?v=20261022-available11" defer></script><script src="header.js?v=20261013-noarrow1" defer></script>
+<script src="notifiche.js" defer></script><script src="ordini.js?v=20261025-archive1" defer></script>
+</head>
+<body data-order-view="archive">
+<a class="skip" href="#archivio">Vai all’archivio</a>
+<header class="header"><div class="wrap header-inner">
+<a class="brand" href="./" aria-label="Vauclair Armurerie — Listino e ordini"><img src="../assets/vauclair-logo.webp" alt="Stemma Vauclair" width="96" height="96"><span><strong>Vauclair <em>Armurerie</em></strong></span></a>
+<div class="header-tools"><nav class="nav" aria-label="Navigazione"><a class="last" href="riservata.html?v=20261012-unified1">Registro</a><a class="last" href="./">Listino acquisti</a><a class="last current" aria-current="page" href="ordini.html">Ordini</a></nav><div class="notification-shell">
+  <button class="notification-toggle" id="notificationBell" type="button" aria-label="Apri notifiche ordini" aria-haspopup="true" aria-expanded="false" aria-controls="notificationPanel">
+    <svg viewBox="0 0 32 32" fill="none" aria-hidden="true" focusable="false">
+      <path d="M16 5.5c-4.3 0-7 3.1-7 7.3v3.3c0 3.6-1.2 5.3-3.3 7.1h20.6c-2.1-1.8-3.3-3.5-3.3-7.1v-3.3c0-4.2-2.7-7.3-7-7.3Z" stroke="currentColor" stroke-width="1.55" stroke-linejoin="round"/>
+      <path d="M16 2.8v2.7M12.5 26.2a3.5 3.5 0 0 0 7 0" stroke="currentColor" stroke-width="1.55" stroke-linecap="round"/>
+    </svg>
+    <span class="notification-count" id="notificationCount" hidden>0</span>
+  </button>
+  <div class="notification-panel" id="notificationPanel" role="region" aria-label="Notifiche degli ordini" hidden>
+    <div class="notification-top">
+      <div><span>REGISTRO VAUCLAIR</span><strong>Notifiche ordini</strong></div>
+      <button type="button" id="markNotificationsRead">Segna lette</button>
+    </div>
+    <div class="notification-list" id="notificationList"><div class="notification-empty">Nessuna notifica al momento.</div></div>
+    <div class="notification-bottom"><a href="ordini.html">Vai agli ordini <span aria-hidden="true">↗</span></a></div>
+  </div>
+</div></div>
+</div></header>
+<main>
+<section class="compact-hero"><div class="wrap"><span class="label">FORNITURE RICEVUTE · ANNO 1900</span>
+<h1>Archivio <em>forniture.</em></h1>
+<p>Gli ordini contrassegnati come “Ricevuto”, con relativi costi e profitti previsti, sono conservati qui per Daniel e Vivian.</p>
+</div></section>
+<section class="order-area" id="archivio"><div class="wrap">
+<div class="order-access" id="orderAccessGate" role="status">
+  <span class="label">ACCESSO FAMILIARE RISERVATO</span>
+  <h2>Archivio riservato.</h2>
+  <p id="orderAccessMessage">Verifica dell'account autorizzato in corso…</p>
+  <a href="riservata.html?dest=archivio" class="btn gold">Accedi per aprire l’Archivio</a>
+  <button class="order-subtle" type="button" id="orderRetry">Riprova la verifica</button>
+</div>
+<div id="orderWorkspace" hidden>
+<div class="order-head">
+<div><span class="label">FORNITURE COMPLETATE</span><h2>Archivio ricevuti</h2></div>
+<div class="order-top-actions"><button class="order-subtle" type="button" id="refreshOrders">↻ Aggiorna</button><button class="order-subtle" type="button" id="exportData">Backup completo</button><a class="btn gold" href="ordini.html">← Ordini attivi</a><button class="btn gold" type="button" id="newOrder" hidden>+ Nuovo ordine</button></div>
+</div>
+<p class="order-sync-info" id="orderSyncStatus" role="status">Accesso in verifica…</p>
+<div class="order-stats">
+<div class="order-stat"><small>Ordini ricevuti</small><strong id="statNew">0</strong></div>
+<div class="order-stat"><small>Armi ricevute</small><strong id="statProgress">0</strong></div>
+<div class="order-stat"><small>Profitto totale previsto</small><strong id="statDone">—</strong></div>
+</div>
+<section id="orderPanel" class="order-form" hidden aria-labelledby="formTitle">
+<h3 id="formTitle">Nuovo ordine</h3>
+<form id="orderForm">
+<div class="form-row">
+<label>Fornitore o referente <input id="supplier" name="supplier" type="text" required maxlength="90" placeholder="Nome del giocatore o dell'armeria"></label>
+<label>Tipo di fornitore <select id="supplierType" name="supplierType"><option>Armeria</option><option>Privato (arma integra)</option></select></label>
+</div>
+<div class="order-builder">
+<label>Arma <select id="weaponChoice" aria-label="Seleziona arma"></select></label>
+<label>Quantità <input id="weaponQuantity" type="number" value="1" min="1" max="999" step="1"></label>
+<button type="button" class="order-subtle" id="addWeapon">+ Aggiungi</button>
+</div>
+<div id="chosenWeapons" class="order-chosen" aria-live="polite">Nessuna arma inserita.</div>
+<div class="form-row">
+<label>Prezzo concordato totale ($) <input id="agreedPrice" name="agreedPrice" type="number" required min="0" max="10000000" step=".01" placeholder="Importo complessivo"></label>
+<label>Stato dell'ordine <select id="initialStatus" name="initialStatus"><option>Da valutare</option><option>Confermato</option><option>In corso</option><option>Ricevuto</option></select></label>
+</div>
+<label>Spese aggiuntive previste ($) <input id="orderExpenses" name="expenses" type="number" min="0" max="10000000" step=".01" value="0" required></label>
+<p class="order-help">Eventuali grassi, riparazioni, trasporto o commissioni non inclusi nel prezzo delle armi. Sono sottratti dal profitto.</p>
+<label>Note (facoltative) <textarea id="orderNotes" name="notes" maxlength="700" rows="2" placeholder="Luogo di consegna, accordi, condizioni dell'arma..."></textarea></label>
+<p id="newOrderProjection" class="order-help">Profitto calcolato dopo l'accesso al registro privato.</p>
+<div class="order-form-total"><span>Totale da listino</span><strong id="estimatedPrice">$0</strong></div>
+<div class="order-form-actions"><button class="btn outline" type="button" id="cancelOrder">Annulla</button><button class="btn gold" type="submit">Salva ordine</button></div>
+<p class="status" id="saveStatus" role="status"></p>
+</form></section>
+<div class="order-filter">
+<input id="filterOrders" type="search" placeholder="Cerca fornitore o arma..." aria-label="Cerca ordine">
+<select id="filterStatus" aria-label="Filtra per stato" hidden>
+<option value="">Tutti gli stati</option>
+<option>Da valutare</option><option>Confermato</option><option>In corso</option><option>Ricevuto</option><option>Annullato</option>
+</select></div>
+<div class="order-list" id="orderList" aria-live="polite"><div class="order-empty">Ancora nessun ordine.</div></div>
+<p class="order-caption">L’Archivio mostra solo gli ordini con stato <strong>Ricevuto</strong>. Per riportare una fornitura negli Ordini attivi, modifica lo stato in “In corso”, “Confermato” o “Da valutare”. Le cifre sono proiezioni commerciali, non incassi già realizzati. Tutto rimane privato e sincronizzato tra Daniel e Vivian; nessun ordine viene duplicato.</p>
+</div></div></section>
+</main>
+<footer class="footer compact-footer"><div class="wrap footer-inner"><strong>Vauclair Armurerie</strong><p>Vauclair Armurerie · Archivio delle forniture ricevute · 1900</p></div></footer>
+</body></html>
