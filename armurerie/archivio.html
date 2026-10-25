@@ -11,10 +11,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600;1,700&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css?v=20261025-archive1">
 <link rel="stylesheet" href="ornamenti.css?v=20261012-banner1">
-<link rel="stylesheet" href="ordini-condivisi.css?v=20261025-archive1">
+<link rel="stylesheet" href="ordini-condivisi.css?v=20261025-fulledit1">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.89.0/dist/umd/supabase.js" defer></script>
 <script src="catalogo.js?v=20261022-available11" defer></script><script src="header.js?v=20261025-archive1" defer></script>
-<script src="notifiche.js?v=20261025-archive1" defer></script><script src="ordini.js?v=20261025-archive1" defer></script>
+<script src="notifiche.js?v=20261025-archive1" defer></script><script src="ordini.js?v=20261025-fulledit1" defer></script>
 </head>
 <body data-order-view="archive">
 <a class="skip" href="#archivio">Vai all’archivio</a>
@@ -64,6 +64,7 @@
 </div>
 <section id="orderPanel" class="order-form" hidden aria-labelledby="formTitle">
 <h3 id="formTitle">Nuovo ordine</h3>
+<p id="editingOrderHint" class="order-help" hidden>Stai modificando un ordine già registrato. Puoi cambiare modelli, quantità, prezzo effettivamente pagato e ogni altra informazione. Il codice dell’ordine rimarrà invariato.</p>
 <form id="orderForm">
 <div class="form-row">
 <label>Fornitore o referente <input id="supplier" name="supplier" type="text" required maxlength="90" placeholder="Nome del giocatore o dell'armeria"></label>
@@ -75,6 +76,7 @@
 <button type="button" class="order-subtle" id="addWeapon">+ Aggiungi</button>
 </div>
 <div id="chosenWeapons" class="order-chosen" aria-live="polite">Nessuna arma inserita.</div>
+<p class="order-help">Puoi cambiare quantità e prezzo unitario indicativo di ogni modello. Per sostituire un’arma, rimuovila e aggiungi il nuovo modello. Verifica sempre il prezzo finale effettivamente concordato.</p>
 <div class="form-row">
 <label>Prezzo concordato totale ($) <input id="agreedPrice" name="agreedPrice" type="number" required min="0" max="10000000" step=".01" placeholder="Importo complessivo"></label>
 <label>Stato dell'ordine <select id="initialStatus" name="initialStatus"><option>Da valutare</option><option>Confermato</option><option>In corso</option><option>Ricevuto</option></select></label>
@@ -83,8 +85,8 @@
 <p class="order-help">Eventuali grassi, riparazioni, trasporto o commissioni non inclusi nel prezzo delle armi. Sono sottratti dal profitto.</p>
 <label>Note (facoltative) <textarea id="orderNotes" name="notes" maxlength="700" rows="2" placeholder="Luogo di consegna, accordi, condizioni dell'arma..."></textarea></label>
 <p id="newOrderProjection" class="order-help">Profitto calcolato dopo l'accesso al registro privato.</p>
-<div class="order-form-total"><span>Totale da listino</span><strong id="estimatedPrice">$0</strong></div>
-<div class="order-form-actions"><button class="btn outline" type="button" id="cancelOrder">Annulla</button><button class="btn gold" type="submit">Salva ordine</button></div>
+<div class="order-form-total"><span>Totale indicativo delle righe</span><strong id="estimatedPrice">$0</strong><button class="order-subtle" id="useEstimatedPrice" type="button">Applica al prezzo totale</button></div>
+<div class="order-form-actions"><button class="btn outline" type="button" id="cancelOrder">Annulla</button><button class="btn gold" type="submit" id="saveOrderButton">Salva ordine</button></div>
 <p class="status" id="saveStatus" role="status"></p>
 </form></section>
 <div class="order-filter">
