@@ -540,3 +540,24 @@ body{
   .private-account-id{flex-direction:column;align-items:stretch}
 }
 @media(prefers-reduced-motion:reduce){.weapon,.filters button,.btn{transition:none}}
+
+/* Quattro voci di navigazione Armurerie: archivio incluso, senza sovrapposizioni su tablet e telefoni. */
+@media(max-width:1040px){
+  .header-inner{gap:12px}
+  .header-tools .nav{gap:7px}
+  .header-tools .nav .last{padding:8px 9px}
+}
+@media(max-width:830px){
+  .header-inner{height:auto;min-height:108px;flex-wrap:wrap;padding:10px 0}
+  .header-tools{flex:1 1 auto;justify-content:flex-end}
+  .header-tools .nav{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:7px;row-gap:5px}
+}
+@media(max-width:640px){
+  .header-tools .nav{flex:1 1 auto;gap:6px;row-gap:6px;justify-content:center;padding:0}
+  .header-tools .nav .last{padding:7px 8px;font-size:9px}
+  .header-tools{align-items:center}
+}
+@media(max-width:390px){
+  .header-tools{gap:6px}
+  .header-tools .nav .last{padding:6px 7px;font-size:8px}
+}
