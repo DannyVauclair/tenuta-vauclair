@@ -1,3 +1,9 @@
+## Modifica completa delle forniture — 25 ottobre 2026
+
+Le schede di **Ordini** e **Archivio** dispongono ora del pulsante `Modifica ordine` al posto del precedente `Modifica costi`. Il modulo precompilato consente di modificare fornitore, tipologia del fornitore, modelli delle armi, quantità di ogni modello, prezzo unitario indicativo, prezzo totale effettivamente pagato, spese aggiuntive, stato e note. Il comando `Applica al prezzo totale` consente di riportare la somma delle righe nel campo pagamento; se il prezzo è stato negoziato diversamente, si inserisce manualmente la cifra effettiva, che **non deve essere sovrascritta**.
+
+Il salvataggio fa `UPDATE` della stessa riga `vauclair_shared_orders`, preservando `id` e `created` e aggiungendo `edited_at` per mostrare l'ultima modifica nella scheda. Non elimina o duplica le righe: cambiare da 35 Evans a 35 Henry aggiornando il costo da $7.875 a $7.700 mantiene lo storico dello stesso ordine e ricalcola ricavo e profitto blip sulla base dei nuovi modelli. Il salvataggio passa dal controllo RLS già esistente e applica la condizione ottimistica `updated_at` per evitare che Daniel e Vivian sovrascrivano modifiche contemporanee. In caso di errore i dati compilati rimangono nel modulo. L'editor si usa anche su forniture già ricevute; cambiare lo stato sposta la scheda nella vista appropriata.
+
 ## Archivio delle forniture ricevute — 25 ottobre 2026
 
 La pagina **`archivio.html`** usa la stessa grafica, autenticazione Supabase e archivio `public.vauclair_shared_orders` della pagina `ordini.html`. **Non è un secondo archivio:** `ordini.html` mostra gli ordini con stato diverso da `Ricevuto`, `archivio.html` mostra solo quelli con stato `Ricevuto`. Cambiare lo stato sposta l'ordine fra le due viste, senza duplicarlo né cancellarlo. L'Archivio mostra le schede complete con costi, ricavi previsti, profitti, note e pulsanti di modifica; in alto riassume ordini ricevuti, numero di armi e profitto complessivo stimato. Il profitto non va interpretato come incasso già realizzato.
@@ -12,7 +18,7 @@ La prima apertura **autenticata dal browser che contiene lo storico vecchio** im
 
 Il riepilogo mostra **prezzo d'acquisto**, **eventuali altre spese**, **ricavo di esportazione previsto** e **profitto netto stimato = ricavo blip − acquisto − altre spese**, con i prezzi di esportazione letti esclusivamente dopo login/RLS da `vauclair_export_prices`. Nessuna tariffa è inserita nel JavaScript pubblico o negli ordini condivisi. Gli ordini già registrati hanno `expenses=0` per compatibilità; il nuovo modulo consente di indicare grassi, trasporto e commissioni e il pulsante `Modifica costi` permette di correggere anche il prezzo negoziato delle forniture esistenti. Il ricavo presuppone tutte le armi a condizione esportabile ≥90% e attualmente usa le tariffe correnti: non è un incasso realizzato. Se un'arma non ha una tariffa approvata, non si presenta un profitto fuorviante.
 
-La pagina Ordini non contiene un modulo di login aggiuntivo: chi non è autenticato usa `riservata.html` e torna su Ordini, conservando la sessione Supabase dello stesso sito.
+La pagina Ordini e la pagina Archivio non contengono moduli di login aggiuntivi: chi non è autenticato usa `riservata.html?dest=ordini` oppure `riservata.html?dest=archivio`, ritornando alla pagina corretta dopo login e verifica dei permessi.
 
 # Vauclair Armurerie
 
