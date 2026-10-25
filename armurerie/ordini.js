@@ -22,7 +22,7 @@ const norm=str=>String(str||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").
 const formatDate=stamp=>{const date=new Date(stamp);return Number.isNaN(date.getTime())?stamp:date.toLocaleString("it-IT",{dateStyle:"short",timeStyle:"short"})};
 const validLine=l=>l&&WEAPONS.some(w=>w.id===l.id)&&Number.isInteger(l.qty)&&l.qty>0&&l.qty<=9999&&Number.isFinite(l.unit)&&l.unit>=0&&l.unit<=100000;
 const validOrder=r=>r&&typeof r==="object"&&typeof r.id==="string"&&r.id.length<100&&typeof r.created==="string"&&r.created.length<80&&typeof r.supplier==="string"&&r.supplier.length<=90&&typeof r.type==="string"&&r.type.length<=50&&typeof r.notes==="string"&&r.notes.length<=700&&STATES.includes(r.status)&&Number.isFinite(r.price)&&r.price>=0&&r.price<=10000000&&(r.expenses===undefined||(Number.isFinite(r.expenses)&&r.expenses>=0&&r.expenses<=10000000))&&Array.isArray(r.lines)&&r.lines.length>0&&r.lines.length<=22&&r.lines.every(validLine);
-let orders=[],lines=[],priceEdited=false,approved=false,client=null,authSerial=0,refreshing=false,userId=null;
+let orders=[],lines=[],priceEdited=false,editingRecord=null,approved=false,client=null,authSerial=0,refreshing=false,userId=null;
 let tariff=new Map(),subscription=null;
 const cents=v=>Math.round(Number(v||0)*100);
 const toMoney=c=>money(c/100);
@@ -156,37 +156,85 @@ function openPanel(){
   $("orderPanel").scrollIntoView({behavior:"smooth",block:"start"});
 }
 function closePanel(){
-  lines=[];priceEdited=false;$("orderForm").reset();$("orderPanel").hidden=true;
+  editingRecord=null;lines=[];priceEdited=false;
+  $("orderForm").reset();
+  $("orderPanel").hidden=true;
+  $("formTitle").textContent="Nuovo ordine";
+  $("editingOrderHint").hidden=true;
+  $("saveOrderButton").textContent="Salva ordine";
   $("estimatedPrice").textContent=money(0);
   $("chosenWeapons").textContent="Nessuna arma inserita.";
-  $("orderExpenses").value="0";showPreview();notice("");
+  $("orderExpenses").value="0";
+  showPreview();notice("");
+}
+function startNewOrder(){closePanel();openPanel();}
+function beginEditOrder(record){
+  if(!approved)return;
+  editingRecord={...record,lines:record.lines.map(l=>({...l}))};
+  lines=record.lines.map(l=>({...l}));
+  priceEdited=Math.abs(cents(record.price)-lines.reduce((sum,l)=>sum+cents(l.unit)*l.qty,0))>1;
+  $("orderForm").reset();
+  $("supplier").value=record.supplier;
+  $("supplierType").value=record.type;
+  $("initialStatus").value=record.status;
+  $("orderNotes").value=record.notes;
+  $("orderExpenses").value=String(record.expenses||0);
+  $("agreedPrice").value=String(record.price);
+  $("formTitle").textContent="Modifica ordine · "+record.id;
+  $("editingOrderHint").hidden=false;
+  $("saveOrderButton").textContent="Salva modifiche";
+  updateLines();
+  $("agreedPrice").value=String(record.price);
+  showPreview();openPanel();
+  notice("Modifica modelli, quantità e prezzi; verifica il totale effettivamente pagato prima di salvare.");
+}
+function updateTotals(){
+  const total=lines.reduce((sum,l)=>sum+cents(l.unit)*l.qty,0);
+  $("estimatedPrice").textContent=toMoney(total);
+  if(!priceEdited)$("agreedPrice").value=(total/100).toFixed(2);
+  showPreview();
 }
 function updateLines(){
   const root=$("chosenWeapons");root.replaceChildren();
-  let total=0;
   if(!lines.length)root.append(node("div","","Nessuna arma inserita."));
   for(const line of lines){
     const w=WEAPONS.find(x=>x.id===line.id);
     if(!w)continue;
-    total+=line.qty*line.unit;
-    const row=node("div","order-chosen-line");
-    row.append(node("span","",line.qty+" × "+w.name),node("b","",money(line.qty*line.unit)));
+    const row=node("div","order-chosen-line order-edit-line");
+    row.append(node("span","",w.name));
+    const qtyLabel=node("label","","Quantità"),qty=node("input");
+    Object.assign(qty,{type:"number",min:"1",max:"9999",step:"1",value:String(line.qty)});
+    qty.setAttribute("aria-label","Quantità "+w.name);
+    qty.addEventListener("change",()=>{
+      const val=Number(qty.value);
+      if(!Number.isInteger(val)||val<1||val>9999){qty.value=String(line.qty);notice("La quantità deve essere intera, da 1 a 9999.");return;}
+      line.qty=val;notice("");updateTotals();
+    });
+    qtyLabel.append(qty);row.append(qtyLabel);
+    const unitLabel=node("label","","Prezzo indicativo / arma ($)"),unit=node("input");
+    Object.assign(unit,{type:"number",min:"0",max:"100000",step:"0.01",value:String(line.unit)});
+    unit.setAttribute("aria-label","Prezzo unitario indicativo "+w.name);
+    unit.addEventListener("change",()=>{
+      const val=Number(unit.value);
+      if(unit.value.trim()===""||!Number.isFinite(val)||val<0||val>100000||Math.abs(cents(val)/100-val)>0.000001){
+        unit.value=String(line.unit);notice("Inserisci un prezzo unitario valido con al massimo due decimali.");return;
+      }
+      line.unit=cents(val)/100;notice("");updateTotals();
+    });
+    unitLabel.append(unit);row.append(unitLabel);
     const remove=node("button","","×");remove.type="button";remove.setAttribute("aria-label","Rimuovi "+w.name);
-    remove.addEventListener("click",()=>{lines=lines.filter(x=>x.id!==line.id);updateLines();});
+    remove.addEventListener("click",()=>{lines=lines.filter(l=>l!==line);updateLines();});
     row.append(remove);root.append(row);
   }
-  total=Math.round(total*100)/100;
-  $("estimatedPrice").textContent=money(total);
-  if(!priceEdited)$("agreedPrice").value=String(total);
-  showPreview();
+  updateTotals();
 }
 function addWeapon(id,amount){
-  const weapon=ACTIVE_WEAPONS.find(w=>w.id===id);
-  const qty=Number(amount);
-  if(!weapon||!Number.isInteger(qty)||qty<1||qty>999){notice("Seleziona un modello e una quantità compresa tra 1 e 999.");return;}
-  const prev=lines.find(x=>x.id===id);
-  if(prev)prev.qty=Math.min(9999,prev.qty+qty);
-  else lines.push({id,qty,unit:weapon.buy});
+  const w=ACTIVE_WEAPONS.find(x=>x.id===id),qty=Number(amount);
+  if(!w||!Number.isInteger(qty)||qty<1||qty>999){notice("Seleziona un modello e una quantità da 1 a 999.");return;}
+  const current=lines.find(x=>x.id===id);
+  if(current&&current.qty+qty>9999){notice("Il massimo è 9999 armi per modello.");return;}
+  if(!current&&lines.length>=22){notice("Massimo 22 modelli per ordine.");return;}
+  if(current)current.qty+=qty;else lines.push({id,qty,unit:w.buy});
   notice("");updateLines();
 }
 function makeId(){
