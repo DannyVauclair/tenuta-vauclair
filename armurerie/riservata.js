@@ -96,10 +96,11 @@ async function sync(){
     $("privateApprovedCount").textContent=String(weapons.length);
     window.VauclairSimulator.mount(weapons,quantities,rerender,preserve);
     show("privateWorkspace");rerender();
-    // Return ONLY to the site's fixed orders page after the usual auth and RLS verification.
-    // No arbitrary URL or password is accepted from the address bar.
-    if(new URLSearchParams(window.location.search).get("dest")==="ordini"){
-      window.location.replace("ordini.html");
+    // Return only to the two fixed private family pages after full login and RLS verification.
+    // Never redirect to an arbitrary user-supplied address.
+    const destination=new URLSearchParams(window.location.search).get("dest");
+    if(destination==="ordini"||destination==="archivio"){
+      window.location.replace(destination==="archivio"?"archivio.html":"ordini.html");
       return;
     }
   }catch(error){
