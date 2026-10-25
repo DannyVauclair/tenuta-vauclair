@@ -266,6 +266,7 @@ function render(){
     const meta=node("div","order-card-meta");
     meta.append(node("span","",r.type));
     meta.append(node("span","",r.lines.reduce((tot,l)=>tot+l.qty,0)+" armi"));
+    if(r.edited_at)meta.append(node("span","","Ultima modifica: "+formatDate(r.edited_at)));
     title.append(meta);
     const state=node("span","order-status",r.status);head.append(title,state);card.append(head);
     const items=node("div","order-card-items");
@@ -302,21 +303,8 @@ function render(){
       try{await navigator.clipboard.writeText(msg);copy.textContent="Copiato ✓";}
       catch(_){window.prompt("Copia il riepilogo dell'ordine:",msg);}
     });
-    const costs=node("button","","Modifica costi");costs.type="button";
-    costs.addEventListener("click",async()=>{
-      const purchaseText=window.prompt("Prezzo totale concordato per le armi ($):",String(r.price));
-      if(purchaseText===null)return;
-      const newPrice=Number(purchaseText.replace(",","."));
-      if(purchaseText.trim()===""||!Number.isFinite(newPrice)||newPrice<0||newPrice>10000000){syncInfo("Importo d'acquisto non valido.",true);return;}
-      const expenseText=window.prompt("Altre spese ($): grassi, trasporto, commissioni…",String(r.expenses||0));
-      if(expenseText===null)return;
-      const newExpenses=Number(expenseText.replace(",","."));
-      if(expenseText.trim()===""||!Number.isFinite(newExpenses)||newExpenses<0||newExpenses>10000000){syncInfo("Spese aggiuntive non valide.",true);return;}
-      costs.disabled=true;
-      try{await changeOrder({...r,price:Math.round(newPrice*100)/100,expenses:Math.round(newExpenses*100)/100});}
-      catch(e){syncInfo("Modifica costi non riuscita: "+e.message,true);await refreshShared();}
-      finally{costs.disabled=false;}
-    });
+    const edit=node("button","","Modifica ordine");edit.type="button";
+    edit.addEventListener("click",()=>beginEditOrder(r));
     const remove=node("button","","Elimina");remove.type="button";
     remove.addEventListener("click",async()=>{
       if(!confirm("Eliminare l'ordine "+r.id+"? Sarà rimosso anche per Vivian e non recuperabile senza backup."))return;
@@ -325,7 +313,7 @@ function render(){
       catch(e){syncInfo("Eliminazione non riuscita: "+e.message,true);await refreshShared();}
       finally{remove.disabled=false;}
     });
-    actions.append(select,costs,copy,remove);bottom.append(actions);card.append(bottom);root.append(card);
+    actions.append(select,edit,copy,remove);bottom.append(actions);card.append(bottom);root.append(card);
   }
 }
 function downloadBackup(){
@@ -369,10 +357,11 @@ function init(){
   const sel=$("weaponChoice");
   if(!sel)return;
   for(const w of ACTIVE_WEAPONS){const opt=node("option","",w.name);opt.value=w.id;sel.append(opt);}
-  $("newOrder").addEventListener("click",openPanel);
+  $("newOrder").addEventListener("click",startNewOrder);
   $("cancelOrder").addEventListener("click",closePanel);
   $("addWeapon").addEventListener("click",()=>addWeapon(sel.value,$("weaponQuantity").value));
   $("agreedPrice").addEventListener("input",()=>{priceEdited=true;showPreview();});
+  $("useEstimatedPrice").addEventListener("click",()=>{priceEdited=false;updateTotals();notice("Prezzo totale aggiornato dalla somma delle righe.");});
   $("orderExpenses").addEventListener("input",showPreview);
   $("filterOrders").addEventListener("input",render);
   $("filterStatus").addEventListener("change",render);
@@ -380,20 +369,36 @@ function init(){
   $("refreshOrders").addEventListener("click",()=>void refreshShared());
   $("orderRetry").addEventListener("click",()=>void checkAccess());
   $("orderForm").addEventListener("submit",async ev=>{
-    ev.preventDefault();if(!ev.currentTarget.reportValidity()||!approved)return;
-    const supplier=$("supplier").value.trim(),price=Number($("agreedPrice").value),extra=Number($("orderExpenses").value),type=$("supplierType").value;
-    if(!supplier||!lines.length||!Number.isFinite(price)||price<0||price>10000000||!Number.isFinite(extra)||extra<0||extra>10000000){notice("Inserisci fornitore, almeno un'arma e importi validi.");return;}
-    const record={id:makeId(),supplier,type,status:$("initialStatus").value,price:Math.round(price*100)/100,expenses:Math.round(extra*100)/100,
-      lines:lines.map(l=>({...l})),notes:$("orderNotes").value.trim(),created:new Date().toISOString()};
+    ev.preventDefault();
+    if(!ev.currentTarget.reportValidity()||!approved)return;
+    const supplier=$("supplier").value.trim(),price=Number($("agreedPrice").value),
+      extra=Number($("orderExpenses").value),type=$("supplierType").value;
+    if(!supplier||!lines.length||!Number.isFinite(price)||price<0||price>10000000||
+       !Number.isFinite(extra)||extra<0||extra>10000000){notice("Inserisci fornitore, almeno un'arma e importi validi.");return;}
+    if(!lines.every(validLine)||new Set(lines.map(l=>l.id)).size!==lines.length){notice("Controlla quantità e prezzi delle armi.");return;}
+    const wasEditing=!!editingRecord;
+    const record=wasEditing?
+      {...editingRecord,supplier,type,status:$("initialStatus").value,price:cents(price)/100,expenses:cents(extra)/100,
+       lines:lines.map(l=>({...l})),notes:$("orderNotes").value.trim(),edited_at:new Date().toISOString()}:
+      {id:makeId(),supplier,type,status:$("initialStatus").value,price:cents(price)/100,expenses:cents(extra)/100,
+       lines:lines.map(l=>({...l})),notes:$("orderNotes").value.trim(),created:new Date().toISOString()};
     if(!validOrder(record)){notice("Controlla i dati dell'ordine.");return;}
-    const btn=$("orderForm").querySelector('button[type="submit"]');btn.disabled=true;
-    notice("Salvataggio nel registro condiviso…");
+    const btn=$("saveOrderButton");btn.disabled=true;
+    notice(wasEditing?"Aggiornamento dell'ordine condiviso…":"Salvataggio nel registro condiviso…");
     try{
-      await writeOrder(record);
-      if(window.VAUCLAIR_NOTIFY){const count=record.lines.reduce((sum,l)=>sum+l.qty,0);window.VAUCLAIR_NOTIFY("Nuovo ordine condiviso",record.supplier+" · "+count+" armi · "+money(record.price),record.id);}
-      closePanel();render();$("orderList").scrollIntoView({behavior:"smooth",block:"start"});
-    }catch(e){notice("Non è stato possibile salvare l'ordine condiviso: "+e.message+". Nessun salvataggio locale è stato effettuato.");}
-    finally{btn.disabled=false;}
+      if(wasEditing)await changeOrder(record);
+      else await writeOrder(record);
+      if(window.VAUCLAIR_NOTIFY){
+        const count=record.lines.reduce((sum,l)=>sum+l.qty,0);
+        window.VAUCLAIR_NOTIFY(wasEditing?"Ordine modificato":"Nuovo ordine condiviso",record.supplier+" · "+count+" armi · "+money(record.price),record.id);
+      }
+      closePanel();
+      if(wasEditing&&!visibleOrder(record))syncInfo("Modifica salvata. L'ordine ora si trova in "+(record.status==="Ricevuto"?"Archivio.":"Ordini attivi."));
+      $("orderList").scrollIntoView({behavior:"smooth",block:"start"});
+    }catch(e){
+      notice("Salvataggio non riuscito: "+(e?.message||"errore di rete")+". I dati non sono stati cancellati: controlla l'ordine e riprova.");
+      syncInfo("Impossibile aggiornare l'ordine: "+(e?.message||"errore di rete"),true);
+    }finally{btn.disabled=false;}
   });
   // Opening Archivio never consumes a draft that belongs to the active Orders form.
   if(!ARCHIVE_VIEW){
