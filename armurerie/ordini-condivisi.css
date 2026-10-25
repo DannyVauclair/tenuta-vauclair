@@ -19,3 +19,11 @@
 .order-card-bottom .order-card-cost span{font-size:11px;display:block}
 @media(max-width:760px){.order-card-finance{grid-template-columns:repeat(2,minmax(0,1fr))}.order-access{padding:18px}}
 @media(max-width:450px){.order-card-finance{gap:7px}.order-card-finance strong{font-size:21px}}
+
+/* Archivio automatico: stesso layout delle schede ordine e statistiche dedicate. */
+.order-archive-stat-link{color:var(--gold);text-decoration:underline;text-decoration-color:rgba(218,177,110,.46);text-underline-offset:3px}
+.order-archive-stat-link:hover{color:#ffe1a7}
+body[data-order-view="archive"] #newOrder,body[data-order-view="archive"] #orderPanel{display:none!important}
+body[data-order-view="archive"] .order-stat:last-child strong{font-size:clamp(19px,2.15vw,31px);overflow-wrap:anywhere}
+body[data-order-view="archive"] .order-top-actions .btn{font-size:11px;min-height:38px;display:inline-flex;align-items:center;justify-content:center;text-align:center}
+body[data-order-view="archive"] .order-filter input{width:100%}
