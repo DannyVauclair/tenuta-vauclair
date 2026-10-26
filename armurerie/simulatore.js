@@ -24,9 +24,11 @@ function manual(){requested=null;$("simStrategy").textContent="Prezzi personaliz
 function update(){
  const rr=rows(),t=M.totals(rr);
  if(!t.count)greaseManual=null;
- const plan=M.repairPlan(rr);
+ const plan=M.repairPlan(rr,Infinity,M.RESTORE_MIN);
+ const favorablePlan=M.repairPlan(rr,Infinity,M.RESTORE_MAX);
  const suggested=plan.suggested,greaseCount=t.count?(greaseManual??suggested):0;
- const fin=M.financials(rr,greaseCount,goalValue,roiValue);
+ const fin=M.financials(rr,greaseCount,goalValue,roiValue,M.RESTORE_MIN);
+ const favorable=M.financials(rr,greaseCount,goalValue,roiValue,M.RESTORE_MAX);
  const maximum=fin.maxPurchase;
  const metrics={
   simCount:t.count,simEligible:fin.exportable,simImpossible:fin.impossible,simUncovered:fin.uncovered,
@@ -35,6 +37,9 @@ function update(){
   simRevenue:money(fin.revenue),simProfit:money(fin.profit),
   simReturn:pct(fin.roi),simMargin:pct(fin.margin),
   simSaving:money(t.retail-t.cost),
+  simEligibleOptimistic:favorable.exportable,
+  simRevenueOptimistic:money(favorable.revenue),
+  simProfitOptimistic:money(favorable.profit),
   simMaximum:t.count?money(maximum):"—",
   simRoom:t.count?money(maximum-t.cost):"—"
  };
@@ -49,20 +54,25 @@ function update(){
  $("simGreaseCount").disabled=$("simGreaseAuto").disabled=!t.count;
  if(document.activeElement!==$("simGreaseCount"))$("simGreaseCount").value=greaseCount;
  $("simGreaseSuggest").textContent=String(suggested);
+ $("simGreaseSuggestOptimistic").textContent=String(favorablePlan.suggested);
  const isShort=fin.uncovered>0,blocked=fin.impossible>0;
  $("simGreaseStatus").classList.toggle("sim-repair-short",isShort||blocked);
  const notices=[];
- if(blocked)notices.push(fin.impossible+" arm"+(fin.impossible===1?"a non recuperabile":"i non recuperabili")+": le riparazioni rimaste non bastano per arrivare al 90%. Esclus"+(fin.impossible===1?"a":"e")+" dal ricavo esportabile.");
- if(isShort)notices.push(fin.uncovered+" arm"+(fin.uncovered===1?"a esclusa":"i escluse")+" dal ricavo per grassi insufficienti. Mancano "+Math.max(0,suggested-greaseCount)+" grassi alla fornitura completa.");
- if(greaseManual!==null&&greaseCount>fin.used)notices.push((greaseCount-fin.used)+" grassi acquistati ma non utilizzati per raggiungere il 90%; il loro costo è incluso.");
- if(!notices.length)notices.push(!t.count?"Aggiungi almeno un'arma per simulare le riparazioni.":"Le armi raggiungono il 90% rispettando il limite massimo di cinque riparazioni ciascuna.");
+ if(blocked){
+   const favorableOnly=fin.impossible-favorablePlan.impossible;
+   if(favorableOnly)notices.push(favorableOnly+" arm"+(favorableOnly===1?"a potrebbe":"i potrebbero")+" raggiungere il 90% soltanto con riparazioni più favorevoli del 15%: il risultato non è garantito.");
+   if(favorablePlan.impossible)notices.push(favorablePlan.impossible+" arm"+(favorablePlan.impossible===1?"a non può":"i non possono")+" raggiungere il 90% neppure ottenendo il 20% per grasso entro il limite di cinque riparazioni.");
+ }
+ if(isShort)notices.push(fin.uncovered+" arm"+(fin.uncovered===1?"a esclusa":"i escluse")+" dalla proiezione prudenziale per grassi insufficienti. Servirebbero "+Math.max(0,suggested-greaseCount)+" grassi in più per coprire le armi recuperabili con il 15%.");
+ if(greaseManual!==null&&greaseCount>fin.used)notices.push((greaseCount-fin.used)+" grassi non assegnati a riparazioni che garantiscono il 90% nello scenario prudente; il loro costo è comunque incluso e potrebbero servire in uno scenario favorevole.");
+ if(!notices.length)notices.push(!t.count?"Aggiungi almeno un'arma per simulare le riparazioni.":"La proiezione prudente raggiunge il 90% contando soltanto il 15% per applicazione e al massimo cinque riparazioni per arma.");
  $("simGreaseStatus").textContent=notices.join(" ");
  const goalText=!t.count?"Aggiungi almeno un’arma per valutare l’obiettivo.":
   maximum<0?"Obiettivo irraggiungibile anche con un acquisto gratuito: ricavo esportabile e spese di manutenzione non lo consentono.":
   fin.totalCost===0&&roiValue>0?"Il rendimento percentuale non è definito con una spesa totale pari a zero.":
-  t.cost<=maximum?"Obiettivi rispettati sui soli esemplari esportabili. Puoi aumentare l'offerta alle armerie fino al limite indicato.":
+  t.cost<=maximum?"Obiettivi rispettati nella proiezione prudenziale (15% per grasso). Puoi aumentare l'offerta alle armerie fino al limite indicato.":
   "Obiettivi non raggiunti: riduci la spesa per le armi di almeno "+money(t.cost-maximum)+".";
- $("simGoalStatus").textContent=goalText+(blocked||isShort?" Le armi non esportabili non producono ricavi nella simulazione.":"");
+ $("simGoalStatus").textContent=goalText+(blocked||isShort?" Le armi non garantite al 90% non producono ricavi nello scenario prudente.":"");
  $("simWarning").textContent=t.count&&(maximum<t.standard||rr.some(r=>r.price<r.standard))?
  "Attenzione: un'offerta sotto il listino Vauclair potrebbe essere poco interessante per il fornitore. Le riparazioni non riducono il prezzo concordato per le armi.":
  "La disponibilità del fornitore ad accettare il prezzo va comunque negoziata.";
@@ -75,11 +85,14 @@ function update(){
   if(document.activeElement!==v.range)v.range.value=r.price/100;
   if(document.activeElement!==v.exact)v.exact.value=(r.price/100).toFixed(2);
   v.warning.textContent=r.price<r.standard?"Offerta inferiore al listino Vauclair":r.price>r.retail?"Offerta superiore al prezzo pieno":"";
-  const local=M.repairPlan([r]),common=M.repairStatus(r.condition,r.repaired);
-  v.conditionHint.textContent="Riparazioni rimaste: "+common.remaining+"/5 · "+(common.possible?"Ne servono "+common.needed+" per arrivare al 90%.":"Non recuperabile: massimo raggiungibile "+common.maxCondition+"%.");
-  v.historyHint.textContent=local.impossible?"Non recuperabili: "+local.impossible+" · Grassi necessari per le altre: "+local.suggested:"Grassi necessari: "+local.suggested+" · Posti riparazione disponibili: "+local.capacity;
+  const local=M.repairPlan([r],Infinity,M.RESTORE_MIN),favLocal=M.repairPlan([r],Infinity,M.RESTORE_MAX);
+  const common=M.repairStatus(r.condition,r.repaired,M.RESTORE_MIN);
+  const bestCommon=M.repairStatus(r.condition,r.repaired,M.RESTORE_MAX);
+  v.conditionHint.textContent="Riparazioni rimaste: "+common.remaining+"/5 · "+(common.alreadyReady?"Già esportabile al 90%.":common.possible?"Grassi per arma: "+common.needed+" al 15% prudente, "+bestCommon.needed+" al 20% favorevole.":bestCommon.possible?"Non garantita al 15%; possibile con "+bestCommon.needed+" grassi favorevoli al 20%.":"Non recuperabile neppure con "+common.remaining+" grassi al 20%.");
+  v.historyHint.textContent="Grassi prudenziali: "+local.suggested+" · nello scenario favorevole: "+favLocal.suggested+" · riparazioni ancora disponibili: "+local.capacity;
   v.unitSummary.textContent="Dettaglio singoli esemplari ("+r.qty+")"+(r.units.size?" · "+r.units.size+" personalizzati":"");
-  v.lineStatus.textContent=local.impossible?local.impossible+" armi non recuperabili con le riparazioni rimaste.":"Tutte le armi di questo modello possono raggiungere il 90%.";
+  const favorableOnly=local.impossible-favLocal.impossible;
+  v.lineStatus.textContent=local.impossible?local.impossible+" armi non garantite al 15%"+(favorableOnly?" (di cui "+favorableOnly+" potenzialmente recuperabili con risultati migliori)":"")+".":"Tutte le armi di questo modello possono raggiungere il 90% nello scenario prudente.";
   v.lineStatus.classList.toggle("sim-repair-short",local.impossible>0);
  }
 }
@@ -143,8 +156,10 @@ function render(){
       const cLabel=el("label","","Condizione (%)"),rLabel=el("label","","Riparazioni precedenti");
       const hint=el("small","sim-unit-state");
       const refresh=()=>{
-        const check=M.repairStatus(Number(cField.value),Number(rField.value));
-        hint.textContent=check.possible?(check.alreadyReady?"Esportabile ora · "+check.remaining+" riparazioni disponibili":check.needed+" grassi per il 90% · "+check.remaining+" riparazioni rimaste"):"NON RECUPERABILE · massimo "+check.maxCondition+"%";
+        const check=M.repairStatus(Number(cField.value),Number(rField.value),M.RESTORE_MIN);
+        const best=M.repairStatus(Number(cField.value),Number(rField.value),M.RESTORE_MAX);
+        hint.textContent=check.alreadyReady?"Esportabile ora · "+check.remaining+" riparazioni rimaste":check.possible?"Al 90%: "+check.needed+" grassi prudenziali / "+best.needed+" favorevoli · "+check.remaining+" usi rimasti":best.possible?"NON GARANTITA: possibile solo con "+best.needed+" grassi favorevoli · "+check.remaining+" usi rimasti":"Non recuperabile nemmeno al 20% (limite riparazioni)";
+
         hint.classList.toggle("sim-repair-short",!check.possible);
       };
       const change=()=>{
@@ -185,7 +200,7 @@ window.VauclairSimulator={
   render();
  },
  render,
- clear(){data=[];quantities=null;prices.clear();conditions.clear();priorRepairs.clear();unitStates.clear();greaseManual=null;views.clear();requested=null;goalValue=roiValue=0;$("simStrategy").textContent="Listino Vauclair";$("simLines").replaceChildren();$("simAddModel").replaceChildren();$("simAddButton").disabled=true;for(const id of ["simCost","simEligible","simImpossible","simUncovered","simGreaseTotal","simRepairCost","simTotalCost","simGreaseSuggest","simGreaseStatus","simRevenue","simProfit","simReturn","simMargin","simSaving","simMaximum","simRoom","simCount","simResidual","simGoalStatus","simWarning"])$(id).textContent="";$("simGoal").value=$("simRoi").value=$("simBudget").value=$("simBudgetNumber").value=$("simGreaseCount").value=0;$("simGreaseAuto").disabled=$("simGreaseCount").disabled=true;},
+ clear(){data=[];quantities=null;prices.clear();conditions.clear();priorRepairs.clear();unitStates.clear();greaseManual=null;views.clear();requested=null;goalValue=roiValue=0;$("simStrategy").textContent="Listino Vauclair";$("simLines").replaceChildren();$("simAddModel").replaceChildren();$("simAddButton").disabled=true;for(const id of ["simCost","simEligible","simEligibleOptimistic","simImpossible","simUncovered","simGreaseTotal","simRepairCost","simTotalCost","simGreaseSuggest","simGreaseSuggestOptimistic","simGreaseStatus","simRevenue","simRevenueOptimistic","simProfit","simProfitOptimistic","simReturn","simMargin","simSaving","simMaximum","simRoom","simCount","simResidual","simGoalStatus","simWarning"])$(id).textContent="";$("simGoal").value=$("simRoi").value=$("simBudget").value=$("simBudgetNumber").value=$("simGreaseCount").value=0;$("simGreaseAuto").disabled=$("simGreaseCount").disabled=true;},
 };
 $("simAddForm").onsubmit=event=>{
  event.preventDefault();
