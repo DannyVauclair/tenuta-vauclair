@@ -62,7 +62,7 @@ function showPreview(){
   return;
  }
  const revenue=lines.reduce((s,l)=>s+l.qty*cents(tariff.get(l.id)),0);
- $("newOrderProjection").textContent="Ricavo blip stimato: "+toMoney(revenue)+" · Costi totali: "+toMoney(purchase+extra)+" · Profitto previsto: "+toMoney(revenue-purchase-extra)+" (armi tutte esportabili).";
+ $("newOrderProjection").textContent="Ricavo blip stimato: "+toMoney(revenue)+" · Costi totali: "+toMoney(purchase+extra)+" · Profitto previsto: "+toMoney(revenue-purchase-extra)+" (si presume che tutte le armi raggiungano almeno il 90%; i grassi ripristinano casualmente il 15–20% e vanno conteggiati nelle spese extra).";
 }
 async function fetchShared(){
  const received=[];
@@ -279,7 +279,7 @@ function render(){
     breakdown.append(metric("Ricavo previsto al blip",fin?toMoney(fin.revenue):"Non disponibile"),
       metric("PROFITTO NETTO PREVISTO",fin?toMoney(fin.profit):"Non disponibile","order-profit"+(fin?.profit<0?" negative":"")));
     breakdown.append(node("small","order-card-finance-note",fin?
-      "Profitto = ricavo delle armi esportabili − acquisto − spese extra. Stima alle tariffe blip correnti: presuppone tutte le armi almeno al 90% e riparazioni possibili.":
+      "Profitto = ricavo delle armi esportabili − acquisto − spese extra. Proiezione teorica: tutte le armi devono raggiungere almeno il 90%. I grassi riparano casualmente il 15–20% e le spese effettive di manutenzione vanno registrate separatamente.":
       "Profitto non calcolabile: uno o più modelli non hanno una tariffa di esportazione approvata."));
     card.append(breakdown);
     const bottom=node("div","order-card-bottom");
@@ -338,7 +338,7 @@ function startSimulationDraft(){
     showPreview();openPanel();
     sessionStorage.removeItem(key);
     sessionStorage.removeItem(DRAFT);
-    notice("Fornitura dal simulatore: prezzi delle armi separati dalla spesa per i grassi. Verifica costi e fornitore prima di salvare l'ordine condiviso.");
+    notice("Fornitura dal simulatore: il costo dei grassi è una stima prudenziale al 15%, distinta dal prezzo delle armi. Aggiorna le spese dopo le riparazioni effettive (15–20% casuale).");
     return true;
   }catch(_){return false;}
 }
