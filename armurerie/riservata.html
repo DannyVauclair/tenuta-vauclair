@@ -14,10 +14,10 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.89.0/dist/umd/supabase.js" defer></script>
 <script src="header.js?v=20261025-archive1" defer></script>
 <script src="notifiche.js?v=20261025-archive1" defer></script>
-<link rel="stylesheet" href="simulatore.css?v=20261022-repair2">
+<link rel="stylesheet" href="simulatore.css?v=20261026-randomgrease1">
 <script src="catalogo.js?v=20261022-available11" defer></script>
-<script src="simulatore-core.js?v=20261022-repair2" defer></script>
-<script src="simulatore.js?v=20261023-shared1" defer></script>
+<script src="simulatore-core.js?v=20261026-randomgrease1" defer></script>
+<script src="simulatore.js?v=20261026-randomgrease1" defer></script>
 <script src="riservata.js?v=20261025-archive1" defer></script>
 </head>
 <body class="private-page">
@@ -130,33 +130,42 @@
 <div class="sim-box sim-repair">
 <span class="label">MANUTENZIONE · SOGLIA 90%</span>
 <h3>Grasso per armi</h3>
-<p>Per esportare serve una condizione di almeno <strong>90%</strong>. Un grasso costa <strong>$8</strong> e ripara del <strong>20%</strong>. <strong>Ogni singola arma può essere riparata al massimo 5 volte in tutta la sua vita.</strong> Indica condizione e riparazioni già effettuate per modello, oppure apri il dettaglio per distinguere ogni esemplare. Le armi non più recuperabili sono escluse dall'incasso previsto.</p>
+<p>Per esportare serve una condizione di almeno <strong>90%</strong>. Ogni grasso costa <strong>$8</strong> e ripristina una quantità <strong>casuale tra il 15% e il 20%</strong> della condizione. <strong>Ogni singola arma può essere riparata al massimo 5 volte in tutta la sua vita.</strong> Il simulatore usa di default il <strong>15% prudenziale</strong> per costi, esportabilità e profitto; mostra separatamente cosa potrebbe accadere nel caso più favorevole del 20%. Inserisci condizione e riparazioni pregresse per modello o per singola arma.</p>
 <div class="sim-repair-entry">
 <label for="simGreaseCount">Grassi da acquistare per questa fornitura
 <input id="simGreaseCount" type="number" min="0" max="100000" step="1" value="0" disabled></label>
-<button class="order-subtle" id="simGreaseAuto" type="button" disabled>Usa quantità calcolata</button>
+<button class="order-subtle" id="simGreaseAuto" type="button" disabled>Usa quantità prudenziale</button>
 </div>
-<p class="sim-reference">Grassi necessari per le armi recuperabili: <strong id="simGreaseSuggest">0</strong>. Il totale rispetta le riparazioni già effettuate su ciascuna arma. Se acquisti meno grassi, il ricavo sarà calcolato solo sulle armi effettivamente esportabili; quelli acquistati in più restano nel costo.</p>
+<p class="sim-reference">Grassi consigliati <strong>prudenziali (15% per uso)</strong>: <strong id="simGreaseSuggest">0</strong>. Grassi teorici <strong>nel caso favorevole (20% per uso)</strong>: <strong id="simGreaseSuggestOptimistic">0</strong>. Sono conteggiate solo le armi recuperabili nello scenario rispettivo, rispettando le 5 riparazioni massime. Se compri meno grassi, alcune armi potrebbero non arrivare al 90%; tutti i grassi acquistati restano nel costo.</p>
 <p class="sim-repair-status" id="simGreaseStatus" role="status"></p>
 </div></div>
 <aside class="quote sim-summary">
 <span class="label">PROIEZIONE COMMERCIALE</span><h3>La tua fornitura</h3>
 <div class="private-totals">
 <div><span>Armi nella fornitura</span><strong id="simCount">0</strong></div>
-<div><span>Esportabili dopo manutenzione</span><strong id="simEligible">0</strong></div>
-<div><span>Non recuperabili (limite 5)</span><strong id="simImpossible">0</strong></div>
-<div><span>In attesa di grassi</span><strong id="simUncovered">0</strong></div>
+<div><span>Esportabili garantite (15%)</span><strong id="simEligible">0</strong></div>
+<div><span>Non garantite al 90% (limite 5)</span><strong id="simImpossible">0</strong></div>
+<div><span>In attesa di grassi (prudente)</span><strong id="simUncovered">0</strong></div>
 <div><span>Acquisto armi</span><strong id="simCost">—</strong></div>
 <div><span>Grassi per armi</span><strong id="simGreaseTotal">0</strong></div>
 <div><span>Spesa riparazioni</span><strong id="simRepairCost">—</strong></div>
 <div class="sim-total-spend"><span>Spesa totale (armi + grassi)</span><strong id="simTotalCost">—</strong></div>
-<div><span>Ricavo delle sole armi esportabili</span><strong id="simRevenue">—</strong></div>
-<div class="private-profit"><span>Profitto lordo dopo riparazioni</span><strong id="simProfit">—</strong></div>
-<div><span>Rendimento sulla spesa</span><strong id="simReturn">—</strong></div>
-<div><span>Margine sul ricavo</span><strong id="simMargin">—</strong></div>
+<div><span>Ricavo prudenziale al blip</span><strong id="simRevenue">—</strong></div>
+<div class="private-profit"><span>Profitto prudenziale dopo i grassi</span><strong id="simProfit">—</strong></div>
+<div><span>Rendimento prudenziale</span><strong id="simReturn">—</strong></div>
+<div><span>Margine prudenziale</span><strong id="simMargin">—</strong></div>
 <div><span>Risparmio sul prezzo pieno</span><strong id="simSaving">—</strong></div>
 </div>
-<details class="sim-formulas"><summary>Come si leggono i risultati</summary><p>Il profitto lordo = ricavo delle armi esportabili − acquisto di TUTTE le armi − costo di TUTTI i grassi acquistati. Ogni arma ha massimo 5 riparazioni in totale (comprese le precedenti). Un grasso costa $8 e ripara del 20%. Le armi che non possono raggiungere il 90% e quelle senza grassi sufficienti non producono ricavi. Rendimento = profitto ÷ spesa totale; margine = profitto ÷ ricavo. Il massimo spendibile per le armi considera la spesa per i grassi. Trasporto e altri costi non sono inclusi.</p></details>
+<div class="sim-bestcase" aria-label="Scenario favorevole per la manutenzione">
+  <span class="label">SCENARIO FAVOREVOLE · 20% A OGNI USO</span>
+  <p>Limite teorico, <strong>non garantito</strong> dal gioco: stessi grassi acquistati e stessi costi, ma ogni applicazione ripristina il massimo possibile.</p>
+  <div class="sim-bestcase-grid">
+    <div><small>Armi esportabili</small><strong id="simEligibleOptimistic">0</strong></div>
+    <div><small>Ricavo possibile</small><strong id="simRevenueOptimistic">—</strong></div>
+    <div><small>Profitto possibile</small><strong id="simProfitOptimistic">—</strong></div>
+  </div>
+</div>
+<details class="sim-formulas"><summary>Come si leggono i risultati</summary><p>Ogni applicazione di grasso costa $8 e ripara casualmente dal 15% al 20%. La previsione <strong>prudenziale</strong> usa sempre il 15%: stima il numero massimo di grassi necessari per le armi recuperabili entro 5 utilizzi e i ricavi garantibili con il budget indicato. Lo scenario <strong>favorevole</strong> usa sempre il 20% e indica solo un limite teorico superiore, non una probabilità o un profitto certo. Alcune armi possono essere recuperabili soltanto con applicazioni favorevoli. Profitto = ricavo delle armi esportabili − acquisto di tutte le armi − tutti i grassi acquistati. ROI = profitto ÷ spesa totale, margine = profitto ÷ ricavo. Il prezzo massimo negoziabile è basato sul caso prudente. Aggiorna la condizione effettiva e il numero di riparazioni già usate dopo ogni riparazione in gioco: il simulatore non può conoscere l'esito casuale. Trasporto e altre spese non sono inclusi.</p></details>
 <h3>Il tuo obiettivo</h3>
 <label>Profitto lordo minimo ($)<input id="simGoal" type="number" min="0" max="1000000000" step="0.01" value="0"></label>
 <label>Rendimento minimo sulla spesa (%)<input id="simRoi" type="number" min="0" max="100000" step="0.01" value="0"></label>
@@ -164,7 +173,7 @@
 <div class="private-totals"><div><span>Massimo spendibile per le armi</span><strong id="simMaximum">—</strong></div><div><span>Spazio per aumentare l’offerta alle armerie</span><strong id="simRoom">—</strong></div></div>
 <p id="simGoalStatus" role="status"></p><p id="simWarning" class="sim-warning"></p>
 <button id="simTransfer" class="btn gold" type="button" disabled>Prepara nuovo ordine →</button>
-<p class="sim-reference">Trasferisce al nuovo ordine quantità, prezzi concordati e costo dei grassi stimato, quest'ultimo soltanto nelle spese aggiuntive (mai nel prezzo dovuto al fornitore). Non trasferisce le tariffe di esportazione né i dettagli di condizione delle singole armi.</p>
+<p class="sim-reference">Trasferisce al nuovo ordine quantità, prezzi concordati e costo dei grassi <strong>prudenziale</strong>, soltanto nelle spese aggiuntive (mai nel prezzo dovuto al fornitore). Con la riparazione casuale il costo effettivo potrà essere inferiore; aggiorna l'ordine quando conosci la spesa reale. Non trasferisce le tariffe di esportazione né i dettagli delle singole armi.</p>
 </aside></div></section>
 </div>
 </div>
