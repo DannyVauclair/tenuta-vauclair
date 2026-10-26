@@ -63,3 +63,14 @@
 @media(max-width:950px){.sim-layout{grid-template-columns:1fr}.sim-summary{max-width:none}.sim-heading{align-items:flex-start;flex-direction:column}}
 @media(max-width:690px){.sim-add{grid-template-columns:minmax(0,1fr) 96px}.sim-add .btn{grid-column:1/-1;white-space:normal}}
 @media(max-width:530px){.sim-repair-entry{grid-template-columns:1fr}.sim-repair-entry .order-subtle{margin-bottom:0}.sim-add{padding:14px}.sim-line,.sim-box,.sim-summary{padding:16px}.sim-line-head{align-items:flex-start;flex-direction:column}.simulator h2{font-size:36px}.sim-presets button{flex:1 1 44%;min-height:44px}.sim-summary .private-totals strong{font-size:25px}.sim-summary .private-profit strong{font-size:36px}}
+
+/* Boundary scenarios: a grease can restore 15–20%, never a fixed 20%.
+   The 15% column is the conservative business forecast; the 20% column is non-guaranteed. */
+.sim-bestcase{margin:18px 0 20px;border:1px solid rgba(195,153,95,.52);background:linear-gradient(150deg,rgba(48,37,32,.87),rgba(28,23,24,.95));padding:17px 18px}
+.sim-bestcase>.label{font-size:10px;letter-spacing:.11em;color:#e9c994}
+.sim-bestcase p{font:12px/1.65 var(--book);color:#dcc5ac;margin:8px 0 15px}
+.sim-bestcase-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.sim-bestcase-grid>div{background:rgba(10,9,10,.25);border-top:1px solid rgba(211,172,118,.3);padding:10px;min-width:0}
+.sim-bestcase-grid small{display:block;font:11px/1.4 var(--book);color:#cdb69d}
+.sim-bestcase-grid strong{display:block;font:600 clamp(18px,2vw,24px)/1.3 var(--serif);color:#efd3aa;overflow-wrap:anywhere;margin-top:6px}
+@media(max-width:530px){.sim-bestcase{padding:13px}.sim-bestcase-grid{grid-template-columns:1fr}.sim-bestcase-grid>div{display:flex;justify-content:space-between;align-items:center;gap:12px}.sim-bestcase-grid strong{margin:0;text-align:right}}
