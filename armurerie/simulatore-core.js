@@ -18,20 +18,23 @@
     rows.forEach((r,i)=>{if(prices[i]<r.retail&&r.qty<=remainder){prices[i]++;remainder-=r.qty;}});
     return {prices,remainder,budget};
   }
-  // Commercial projection, in integer cents. Gun grease restores 20 durability points
-  // and may be applied at most 5 times PER physical weapon, including prior repairs.
-  const GREASE_UNIT_CENTS=800,MIN_EXPORT_CONDITION=90,RESTORE_POINTS=20,MAX_REPAIRS=5;
-  function repairStatus(condition=100,previous=0){
+  // Staff confirmed each application restores a RANDOM 15–20 percentage points.
+  // Default = conservative guaranteed minimum, never a made-up mean or exact prediction.
+  // Five applications maximum per individual physical gun (including prior repairs).
+  const GREASE_UNIT_CENTS=800,MIN_EXPORT_CONDITION=90;
+  const RESTORE_MIN=15,RESTORE_MAX=20,RESTORE_POINTS=RESTORE_MIN,MAX_REPAIRS=5;
+  function repairStatus(condition=100,previous=0,restorePoints=RESTORE_MIN){
     const level=Number(condition),past=Number(previous);
     if(!Number.isFinite(level)||!Number.isInteger(level)||level<0||level>100)throw new RangeError("Condizione arma non valida (0-100)");
     if(!Number.isInteger(past)||past<0||past>MAX_REPAIRS)throw new RangeError("Riparazioni pregresse non valide (0-5)");
-    const needed=Math.max(0,Math.ceil((MIN_EXPORT_CONDITION-level)/RESTORE_POINTS));
+    if(restorePoints!==RESTORE_MIN&&restorePoints!==RESTORE_MAX)throw new RangeError("Scenario di riparazione non valido");
+    const needed=Math.max(0,Math.ceil((MIN_EXPORT_CONDITION-level)/restorePoints));
     const remaining=MAX_REPAIRS-past;
     return {needed,remaining,possible:needed<=remaining,alreadyReady:needed===0,
-      maxCondition:Math.min(100,level+remaining*RESTORE_POINTS)};
+      maxCondition:Math.min(100,level+remaining*restorePoints)};
   }
-  const greasePerWeapon=(condition)=>repairStatus(condition,0).needed;
-  function repairPlan(rows,availableGrease=Infinity){
+  const greasePerWeapon=(condition,restorePoints=RESTORE_MIN)=>repairStatus(condition,0,restorePoints).needed;
+  function repairPlan(rows,availableGrease=Infinity,restorePoints=RESTORE_MIN){
     if(availableGrease!==Infinity&&(!Number.isInteger(availableGrease)||availableGrease<0||availableGrease>100000))throw new RangeError("Quantità grassi non valida");
     const candidates=[],byModel=new Map();
     let ready=0,revenue=0,impossible=0,suggested=0,capacity=0,total=0;
@@ -42,7 +45,7 @@
       byModel.set(r.id,item);
       for(let i=0;i<qty;i++){
         const override=r.units instanceof Map?r.units.get(i):r.units?.[i];
-        const state=repairStatus(override?.condition??r.condition??100,override?.repaired??r.repaired??0);
+        const state=repairStatus(override?.condition??r.condition??100,override?.repaired??r.repaired??0,restorePoints);
         total++;capacity+=state.remaining;item.capacity+=state.remaining;
         if(!state.possible){impossible++;item.impossible++;continue;}
         if(state.alreadyReady){ready++;item.ready++;revenue+=r.export;continue;}
@@ -62,20 +65,20 @@
     return {total,ready,covered,uncovered,impossible,exportable:ready+covered,
       revenue,suggested,used,capacity,byModel};
   }
-  function greaseSuggested(rows){return repairPlan(rows).suggested;}
-  function financials(rows,greaseCount,profitGoal=0,roiHundredths=0){
+  function greaseSuggested(rows,restorePoints=RESTORE_MIN){return repairPlan(rows,Infinity,restorePoints).suggested;}
+  function financials(rows,greaseCount,profitGoal=0,roiHundredths=0,restorePoints=RESTORE_MIN){
     if(!Number.isInteger(greaseCount)||greaseCount<0||greaseCount>100000)throw new RangeError("Quantità grassi non valida");
-    const quote=totals(rows),plan=repairPlan(rows,greaseCount);
+    const quote=totals(rows),plan=repairPlan(rows,greaseCount,restorePoints);
     const repair=greaseCount*GREASE_UNIT_CENTS,totalCost=quote.cost+repair,profit=plan.revenue-totalCost;
     return {
       ...quote,...plan,greaseCount,repair,totalCost,profit,
-      // Revenue is restricted to weapons reaching >=90% without breaking the 5-use cap.
+      // Revenue only includes guns reaching >=90% with this explicit repair scenario.
       revenue:plan.revenue,
       roi:totalCost>0?profit/totalCost*100:null,
       margin:plan.revenue>0?profit/plan.revenue*100:null,
       maxPurchase:target(plan.revenue,profitGoal,roiHundredths)-repair
     };
   }
-  const api={cents,totals,target,allocate,greasePerWeapon,greaseSuggested,repairStatus,repairPlan,financials,GREASE_UNIT_CENTS,MIN_EXPORT_CONDITION,RESTORE_POINTS,MAX_REPAIRS};
+  const api={cents,totals,target,allocate,greasePerWeapon,greaseSuggested,repairStatus,repairPlan,financials,GREASE_UNIT_CENTS,MIN_EXPORT_CONDITION,RESTORE_MIN,RESTORE_MAX,RESTORE_POINTS,MAX_REPAIRS};
   if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.VauclairMath=api;
 })(globalThis);
