@@ -28,7 +28,11 @@ function update(){
  const favorablePlan=M.repairPlan(rr,Infinity,M.RESTORE_MAX);
  const suggested=plan.suggested,greaseCount=t.count?(greaseManual??suggested):0;
  const fin=M.financials(rr,greaseCount,goalValue,roiValue,M.RESTORE_MIN);
- const favorable=M.financials(rr,greaseCount,goalValue,roiValue,M.RESTORE_MAX);
+ const favorableRaw=M.financials(rr,greaseCount,goalValue,roiValue,M.RESTORE_MAX);
+ // With a 20% yield we can always follow the conservative gun allocation and
+ // obtain AT LEAST its revenue; changing the greedy order must not lower the best case.
+ const favorable=favorableRaw.revenue>=fin.revenue?favorableRaw:{...favorableRaw,
+   revenue:fin.revenue,profit:fin.profit,exportable:fin.exportable};
  const maximum=fin.maxPurchase;
  const metrics={
   simCount:t.count,simEligible:fin.exportable,simImpossible:fin.impossible,simUncovered:fin.uncovered,
