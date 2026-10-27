@@ -28,6 +28,7 @@ function update(){
  const favorablePlan=M.repairPlan(rr,Infinity,M.RESTORE_MAX);
  const suggested=plan.suggested,greaseCount=t.count?(greaseManual??suggested):0;
  const fin=M.financials(rr,greaseCount,goalValue,roiValue,M.RESTORE_MIN);
+ const supplierNet=M.netSupplierOffer(t.cost,greaseCount);
  const favorableRaw=M.financials(rr,greaseCount,goalValue,roiValue,M.RESTORE_MAX);
  // With a 20% yield we can always follow the conservative gun allocation and
  // obtain AT LEAST its revenue; changing the greedy order must not lower the best case.
@@ -36,7 +37,7 @@ function update(){
  const maximum=fin.maxPurchase;
  const metrics={
   simCount:t.count,simEligible:fin.exportable,simImpossible:fin.impossible,simUncovered:fin.uncovered,
-  simCost:money(t.cost),simGreaseTotal:greaseCount,
+  simCost:money(t.cost),simNetOffer:t.count?money(supplierNet.amount):"—",simGreaseTotal:greaseCount,
   simRepairCost:money(fin.repair),simTotalCost:money(fin.totalCost),
   simRevenue:money(fin.revenue),simProfit:money(fin.profit),
   simReturn:pct(fin.roi),simMargin:pct(fin.margin),
@@ -48,6 +49,9 @@ function update(){
   simRoom:t.count?money(maximum-t.cost):"—"
  };
  for(const [id,value] of Object.entries(metrics))$(id).textContent=value;
+ $("simNetOfferHelp").textContent=!t.count?"Il valore tra parentesi è una proposta per la trattativa, non un pagamento registrato.":
+  supplierNet.uncovered?"Il costo dei grassi supera il prezzo d'acquisto: l'offerta indicativa è limitata a $0 e restano "+money(supplierNet.uncovered)+" di manutenzione non compensabili con uno sconto. Nessuna offerta viene modificata automaticamente.":
+  "Proposta di trattativa: "+money(t.cost)+" per le armi − "+money(supplierNet.repair)+" per i "+greaseCount+" grassi selezionati. Non cambia l'offerta concordata, i profitti né gli ordini finché non modifichi manualmente i prezzi.";
  $("simProfit").classList.toggle("sim-loss",fin.profit<0);
  $("simBudget").max=(t.retail/100).toFixed(2);
  $("simBudgetNumber").max=(t.retail/100).toFixed(2);
@@ -90,6 +94,15 @@ function update(){
   if(document.activeElement!==v.exact)v.exact.value=(r.price/100).toFixed(2);
   v.warning.textContent=r.price<r.standard?"Offerta inferiore al listino Vauclair":r.price>r.retail?"Offerta superiore al prezzo pieno":"";
   const local=M.repairPlan([r],Infinity,M.RESTORE_MIN),favLocal=M.repairPlan([r],Infinity,M.RESTORE_MAX);
+  const modelNet=M.netSupplierOffer(r.qty*r.price,local.suggested);
+  v.netOffer.textContent=local.impossible===r.qty?
+    "Nessuna arma garantita recuperabile: offerta netta non stimabile solo dai grassi.":
+    "(Detraendo "+local.suggested+" grassi prudenziali, "+money(modelNet.repair)+": "+money(modelNet.amount)+" totali"+(r.qty>1?", media "+money(modelNet.amount/r.qty)+" per arma":"")+")"+
+    (modelNet.uncovered?" · La riparazione supera l'offerta di "+money(modelNet.uncovered)+".":"")+
+    (local.impossible?" · "+local.impossible+" armi non garantite: da valutare a parte.":"");
+  v.netTotal.textContent=local.impossible===r.qty?
+    "(nessuna stima netta per armi non recuperabili)":
+    "(al netto dei grassi: "+money(modelNet.amount)+")";
   const common=M.repairStatus(r.condition,r.repaired,M.RESTORE_MIN);
   const bestCommon=M.repairStatus(r.condition,r.repaired,M.RESTORE_MAX);
   v.conditionHint.textContent="Riparazioni rimaste: "+common.remaining+"/5 · "+(common.alreadyReady?"Già esportabile al 90%.":common.possible?"Grassi per arma: "+common.needed+" al 15% prudente, "+bestCommon.needed+" al 20% favorevole.":bestCommon.possible?"Non garantita al 15%; possibile con "+bestCommon.needed+" grassi favorevoli al 20%.":"Non recuperabile neppure con "+common.remaining+" grassi al 20%.");
@@ -119,7 +132,7 @@ function render(){
   qbox.append(button("−",()=>change(r.qty-1)),qty,button("+",()=>change(Math.min(999,r.qty+1))));
   const range=input("range",r.price/100,0,Math.max(r.retail,r.price)/100,.01,"Prezzo offerto "+r.name);
   const exact=input("number",(r.price/100).toFixed(2),0,100000,.01,"Prezzo unitario esatto "+r.name);
-  const offer=el("label","sim-offer","Offerta per arma ($)");offer.append(range,exact);
+  const offer=el("label","sim-offer","Offerta per arma ($)");const netOffer=el("small","sim-net-offer");offer.append(range,exact,netOffer);
   const set=i=>{if(i.value===""||!i.checkValidity())return;prices.set(r.id,M.cents(i.value));manual();update();};
   range.oninput=()=>set(range);exact.oninput=()=>set(exact);
   exact.onchange=()=>{if(!exact.checkValidity()||exact.value===""){exact.value=((prices.get(r.id)??r.standard)/100).toFixed(2);}update();};
@@ -186,9 +199,9 @@ function render(){
   }
   unitDetails.addEventListener("toggle",()=>{if(unitDetails.open)renderUnitPage();});
   const summary=el("div","sim-line-bottom"),total=el("strong"),gain=el("strong"),warning=el("small","sim-warning");
-  const c=el("span","","Acquisto modello ");c.append(total);const g=el("span","","Profitto prima dei grassi ");g.append(gain);summary.append(c,g);
+  const c=el("span","","Acquisto modello "),netTotal=el("small","sim-net-total");c.append(total,netTotal);const g=el("span","","Profitto prima dei grassi ");g.append(gain);summary.append(c,g);
   card.append(head,refs,qbox,offer,conditionBox,historyBox,lineStatus,unitDetails,summary,warning);
-  root.append(card);views.set(r.id,{range,exact,total,profit:gain,warning,conditionHint,historyHint,lineStatus,unitSummary});
+  root.append(card);views.set(r.id,{range,exact,total,netTotal,netOffer,profit:gain,warning,conditionHint,historyHint,lineStatus,unitSummary});
  }
  if(!rows().length)root.append(el("p","empty","Aggiungi armi alla fornitura: puoi scegliere i modelli qui sopra oppure dal catalogo."));
  update();
@@ -204,7 +217,7 @@ window.VauclairSimulator={
   render();
  },
  render,
- clear(){data=[];quantities=null;prices.clear();conditions.clear();priorRepairs.clear();unitStates.clear();greaseManual=null;views.clear();requested=null;goalValue=roiValue=0;$("simStrategy").textContent="Listino Vauclair";$("simLines").replaceChildren();$("simAddModel").replaceChildren();$("simAddButton").disabled=true;for(const id of ["simCost","simEligible","simEligibleOptimistic","simImpossible","simUncovered","simGreaseTotal","simRepairCost","simTotalCost","simGreaseSuggest","simGreaseSuggestOptimistic","simGreaseStatus","simRevenue","simRevenueOptimistic","simProfit","simProfitOptimistic","simReturn","simMargin","simSaving","simMaximum","simRoom","simCount","simResidual","simGoalStatus","simWarning"])$(id).textContent="";$("simGoal").value=$("simRoi").value=$("simBudget").value=$("simBudgetNumber").value=$("simGreaseCount").value=0;$("simGreaseAuto").disabled=$("simGreaseCount").disabled=true;},
+ clear(){data=[];quantities=null;prices.clear();conditions.clear();priorRepairs.clear();unitStates.clear();greaseManual=null;views.clear();requested=null;goalValue=roiValue=0;$("simStrategy").textContent="Listino Vauclair";$("simLines").replaceChildren();$("simAddModel").replaceChildren();$("simAddButton").disabled=true;for(const id of ["simCost","simNetOffer","simEligible","simEligibleOptimistic","simImpossible","simUncovered","simGreaseTotal","simRepairCost","simTotalCost","simGreaseSuggest","simGreaseSuggestOptimistic","simGreaseStatus","simRevenue","simRevenueOptimistic","simProfit","simProfitOptimistic","simReturn","simMargin","simSaving","simMaximum","simRoom","simCount","simResidual","simGoalStatus","simWarning"])$(id).textContent="";$("simGoal").value=$("simRoi").value=$("simBudget").value=$("simBudgetNumber").value=$("simGreaseCount").value=0;$("simGreaseAuto").disabled=$("simGreaseCount").disabled=true;$("simNetOfferHelp").textContent="";},
 };
 $("simAddForm").onsubmit=event=>{
  event.preventDefault();

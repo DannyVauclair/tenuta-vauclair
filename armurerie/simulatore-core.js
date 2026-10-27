@@ -66,6 +66,14 @@
       revenue,suggested,used,capacity,byModel};
   }
   function greaseSuggested(rows,restorePoints=RESTORE_MIN){return repairPlan(rows,Infinity,restorePoints).suggested;}
+  // Negotiation-only amount: the seller has NOT agreed to a discount.
+  // Do not apply this figure to saved orders or subtract grease costs twice.
+  function netSupplierOffer(purchaseCents,greaseCount){
+    if(!Number.isSafeInteger(purchaseCents)||purchaseCents<0)throw new RangeError("Offerta acquisto non valida");
+    if(!Number.isInteger(greaseCount)||greaseCount<0||greaseCount>100000)throw new RangeError("Quantità grassi non valida");
+    const repair=greaseCount*GREASE_UNIT_CENTS;
+    return {amount:Math.max(0,purchaseCents-repair),repair,uncovered:Math.max(0,repair-purchaseCents)};
+  }
   function financials(rows,greaseCount,profitGoal=0,roiHundredths=0,restorePoints=RESTORE_MIN){
     if(!Number.isInteger(greaseCount)||greaseCount<0||greaseCount>100000)throw new RangeError("Quantità grassi non valida");
     const quote=totals(rows),plan=repairPlan(rows,greaseCount,restorePoints);
@@ -79,6 +87,6 @@
       maxPurchase:target(plan.revenue,profitGoal,roiHundredths)-repair
     };
   }
-  const api={cents,totals,target,allocate,greasePerWeapon,greaseSuggested,repairStatus,repairPlan,financials,GREASE_UNIT_CENTS,MIN_EXPORT_CONDITION,RESTORE_MIN,RESTORE_MAX,RESTORE_POINTS,MAX_REPAIRS};
+  const api={cents,totals,target,allocate,greasePerWeapon,greaseSuggested,repairStatus,repairPlan,netSupplierOffer,financials,GREASE_UNIT_CENTS,MIN_EXPORT_CONDITION,RESTORE_MIN,RESTORE_MAX,RESTORE_POINTS,MAX_REPAIRS};
   if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.VauclairMath=api;
 })(globalThis);

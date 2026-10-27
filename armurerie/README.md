@@ -1,3 +1,9 @@
+## Prezzo al venditore al netto dei grassi — 27 ottobre 2026
+
+Nel simulatore riservato il prezzo originale di acquisto resta distinto da una **offerta teorica al netto dei grassi**. Accanto a ciascuna offerta per modello e al totale della fornitura viene mostrato, fra parentesi o sotto il prezzo, il corrispettivo d'acquisto meno $8 per grasso. Per il totale si usa la quantità di grassi selezionata (automatica al 15% oppure manuale); per ciascun modello si usano i grassi prudenziali consigliati al 15%, considerando condizione e riparazioni già effettuate dei singoli esemplari. Con più armi per modello, il valore unitario mostrato è una **media indicativa**, non un prezzo specifico per ogni arma. Le armi non garantite recuperabili vengono segnalate: se un modello è interamente non recuperabile, non si presenta un'offerta netta calcolata dal numero zero di grassi.
+
+Il suggerimento si ferma a **$0** se il costo dei grassi supera l'importo di acquisto, mostrando la parte eccedente. **È esclusivamente un riferimento per negoziare con il venditore**, non un ribasso automaticamente approvato: l'offerta attiva, la spesa prevista, ROI/profitto e il trasferimento agli Ordini restano basati sui prezzi effettivamente inseriti. Non si sottrae due volte il costo dei grassi. Non si modificano tariffe riservate, dati Supabase o ordini esistenti.
+
 ## Correzione grasso per armi — 26 ottobre 2026
 
 Nuova informazione dello staff: ogni grasso costa **$8** e ripristina casualmente **15–20 punti percentuali** della condizione (non sempre 20). La soglia blip rimane 90%, e ogni esemplare può subire massimo **5 riparazioni totali**, comprese quelle precedenti. Non assumere alcuna distribuzione uniforme: i due estremi sono scenari, non probabilità né valori medi.

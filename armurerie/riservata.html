@@ -14,10 +14,10 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.89.0/dist/umd/supabase.js" defer></script>
 <script src="header.js?v=20261025-archive1" defer></script>
 <script src="notifiche.js?v=20261025-archive1" defer></script>
-<link rel="stylesheet" href="simulatore.css?v=20261026-randomgrease1">
+<link rel="stylesheet" href="simulatore.css?v=20261027-suppliernet1">
 <script src="catalogo.js?v=20261022-available11" defer></script>
-<script src="simulatore-core.js?v=20261026-randomgrease1" defer></script>
-<script src="simulatore.js?v=20261026-randomgrease1" defer></script>
+<script src="simulatore-core.js?v=20261027-suppliernet1" defer></script>
+<script src="simulatore.js?v=20261027-suppliernet1" defer></script>
 <script src="riservata.js?v=20261027-quantity-input1" defer></script>
 </head>
 <body class="private-page">
@@ -146,7 +146,8 @@
 <div><span>Esportabili garantite (15%)</span><strong id="simEligible">0</strong></div>
 <div><span>Non garantite al 90% (limite 5)</span><strong id="simImpossible">0</strong></div>
 <div><span>In attesa di grassi (prudente)</span><strong id="simUncovered">0</strong></div>
-<div><span>Acquisto armi</span><strong id="simCost">—</strong></div>
+<div class="sim-purchase-pair"><span>Acquisto armi <small class="sim-net-inline">(al netto dei grassi: <b id="simNetOffer">—</b>)</small></span><strong id="simCost">—</strong></div>
+<p class="sim-reference sim-net-help" id="simNetOfferHelp">Il valore tra parentesi è una proposta per la trattativa, non un pagamento registrato.</p>
 <div><span>Grassi per armi</span><strong id="simGreaseTotal">0</strong></div>
 <div><span>Spesa riparazioni</span><strong id="simRepairCost">—</strong></div>
 <div class="sim-total-spend"><span>Spesa totale (armi + grassi)</span><strong id="simTotalCost">—</strong></div>
@@ -165,7 +166,7 @@
     <div><small>Profitto possibile</small><strong id="simProfitOptimistic">—</strong></div>
   </div>
 </div>
-<details class="sim-formulas"><summary>Come si leggono i risultati</summary><p>Ogni applicazione di grasso costa $8 e ripara casualmente dal 15% al 20%. La previsione <strong>prudenziale</strong> usa sempre il 15%: stima il numero massimo di grassi necessari per le armi recuperabili entro 5 utilizzi e i ricavi garantibili con il budget indicato. Lo scenario <strong>favorevole</strong> usa sempre il 20% e indica solo un limite teorico superiore, non una probabilità o un profitto certo. Alcune armi possono essere recuperabili soltanto con applicazioni favorevoli. Profitto = ricavo delle armi esportabili − acquisto di tutte le armi − tutti i grassi acquistati. ROI = profitto ÷ spesa totale, margine = profitto ÷ ricavo. Il prezzo massimo negoziabile è basato sul caso prudente. Aggiorna la condizione effettiva e il numero di riparazioni già usate dopo ogni riparazione in gioco: il simulatore non può conoscere l'esito casuale. Trasporto e altre spese non sono inclusi.</p></details>
+<details class="sim-formulas"><summary>Come si leggono i risultati</summary><p>Ogni applicazione di grasso costa $8 e ripara casualmente dal 15% al 20%. La previsione <strong>prudenziale</strong> usa sempre il 15%: stima il numero massimo di grassi necessari per le armi recuperabili entro 5 utilizzi e i ricavi garantibili con il budget indicato. Lo scenario <strong>favorevole</strong> usa sempre il 20% e indica solo un limite teorico superiore, non una probabilità o un profitto certo. Alcune armi possono essere recuperabili soltanto con applicazioni favorevoli. Profitto = ricavo delle armi esportabili − acquisto di tutte le armi − tutti i grassi acquistati. ROI = profitto ÷ spesa totale, margine = profitto ÷ ricavo. Il prezzo massimo negoziabile è basato sul caso prudente. Il prezzo tra parentesi è soltanto una possibile offerta al venditore ottenuta sottraendo i grassi stimati al prezzo attualmente inserito: il totale usa i grassi selezionati, mentre i singoli modelli usano quelli consigliati al 15%. Questa indicazione non modifica i prezzi concordati, i costi contabilizzati, i profitti né gli ordini. Se lo sconto assorbirebbe tutta la cifra, l’offerta visualizzata si ferma a $0. Aggiorna la condizione effettiva e il numero di riparazioni già usate dopo ogni riparazione in gioco: il simulatore non può conoscere l'esito casuale. Trasporto e altre spese non sono inclusi.</p></details>
 <h3>Il tuo obiettivo</h3>
 <label>Profitto lordo minimo ($)<input id="simGoal" type="number" min="0" max="1000000000" step="0.01" value="0"></label>
 <label>Rendimento minimo sulla spesa (%)<input id="simRoi" type="number" min="0" max="100000" step="0.01" value="0"></label>

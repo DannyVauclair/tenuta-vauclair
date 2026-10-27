@@ -74,3 +74,11 @@
 .sim-bestcase-grid small{display:block;font:11px/1.4 var(--book);color:#cdb69d}
 .sim-bestcase-grid strong{display:block;font:600 clamp(18px,2vw,24px)/1.3 var(--serif);color:#efd3aa;overflow-wrap:anywhere;margin-top:6px}
 @media(max-width:530px){.sim-bestcase{padding:13px}.sim-bestcase-grid{grid-template-columns:1fr}.sim-bestcase-grid>div{display:flex;justify-content:space-between;align-items:center;gap:12px}.sim-bestcase-grid strong{margin:0;text-align:right}}
+
+/* Suggested supplier discount: separate from the actual agreed purchase amount. */
+.simulator .sim-net-offer{display:block;margin-top:9px;font:12px/1.6 var(--book);color:#eecf9c}
+.sim-line-bottom .sim-net-total{display:block;margin-top:4px;font:11px/1.55 var(--book);color:#d7b992}
+.sim-summary .sim-net-inline{display:block;font:11px/1.5 var(--book);color:#d9b88d;margin-top:4px}
+.sim-summary .sim-net-inline b{font-weight:700;color:#f3d39e;font-variant-numeric:tabular-nums}
+.sim-summary .sim-net-help{font-size:11px;line-height:1.6;margin:0;padding:5px 0 12px;color:#cdb89d;border-bottom:1px solid rgba(218,176,117,.18)}
+.sim-summary .sim-purchase-pair{align-items:center}
