@@ -64,7 +64,7 @@ h2 em{font-weight:500;color:var(--gold)}
 .filters button.active,.filters button:hover{background:#5a3329;border-color:var(--gold2);color:var(--gold)}
 .catalog-layout{display:grid;grid-template-columns:minmax(0,1fr) 292px;gap:17px;align-items:start}
 .price-list{border:1px solid var(--border);background:#241b18}
-.weapon{display:grid;grid-template-columns:minmax(0,1fr) 106px 96px;align-items:center;gap:13px;padding:14px 17px;border-bottom:1px solid rgba(206,165,107,.13);min-height:71px}
+.weapon{display:grid;grid-template-columns:minmax(0,1fr) 106px 116px;align-items:center;gap:13px;padding:14px 17px;border-bottom:1px solid rgba(206,165,107,.13);min-height:71px}
 .weapon:last-child{border-bottom:0}
 .weapon:nth-child(even){background:rgba(255,255,255,.019)}
 .weapon-name{font:700 12px/1.5 var(--book);color:#f0e0cb}
@@ -492,7 +492,7 @@ body{
 .private-summary-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:22px}
 .private-toolbar{margin-bottom:16px}
 .private-weapon{
-  display:grid;grid-template-columns:minmax(0,1fr) 96px 94px 96px 81px;
+  display:grid;grid-template-columns:minmax(0,1fr) 96px 94px 96px 108px;
   align-items:center;gap:8px;min-height:79px;padding:13px 16px;
   border-bottom:1px solid rgba(210,167,104,.16);
 }
@@ -561,3 +561,19 @@ body{
   .header-tools{gap:6px}
   .header-tools .nav .last{padding:6px 7px;font-size:8px}
 }
+
+/* Editable quantity between +/- in the public list and private catalog. */
+.qty .qty-input{
+  box-sizing:border-box;
+  width:44px;min-width:44px;height:31px;
+  margin:0;padding:3px 2px;border-radius:0;
+  border:1px solid rgba(219,170,110,.6);
+  background:#211a20;color:#f8dfb4;
+  text-align:center;font:700 12px/1 var(--book);
+  font-variant-numeric:tabular-nums;
+  appearance:textfield;-moz-appearance:textfield;
+}
+.qty .qty-input::-webkit-inner-spin-button,
+.qty .qty-input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.qty .qty-input:focus{outline:2px solid #e4b673;outline-offset:1px;background:#37272c}
+.private-weapon .qty .qty-input{height:29px}

@@ -43,18 +43,27 @@ function update(){
       const row=n("article","weapon"),name=n("div"),price=n("div","price"),qty=n("div","qty");
       name.append(n("strong","weapon-name",w.name));
       price.append(n("span","","Acquisto"),n("b","",money(w.buy)));
-      const minus=n("button","","−"),count=n("output","",pick.get(w.id)||0),plus=n("button","+","+");
+      const minus=n("button","","−"),count=n("input","qty-input"),plus=n("button","+","+");
+      count.type="number";count.min="0";count.max="999";count.step="1";count.inputMode="numeric";
+      count.value=String(pick.get(w.id)||0);
+      count.setAttribute("aria-label","Quantità "+w.name);
       minus.type=plus.type="button";
       minus.setAttribute("aria-label","Rimuovi una "+w.name);
       plus.setAttribute("aria-label","Aggiungi una "+w.name);
       minus.disabled=!(pick.get(w.id)||0);
       minus.addEventListener("click",()=>change(w.id,-1));
       plus.addEventListener("click",()=>change(w.id,1));
+      count.addEventListener("input",()=>typedQuantity(w.id,count,minus));
+      count.addEventListener("change",()=>typedQuantity(w.id,count,minus,true));
+      count.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();count.blur();}});
       qty.append(minus,count,plus);row.append(name,price,qty);groupList.append(row);
     }
     section.append(groupList);
     root.append(section);
   }
+  renderSelection();
+}
+function renderSelection(){
   const selected=$("selected");selected.replaceChildren();
   let sum=0,quantity=0;
   for(const w of weapons){
@@ -68,6 +77,21 @@ function update(){
   if(!quantity)selected.append(n("div","empty","Nessuna arma selezionata."));
   $("total").textContent=money(sum);
   $("startOrder").disabled=!quantity;
+}
+// Typing updates the quote without rebuilding the focused input.
+function typedQuantity(id,field,minus,finalize=false){
+  const raw=field.value.trim(),parsed=Number(raw);
+  if(!raw||!Number.isInteger(parsed)){
+    if(finalize)field.value=String(pick.get(id)||0);
+    return;
+  }
+  if(!finalize&&(parsed<0||parsed>999))return;
+  const amount=Math.max(0,Math.min(999,parsed));
+  if(finalize)field.value=String(amount);
+  if(amount===(pick.get(id)||0))return;
+  if(amount)pick.set(id,amount);else pick.delete(id);
+  minus.disabled=amount===0;
+  renderSelection();
 }
 function change(id,delta){
   const value=Math.max(0,Math.min(999,(pick.get(id)||0)+delta));

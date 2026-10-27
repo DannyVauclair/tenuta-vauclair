@@ -50,18 +50,39 @@ function rerender(){
       row.append(name);
       for(const [label,value,cls] of amounts){const v=node("div",cls);v.append(node("small","",label),node("strong","",value));row.append(v);}
       const qty=node("div","qty");
-      const minus=node("button","","−"),count=node("output","",quantities.get(w.weapon_id)||0),plus=node("button","","+");
+      const minus=node("button","","−"),count=node("input","qty-input"),plus=node("button","","+");
+      count.type="number";count.min="0";count.max="999";count.step="1";count.inputMode="numeric";
+      count.value=String(quantities.get(w.weapon_id)||0);
+      count.setAttribute("aria-label","Quantità "+w.weapon_name);
       minus.type=plus.type="button";
       minus.disabled=!(quantities.get(w.weapon_id)||0);
       minus.setAttribute("aria-label","Rimuovi una "+w.weapon_name);
       plus.setAttribute("aria-label","Aggiungi una "+w.weapon_name);
       minus.addEventListener("click",()=>adjust(w.weapon_id,-1));
       plus.addEventListener("click",()=>adjust(w.weapon_id,1));
+      count.addEventListener("input",()=>typedQuantity(w.weapon_id,count,minus));
+      count.addEventListener("change",()=>typedQuantity(w.weapon_id,count,minus,true));
+      count.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();count.blur();}});
       qty.append(minus,count,plus);row.append(qty);
       body.append(row);
     }
     section.append(body);root.append(section);
   }
+  window.VauclairSimulator.render();
+}
+// Keep the catalog field focused while refreshing the linked private simulator.
+function typedQuantity(id,field,minus,finalize=false){
+  const raw=field.value.trim(),parsed=Number(raw);
+  if(!raw||!Number.isInteger(parsed)){
+    if(finalize)field.value=String(quantities.get(id)||0);
+    return;
+  }
+  if(!finalize&&(parsed<0||parsed>999))return;
+  const qty=Math.max(0,Math.min(999,parsed));
+  if(finalize)field.value=String(qty);
+  if(qty===(quantities.get(id)||0))return;
+  if(qty)quantities.set(id,qty);else quantities.delete(id);
+  minus.disabled=qty===0;
   window.VauclairSimulator.render();
 }
 function adjust(id,delta){
