@@ -14,10 +14,10 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.89.0/dist/umd/supabase.js" defer></script>
 <script src="header.js?v=20261025-archive1" defer></script>
 <script src="notifiche.js?v=20261025-archive1" defer></script>
-<link rel="stylesheet" href="simulatore.css?v=20261027-suppliernet1">
+<link rel="stylesheet" href="simulatore.css?v=20261028-advice1">
 <script src="catalogo.js?v=20261022-available11" defer></script>
-<script src="simulatore-core.js?v=20261027-suppliernet1" defer></script>
-<script src="simulatore.js?v=20261027-suppliernet1" defer></script>
+<script src="simulatore-core.js?v=20261028-advice1" defer></script>
+<script src="simulatore.js?v=20261028-advice1" defer></script>
 <script src="riservata.js?v=20261027-quantity-input1" defer></script>
 </head>
 <body class="private-page">
@@ -141,6 +141,13 @@
 </div></div>
 <aside class="quote sim-summary">
 <span class="label">PROIEZIONE COMMERCIALE</span><h3>La tua fornitura</h3>
+<section class="sim-advice" aria-labelledby="simAdviceTitle">
+  <h3 id="simAdviceTitle">Quali armi acquistare</h3>
+  <p class="sim-reference">Consigli basati sul 15% prudenziale, fino a 5 riparazioni per arma, grassi disponibili e guadagno per esemplare. I casi incerti sono da verificare, non da accettare automaticamente.</p>
+  <p id="simAdviceCount" class="sim-advice-count">0 da accettare · 0 da verificare · 0 da evitare</p>
+  <div id="simAdviceList" class="sim-advice-list"><p class="sim-advice-empty">Seleziona le armi per vedere quali conviene acquistare.</p></div>
+  <p class="sim-advice-foot">Le indicazioni non rimuovono armi dalla simulazione: il profitto totale qui sotto considera ancora tutta la fornitura. Correggi quantità o prezzi manualmente prima di creare l'ordine.</p>
+</section>
 <div class="private-totals">
 <div><span>Armi nella fornitura</span><strong id="simCount">0</strong></div>
 <div><span>Esportabili garantite (15%)</span><strong id="simEligible">0</strong></div>

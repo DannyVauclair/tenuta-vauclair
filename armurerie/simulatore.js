@@ -6,6 +6,43 @@ const retail={a1:80,a2:90,a3:95,a4:120,a5:140,a9:125,a10:145,a15:100,a16:140,a17
 const money=c=>new Intl.NumberFormat("it-IT",{style:"currency",currency:"USD",currencyDisplay:"narrowSymbol"}).format(c/100);
 const pct=x=>x===null?"—":new Intl.NumberFormat("it-IT",{maximumFractionDigits:2}).format(x)+"%";
 const el=(tag,cls,text)=>{const n=document.createElement(tag);n.className=cls||"";if(text!==undefined)n.textContent=text;return n;};
+function formatUnitIndices(indices){
+ const parts=[];let start=indices[0],end=start;
+ for(let i=1;i<=indices.length;i++){
+  if(indices[i]===end+1){end=indices[i];continue;}
+  parts.push(start===end?String(start):start+"–"+end);
+  start=end=indices[i];
+ }
+ return parts.join(", ");
+}
+function renderAdvice(advice){
+ const container=$("simAdviceList");container.replaceChildren();
+ $("simAdviceCount").textContent=advice.accept+" da accettare · "+advice.review+" da verificare · "+advice.reject+" da evitare";
+ if(!advice.total){container.append(el("p","sim-advice-empty","Seleziona le armi per vedere quali conviene acquistare."));return;}
+ const labels={accept:"ACCETTA",review:"DA VERIFICARE",reject:"NON ACCETTARE"};
+ for(const status of ["accept","review","reject"]){
+  const groups=advice.groups.filter(g=>g.status===status);
+  if(!groups.length)continue;
+  const section=el("section","sim-advice-group sim-advice-"+status);
+  section.append(el("h4","",labels[status]+" · "+advice[status]));
+  for(const g of groups){
+   const item=el("div","sim-advice-item");
+   item.append(el("strong","",g.indices.length+" × "+g.model));
+   if(g.indices.length<g.modelQty)item.append(el("small","sim-advice-indices","Esemplari n. "+formatUnitIndices(g.indices)));
+   let detail="";
+   switch(g.reason){
+    case "ready": detail="Già al 90% o più. Margine per queste armi: +"+money(g.margin)+".";break;
+    case "repairable":detail="Riparabili al 90% con "+g.greases+" grassi prudenziali ($"+(g.greases*8)+"). Margine dopo manutenzione: +"+money(g.margin)+".";break;
+    case "grease-shortage":detail="Al 15% sono recuperabili, ma i grassi selezionati sono insufficienti: servirebbero "+g.greases+" grassi per questi esemplari. Non confermare senza integrarli.";break;
+    case "uncertain":detail="Non garantite al 15% entro le 5 riparazioni. Possibili solo con risultati più favorevoli, fino al 20%.";break;
+    case "unrecoverable":detail="Non raggiungono il 90% neppure con il 20% per grasso e le riparazioni rimaste.";break;
+    case "unprofitable":detail="Il prezzo d'acquisto e i grassi necessari eliminano il margine: "+money(g.margin)+" per questi esemplari. Rinegoziare prima di acquistare.";break;
+   }
+   item.append(el("small","",detail));section.append(item);
+  }
+  container.append(section);
+ }
+}
 let data=[],quantities=null,prices=new Map(),conditions=new Map(),priorRepairs=new Map(),unitStates=new Map(),greaseManual=null,onQuantity=()=>{},views=new Map(),requested=null,goalValue=0,roiValue=0;
 function rows(){return data.filter(w=>quantities?.get(w.id)>0).map(w=>({...w,qty:quantities.get(w.id),price:prices.get(w.id)??w.standard,condition:conditions.get(w.id)??100,repaired:priorRepairs.get(w.id)??0,units:unitStates.get(w.id)||new Map()}));}
 function setUnit(id,index,condition,repaired){
@@ -29,6 +66,7 @@ function update(){
  const suggested=plan.suggested,greaseCount=t.count?(greaseManual??suggested):0;
  const fin=M.financials(rr,greaseCount,goalValue,roiValue,M.RESTORE_MIN);
  const supplierNet=M.netSupplierOffer(t.cost,greaseCount);
+ const advice=M.purchaseAdvice(rr,fin);
  const favorableRaw=M.financials(rr,greaseCount,goalValue,roiValue,M.RESTORE_MAX);
  // With a 20% yield we can always follow the conservative gun allocation and
  // obtain AT LEAST its revenue; changing the greedy order must not lower the best case.
@@ -49,6 +87,7 @@ function update(){
   simRoom:t.count?money(maximum-t.cost):"—"
  };
  for(const [id,value] of Object.entries(metrics))$(id).textContent=value;
+ renderAdvice(advice);
  $("simNetOfferHelp").textContent=!t.count?"Il valore tra parentesi è una proposta per la trattativa, non un pagamento registrato.":
   supplierNet.uncovered?"Il costo dei grassi supera il prezzo d'acquisto: l'offerta indicativa è limitata a $0 e restano "+money(supplierNet.uncovered)+" di manutenzione non compensabili con uno sconto. Nessuna offerta viene modificata automaticamente.":
   "Proposta di trattativa: "+money(t.cost)+" per le armi − "+money(supplierNet.repair)+" per i "+greaseCount+" grassi selezionati. Non cambia l'offerta concordata, i profitti né gli ordini finché non modifichi manualmente i prezzi.";

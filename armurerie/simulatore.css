@@ -82,3 +82,20 @@
 .sim-summary .sim-net-inline b{font-weight:700;color:#f3d39e;font-variant-numeric:tabular-nums}
 .sim-summary .sim-net-help{font-size:11px;line-height:1.6;margin:0;padding:5px 0 12px;color:#cdb89d;border-bottom:1px solid rgba(218,176,117,.18)}
 .sim-summary .sim-purchase-pair{align-items:center}
+
+/* Explicit purchase guidance. Three categories keep exceptions visible without affecting orders. */
+.sim-advice{border:1px solid rgba(205,166,114,.52);background:linear-gradient(160deg,#302627,#211b21);padding:15px 14px;margin:16px 0 19px}
+.sim-summary .sim-advice h3{font:600 24px/1.2 var(--serif);color:#f3d49d;margin:0 0 8px}
+.sim-summary .sim-advice .sim-reference{font-size:11px;line-height:1.6;margin:0 0 11px}
+.sim-advice-count{font:700 11px/1.7 var(--book);color:#f4dfc0;margin:0 0 12px;border-bottom:1px solid rgba(212,176,119,.25);padding-bottom:9px}
+.sim-advice-group{margin:12px 0}
+.sim-advice-group h4{font:700 11px/1.5 var(--display);letter-spacing:.05em;margin:0;padding:6px 10px;border-left:3px solid #bba78d;color:#ead2b1}
+.sim-advice-accept h4{border-color:#80b891;color:#bce5c2;background:rgba(64,115,77,.11)}
+.sim-advice-review h4{border-color:#d5ad6b;color:#f1ce90;background:rgba(147,104,55,.10)}
+.sim-advice-reject h4{border-color:#d88d85;color:#f1b0a7;background:rgba(147,74,66,.11)}
+.sim-advice-item{margin:0 0 0 3px;padding:10px 8px 10px 12px;border-left:1px solid rgba(204,166,112,.3);border-bottom:1px solid rgba(204,166,112,.13);overflow-wrap:anywhere}
+.sim-advice-item strong{display:block;font:700 12px/1.5 var(--book);color:#f6e5c6}
+.sim-advice-item small{display:block;font:11px/1.6 var(--book);color:#d2bfa9;margin-top:4px}
+.sim-advice-item .sim-advice-indices{color:#efce92}
+.sim-summary .sim-advice .sim-advice-foot{font:10.5px/1.65 var(--book);color:#c6b096;margin:12px 0 0}
+.sim-advice-empty{font:12px/1.7 var(--book);color:#d9c3a5}

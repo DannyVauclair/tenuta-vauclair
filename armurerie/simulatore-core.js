@@ -41,14 +41,14 @@
     for(const r of rows){
       const qty=Number(r.qty);
       if(!Number.isInteger(qty)||qty<0||qty>9999)throw new RangeError("Quantità di armi non valida");
-      const item={count:qty,ready:0,impossible:0,covered:0,uncovered:0,suggested:0,capacity:0};
+      const item={count:qty,ready:0,impossible:0,covered:0,uncovered:0,suggested:0,capacity:0,included:new Set()};
       byModel.set(r.id,item);
       for(let i=0;i<qty;i++){
         const override=r.units instanceof Map?r.units.get(i):r.units?.[i];
         const state=repairStatus(override?.condition??r.condition??100,override?.repaired??r.repaired??0,restorePoints);
         total++;capacity+=state.remaining;item.capacity+=state.remaining;
         if(!state.possible){impossible++;item.impossible++;continue;}
-        if(state.alreadyReady){ready++;item.ready++;revenue+=r.export;continue;}
+        if(state.alreadyReady){ready++;item.ready++;item.included.add(i);revenue+=r.export;continue;}
         suggested+=state.needed;item.suggested+=state.needed;
         candidates.push({model:r.id,index:i,needed:state.needed,value:r.export});
       }
@@ -59,11 +59,39 @@
     for(const w of candidates){
       const item=byModel.get(w.model);
       if(w.needed<=left){
-        left-=w.needed;used+=w.needed;covered++;item.covered++;revenue+=w.value;
+        left-=w.needed;used+=w.needed;covered++;item.covered++;item.included.add(w.index);revenue+=w.value;
       }else{uncovered++;item.uncovered++;}
     }
     return {total,ready,covered,uncovered,impossible,exportable:ready+covered,
       revenue,suggested,used,capacity,byModel};
+  }
+  // Advice mirrors the existing conservative allocation, but adds the unit's
+  // purchase price and repair cost. Never mutates offers, orders or profitability.
+  function purchaseAdvice(rows,plan){
+    const groups=new Map();
+    const counts={accept:0,review:0,reject:0,total:0};
+    for(const r of rows){
+      const selected=plan.byModel.get(r.id)?.included||new Set();
+      for(let i=0;i<r.qty;i++){
+        const override=r.units instanceof Map?r.units.get(i):r.units?.[i];
+        const condition=override?.condition??r.condition??100,previous=override?.repaired??r.repaired??0;
+        const low=repairStatus(condition,previous,RESTORE_MIN);
+        const high=repairStatus(condition,previous,RESTORE_MAX);
+        const profit=r.export-r.price-low.needed*GREASE_UNIT_CENTS;
+        let status,reason;
+        if(!high.possible){status="reject";reason="unrecoverable";}
+        else if(!low.possible){status="review";reason="uncertain";}
+        else if(profit<=0){status="reject";reason="unprofitable";}
+        else if(!selected.has(i)){status="review";reason="grease-shortage";}
+        else {status="accept";reason=low.needed?"repairable":"ready";}
+        const key=String(r.id)+"|"+reason;
+        if(!groups.has(key))groups.set(key,{model:r.name,modelId:r.id,modelQty:r.qty,status,reason,indices:[],greases:0,margin:0});
+        const g=groups.get(key);g.indices.push(i+1);
+        if(low.possible){g.greases+=low.needed;g.margin+=profit;}
+        counts[status]++;counts.total++;
+      }
+    }
+    return {...counts,groups:[...groups.values()]};
   }
   function greaseSuggested(rows,restorePoints=RESTORE_MIN){return repairPlan(rows,Infinity,restorePoints).suggested;}
   // Negotiation-only amount: the seller has NOT agreed to a discount.
@@ -87,6 +115,6 @@
       maxPurchase:target(plan.revenue,profitGoal,roiHundredths)-repair
     };
   }
-  const api={cents,totals,target,allocate,greasePerWeapon,greaseSuggested,repairStatus,repairPlan,netSupplierOffer,financials,GREASE_UNIT_CENTS,MIN_EXPORT_CONDITION,RESTORE_MIN,RESTORE_MAX,RESTORE_POINTS,MAX_REPAIRS};
+  const api={cents,totals,target,allocate,greasePerWeapon,greaseSuggested,repairStatus,repairPlan,purchaseAdvice,netSupplierOffer,financials,GREASE_UNIT_CENTS,MIN_EXPORT_CONDITION,RESTORE_MIN,RESTORE_MAX,RESTORE_POINTS,MAX_REPAIRS};
   if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.VauclairMath=api;
 })(globalThis);
